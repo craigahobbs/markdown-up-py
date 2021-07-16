@@ -14,13 +14,13 @@ def main():
     # Do the setup
     setup(
         name='markdown-up',
-        description='markdown-up',
+        description='Markdown viewer application',
         long_description=long_description,
         long_description_content_type='text/markdown',
         version='0.9.0',
         author='Craig Hobbs',
         author_email='craigahobbs@gmail.com',
-        keywords='markdown-up',
+        keywords='Markdown viewer application',
         url='https://github.com/craigahobbs/markdown-up',
         license='MIT',
         classifiers=[
