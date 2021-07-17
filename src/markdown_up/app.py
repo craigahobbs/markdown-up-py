@@ -9,6 +9,7 @@ import chisel
 from schema_markdown import encode_query_string
 
 
+# The map of static file extension to content-type
 STATIC_EXT_TO_CONTENT_TYPE = {
     '.gif': 'image/gif',
     '.jpeg': 'image/jpeg',
@@ -33,8 +34,8 @@ class MarkdownUpApplication(chisel.Application):
         self.add_requests(chisel.create_doc_requests())
 
         # Add the markdown-up application
-        self.add_request(index_html)
-        self.add_request(index_md)
+        self.add_request(markdown_up_html)
+        self.add_request(markdown_up_index)
 
     def __call__(self, environ, start_response):
 
@@ -44,7 +45,7 @@ class MarkdownUpApplication(chisel.Application):
         content_type = STATIC_EXT_TO_CONTENT_TYPE.get(path_ext)
 
         # Handle markdown static requests
-        if content_type is not None and path_info != '/index.md':
+        if content_type is not None:
             path = os.path.normpath(os.path.join(self.root, *path_info.split('/')))
             with open(path, 'rb') as path_file:
                 start_response('OK', [('Content-Type', content_type)])
@@ -58,7 +59,7 @@ class MarkdownUpApplication(chisel.Application):
 group "markdown-up"
 
 # The markdown-up HTML page
-action index_html
+action markdown_up_html
     urls
         GET /
     query
@@ -68,7 +69,7 @@ action index_html
         # The relative path of the sub-directory. If not provided, the root directory is used.
         optional string(len > 0) subdir
 ''')
-def index_html(ctx, req):
+def markdown_up_html(ctx, req):
     # Compute the markdown URL
     if 'file' in req and 'subdir' in req:
         markdown_url = f'{req["subdir"]}/{req["file"]}'
@@ -76,9 +77,9 @@ def index_html(ctx, req):
         markdown_url = req['file']
     elif 'subdir' in req:
         query_string = encode_query_string({'subdir': req['subdir']})
-        markdown_url = f'index.md?{query_string}'
+        markdown_url = f'markdown_up_index?{query_string}'
     else:
-        markdown_url = 'index.md'
+        markdown_url = 'markdown_up_index'
 
     # Return the customized markdown-up application stub
     return ctx.response_text(
@@ -108,14 +109,14 @@ def index_html(ctx, req):
 group "markdown-up"
 
 # The markdown-up index markdown
-action index_md
+action markdown_up_index
     urls
-        GET /index.md
+        GET
     query
         # The relative path of the sub-directory. If not provided, the root directory is used.
         optional string(len > 0) subdir
 ''')
-def index_md(ctx, req):
+def markdown_up_index(ctx, req):
     # Compute the sub-directory path
     path = os.path.join(ctx.app.root, req.get('subdir', ''))
 
