@@ -5,6 +5,7 @@ from contextlib import contextmanager
 import os
 from tempfile import TemporaryDirectory
 import unittest
+import unittest.mock
 
 import chisel.app
 from markdown_up.app import MarkdownUpApplication
@@ -41,7 +42,6 @@ class TestMarkdownUpApplication(unittest.TestCase):
             'redirect_doc'
         ])
 
-
     def test_static(self):
         with create_test_files([
                 ('README.md', '# Title'),
@@ -53,7 +53,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             environ = chisel.Context.create_environ('GET', '/README.md')
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
-            self.assertEqual(start_response.status, 'OK')
+            self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(start_response.headers, [('Content-Type', 'text/plain')])
             self.assertEqual(content, [b'# Title'])
 
@@ -61,9 +61,17 @@ class TestMarkdownUpApplication(unittest.TestCase):
             environ = chisel.Context.create_environ('GET', '/images/image.svg')
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
-            self.assertEqual(start_response.status, 'OK')
+            self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(start_response.headers, [('Content-Type', 'image/svg+xml')])
             self.assertEqual(content, [b'<svg></svg>'])
+
+            # Get a not-found file
+            environ = chisel.Context.create_environ('GET', '/not-found.md')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '404 Not Found')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain')])
+            self.assertEqual(content, [b'Not Found'])
 
             # Get an file of unknown content type
             environ = chisel.Context.create_environ('GET', '/file.unk')
@@ -72,3 +80,18 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.status, '404 Not Found')
             self.assertEqual(start_response.headers, [('Content-Type', 'text/plain')])
             self.assertEqual(content, [b'Not Found'])
+
+    def test_static_internal_server_error(self):
+        with unittest.mock.patch('markdown_up.app.open') as mock_open:
+            mock_open.side_effect = Exception('BAD')
+
+            with create_test_files([]) as temp_dir:
+                app = MarkdownUpApplication(temp_dir)
+
+                # Get a markdown file - fail
+                environ = chisel.Context.create_environ('GET', '/README.md')
+                start_response = chisel.app.StartResponse()
+                content = app(environ, start_response)
+                self.assertEqual(start_response.status, '500 Internal Server Error')
+                self.assertEqual(start_response.headers, [('Content-Type', 'text/plain')])
+                self.assertEqual(content, [b'Internal Server Error'])

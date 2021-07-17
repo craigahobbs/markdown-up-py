@@ -4,6 +4,7 @@
 from http import HTTPStatus
 from io import StringIO
 import os
+from pathlib import PurePosixPath
 
 import chisel
 from schema_markdown import encode_query_string
@@ -39,17 +40,23 @@ class MarkdownUpApplication(chisel.Application):
 
     def __call__(self, environ, start_response):
 
-        # Determine the content type
-        path_info = environ['PATH_INFO']
-        _, path_ext = os.path.splitext(path_info)
-        content_type = STATIC_EXT_TO_CONTENT_TYPE.get(path_ext)
-
         # Handle markdown static requests
+        path_info = PurePosixPath(environ['PATH_INFO'])
+        content_type = STATIC_EXT_TO_CONTENT_TYPE.get(path_info.suffix)
         if content_type is not None:
-            path = os.path.normpath(os.path.join(self.root, *path_info.split('/')))
-            with open(path, 'rb') as path_file:
-                start_response('OK', [('Content-Type', content_type)])
-                return [path_file.read()]
+            try:
+                path = os.path.join(self.root, *path_info.parts[1:])
+                with open(path, 'rb') as path_file:
+                    status = HTTPStatus.OK
+                    start_response(f'{status.value} {status.phrase}', [('Content-Type', content_type)])
+                    return [path_file.read()]
+            except Exception as exc: # pylint: disable=broad-except
+                if isinstance(exc, FileNotFoundError):
+                    status = HTTPStatus.NOT_FOUND
+                else:
+                    status = HTTPStatus.INTERNAL_SERVER_ERROR
+                start_response(f'{status.value} {status.phrase}', [('Content-Type', 'text/plain')])
+                return [status.phrase.encode()]
 
         # Run the chisel application...
         return super().__call__(environ, start_response)
