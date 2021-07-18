@@ -78,10 +78,8 @@ action markdown_up_html
 ''')
 def markdown_up_html(ctx, req):
     # Compute the markdown URL
-    if 'file' in req and 'subdir' in req:
-        markdown_url = f'{req["subdir"]}/{req["file"]}'
-    elif 'file' in req:
-        markdown_url = req['file']
+    if 'file' in req:
+        markdown_url = PurePosixPath(req.get('subdir', '')).joinpath(req['file'])
     elif 'subdir' in req:
         query_string = encode_query_string({'subdir': req['subdir']})
         markdown_url = f'markdown_up_index?{query_string}'
@@ -125,7 +123,7 @@ action markdown_up_index
 ''')
 def markdown_up_index(ctx, req):
     # Compute the sub-directory path
-    path = os.path.join(ctx.app.root, req.get('subdir', ''))
+    path = os.path.join(ctx.app.root, *PurePosixPath(req.get('subdir', '')).parts)
 
     # Get the list of markdown files and sub-directories from the current sub-directory
     files = []
@@ -166,10 +164,7 @@ def markdown_up_index(ctx, req):
         print('', file=response)
         print('### Directories', file=response)
         for dir_name in sorted(directories):
-            if 'subdir' in req:
-                subdir = f'{req["subdir"]}/{dir_name}'
-            else:
-                subdir = dir_name
+            subdir = PurePosixPath(req.get('subdir', '')).joinpath(dir_name)
             print('', file=response)
             print(f'[{dir_name}](?{encode_query_string(dict(subdir=subdir))})', file=response)
 
