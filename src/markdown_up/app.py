@@ -123,7 +123,8 @@ action markdown_up_index
 ''')
 def markdown_up_index(ctx, req):
     # Compute the sub-directory path
-    path = os.path.join(ctx.app.root, *PurePosixPath(req.get('subdir', '')).parts)
+    subdir = PurePosixPath(req.get('subdir', ''))
+    path = os.path.join(ctx.app.root, *subdir.parts)
 
     # Get the list of markdown files and sub-directories from the current sub-directory
     files = []
@@ -140,8 +141,8 @@ def markdown_up_index(ctx, req):
 
     # Sub-directory? If so, report...
     if 'subdir' in req:
-        parent_subdir = os.path.dirname(req['subdir'])
-        if parent_subdir == '':
+        parent_subdir = str(subdir.parent)
+        if parent_subdir == '.':
             parent_url = '?'
         else:
             parent_url = f'?{encode_query_string(dict(subdir=parent_subdir))}'
@@ -164,8 +165,7 @@ def markdown_up_index(ctx, req):
         print('', file=response)
         print('### Directories', file=response)
         for dir_name in sorted(directories):
-            subdir = PurePosixPath(req.get('subdir', '')).joinpath(dir_name)
             print('', file=response)
-            print(f'[{dir_name}](?{encode_query_string(dict(subdir=subdir))})', file=response)
+            print(f'[{dir_name}](?{encode_query_string(dict(subdir=subdir.joinpath(dir_name)))})', file=response)
 
     return ctx.response_text(HTTPStatus.OK, response.getvalue())
