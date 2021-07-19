@@ -95,3 +95,79 @@ class TestMarkdownUpApplication(unittest.TestCase):
                 self.assertEqual(start_response.status, '500 Internal Server Error')
                 self.assertEqual(start_response.headers, [('Content-Type', 'text/plain')])
                 self.assertEqual(content, [b'Internal Server Error'])
+
+    def test_markdown_up_html(self):
+        with create_test_files([]) as temp_dir:
+            app = MarkdownUpApplication(temp_dir)
+            status, headers, content_bytes = app.request('GET', '/')
+            self.assertEqual(status, '200 OK')
+            self.assertEqual(headers, [('Content-Type', 'text/html')])
+            self.assertEqual(content_bytes, b'''\
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/markdown-model.css">
+        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/schema-markdown-doc.css">
+    </head>
+    <body>
+    </body>
+    <script type="module">
+        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/markdown-up/index.js';
+        MarkdownUp.run(window, 'markdown_up_index');
+    </script>
+</html>
+''')
+
+    def test_markdown_up_html_path(self):
+        with create_test_files([
+                (('subdir', 'README.md'), '# Title')
+        ]) as temp_dir:
+            app = MarkdownUpApplication(temp_dir)
+            status, headers, content_bytes = app.request('GET', '/', query_string='path=subdir')
+            self.assertEqual(status, '200 OK')
+            self.assertEqual(headers, [('Content-Type', 'text/html')])
+            self.assertEqual(content_bytes, b'''\
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/markdown-model.css">
+        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/schema-markdown-doc.css">
+    </head>
+    <body>
+    </body>
+    <script type="module">
+        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/markdown-up/index.js';
+        MarkdownUp.run(window, 'markdown_up_index?path=subdir');
+    </script>
+</html>
+''')
+
+    def test_markdown_up_html_file(self):
+        with create_test_files([
+                (('subdir', 'README.md'), '# Title')
+        ]) as temp_dir:
+            app = MarkdownUpApplication(temp_dir)
+            status, headers, content_bytes = app.request('GET', '/', query_string='path=subdir/README.md')
+            self.assertEqual(status, '200 OK')
+            self.assertEqual(headers, [('Content-Type', 'text/html')])
+            self.assertEqual(content_bytes, b'''\
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/markdown-model.css">
+        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/schema-markdown-doc.css">
+    </head>
+    <body>
+    </body>
+    <script type="module">
+        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/markdown-up/index.js';
+        MarkdownUp.run(window, 'subdir/README.md');
+    </script>
+</html>
+''')
