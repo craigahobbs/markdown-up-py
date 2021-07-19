@@ -323,6 +323,30 @@ You are in the sub-directory, "**dir/dir2**".
 [README.md](?path=dir/dir2/README.md)
 ''')
 
+    def test_markdown_up_index_escape(self):
+        with create_test_files([
+                (('dir()[]\\*', 'dir2()[]\\*', 'file()[]\\*.md'), '# File'),
+                (('dir()[]\\*', 'dir2()[]\\*', 'dir3()[]\\*', 'file2()[]\\*.md'), '# File 2')
+        ]) as temp_dir:
+            app = MarkdownUpApplication(temp_dir)
+            status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=dir()[]\\*/dir2()[]\\*')
+            self.assertEqual(status, '200 OK')
+            self.assertEqual(headers, [('Content-Type', 'text/plain')])
+            self.assertEqual(content_bytes, rb'''## [markdown-up](https://github.com/craigahobbs/markdown-up-py#readme)
+
+You are in the sub-directory, "**dir\(\)\[\]\\\*/dir2\(\)\[\]\\\***".
+
+[Back to parent](?path=dir%28%29%5B%5D%5C%2A)
+
+### Markdown Files
+
+[file\(\)\[\]\\\*.md](?path=dir%28%29%5B%5D%5C%2A/dir2%28%29%5B%5D%5C%2A/file%28%29%5B%5D%5C%2A.md)
+
+### Directories
+
+[dir3\(\)\[\]\\\*](?path=dir%28%29%5B%5D%5C%2A/dir2%28%29%5B%5D%5C%2A/dir3%28%29%5B%5D%5C%2A)
+''')
+
     def test_markdown_up_index_invalid_path(self):
         with create_test_files([]) as temp_dir:
             app = MarkdownUpApplication(temp_dir)

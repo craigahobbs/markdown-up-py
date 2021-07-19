@@ -5,6 +5,7 @@ from http import HTTPStatus
 from io import StringIO
 import os
 from pathlib import PurePosixPath
+import re
 
 import chisel
 from schema_markdown import encode_query_string
@@ -189,7 +190,7 @@ def markdown_up_index(ctx, req):
             parent_url = f'?{encode_query_string(dict(path=parent_path))}'
 
         print('', file=response)
-        print(f'You are in the sub-directory, "**{req["path"]}**".', file=response)
+        print(f'You are in the sub-directory, "**{escape_markdown_span(req["path"])}**".', file=response)
 
     # Empty?
     if not files and not directories:
@@ -208,7 +209,7 @@ def markdown_up_index(ctx, req):
         for file_name in sorted(files):
             file_url = encode_query_string(dict(path=str(posix_path.joinpath(file_name))))
             print('', file=response)
-            print(f'[{file_name}](?{file_url})', file=response)
+            print(f'[{escape_markdown_span(file_name)}](?{file_url})', file=response)
 
     # Add the sub-directory links
     if directories:
@@ -217,6 +218,13 @@ def markdown_up_index(ctx, req):
         for dir_name in sorted(directories):
             dir_url = encode_query_string(dict(path=posix_path.joinpath(dir_name)))
             print('', file=response)
-            print(f'[{dir_name}](?{dir_url})', file=response)
+            print(f'[{escape_markdown_span(dir_name)}](?{dir_url})', file=response)
 
     return ctx.response_text(HTTPStatus.OK, response.getvalue())
+
+
+# Helper function to escape Markdown span characters
+def escape_markdown_span(text):
+    return re_escape_markdown_span.sub(r'\\\1', text)
+
+re_escape_markdown_span = re.compile(r'([\\\[\]()*])')
