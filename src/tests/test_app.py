@@ -172,6 +172,32 @@ class TestMarkdownUpApplication(unittest.TestCase):
 </html>
 ''')
 
+    def test_markdown_up_html_path_escape(self):
+        with create_test_files([
+                (("a\\b 'ab'", 'README.md'), '# Title')
+        ]) as temp_dir:
+            app = MarkdownUpApplication(temp_dir)
+            status, headers, content_bytes = app.request('GET', '/', query_string="path=a\\b 'ab'/README.md")
+            self.assertEqual(status, '200 OK')
+            self.assertEqual(headers, [('Content-Type', 'text/html')])
+            self.assertEqual(content_bytes, b'''\
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/markdown-model.css">
+        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/schema-markdown-doc.css">
+    </head>
+    <body>
+    </body>
+    <script type="module">
+        import {MarkdownUp} from \'https://craigahobbs.github.io/markdown-up/markdown-up/index.js\';
+        MarkdownUp.run(window, 'a\\\\b \\\'ab\\\'/README.md');
+    </script>
+</html>
+''')
+
     def test_markdown_up_html_path_file(self):
         with create_test_files([
                 (('dir', 'README.md'), '# Title')
