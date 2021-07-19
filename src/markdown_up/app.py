@@ -7,7 +7,7 @@ import os
 from pathlib import PurePosixPath
 
 import chisel
-from schema_markdown import encode_query_string
+from schema_markdown import SchemaMarkdownParser, encode_query_string
 
 
 # The map of static file extension to content-type
@@ -62,24 +62,75 @@ class MarkdownUpApplication(chisel.Application):
         return super().__call__(environ, start_response)
 
 
-@chisel.action(wsgi_response=True, spec='''\
+# Shared Schema Markdown types
+MARKDOWN_UP_TYPES = SchemaMarkdownParser('''\
+# MarkdownUp action base
+struct MarkdownUpBase
+
+    # The relative path of the sub-directory. If not provided, the root directory is used.
+    optional string(len > 0) subdir
+
+
+# MarkdownUp action error base
+enum MarkdownUpErrors
+
+    # The subdir/file is invalid
+    InvalidPath
+
+    # The subdir/file does not exist
+    FileNotFound
+''').types
+
+
+# Helper function to validate subdir/file arguments
+def validate_path(ctx, req):
+
+    # Validate the subdir
+    subdir = PurePosixPath(req.get('subdir', ''))
+    if subdir.is_absolute() or any(part == '..' for part in subdir.parts):
+        raise chisel.ActionError('InvalidPath')
+
+    # File path?
+    if 'file' in req:
+        # Validate the file path - must be name-only
+        file_path = PurePosixPath(req['file'])
+        if file_path.is_absolute() or len(file_path.parts) != 1 or any(part == '..' for part in file_path.parts):
+            raise chisel.ActionError('InvalidPath')
+
+        # Verify that the file path exists
+        path = os.path.join(ctx.app.root, *subdir.parts, req['file'])
+        if not os.path.isfile(path):
+            raise chisel.ActionError('FileNotFound', status=HTTPStatus.NOT_FOUND)
+    else:
+        # Verify that the sub-directory path exists
+        path = os.path.join(ctx.app.root, *subdir.parts)
+        if not os.path.isdir(path):
+            raise chisel.ActionError('FileNotFound', status=HTTPStatus.NOT_FOUND)
+
+    return subdir, path
+
+
+@chisel.action(wsgi_response=True, types=MARKDOWN_UP_TYPES, spec='''\
 group "markdown-up"
 
 # The markdown-up HTML page
 action markdown_up_html
     urls
         GET /
-    query
+
+    query (MarkdownUpBase)
+
         # The markdown file name. If not provided, the markdown index is displayed.
         optional string(len > 0) file
 
-        # The relative path of the sub-directory. If not provided, the root directory is used.
-        optional string(len > 0) subdir
+    errors (MarkdownUpErrors)
 ''')
 def markdown_up_html(ctx, req):
+    subdir, _ = validate_path(ctx, req)
+
     # Compute the markdown URL
     if 'file' in req:
-        markdown_url = PurePosixPath(req.get('subdir', '')).joinpath(req['file'])
+        markdown_url = subdir.joinpath(req['file'])
     elif 'subdir' in req:
         query_string = encode_query_string({'subdir': req['subdir']})
         markdown_url = f'markdown_up_index?{query_string}'
@@ -110,21 +161,20 @@ def markdown_up_html(ctx, req):
         )
 
 
-@chisel.action(wsgi_response=True, spec='''\
+@chisel.action(wsgi_response=True, types=MARKDOWN_UP_TYPES, spec='''\
 group "markdown-up"
 
 # The markdown-up index markdown
 action markdown_up_index
     urls
         GET
-    query
-        # The relative path of the sub-directory. If not provided, the root directory is used.
-        optional string(len > 0) subdir
+
+    query (MarkdownUpBase)
+
+    errors (MarkdownUpErrors)
 ''')
 def markdown_up_index(ctx, req):
-    # Compute the sub-directory path
-    subdir = PurePosixPath(req.get('subdir', ''))
-    path = os.path.join(ctx.app.root, *subdir.parts)
+    subdir, path = validate_path(ctx, req)
 
     # Get the list of markdown files and sub-directories from the current sub-directory
     files = []
