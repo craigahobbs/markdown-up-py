@@ -5,7 +5,32 @@
 [![GitHub](https://img.shields.io/github/license/craigahobbs/markdown-up)](https://github.com/craigahobbs/markdown-up/blob/main/LICENSE)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/markdown-up)](https://pypi.org/project/markdown-up/)
 
-Coming soon!
+**markdown-up** is a Markdown viewer application. To launch markdown-up, run it from the command line:
+
+```
+$ markdown-up
+```
+
+The markdown-up service starts and then opens the web browser to the current directory index by default. You can also
+open a specific file or directory:
+
+```
+$ markdown-up README.md
+```
+
+
+## How it works
+
+markdown-up first starts a back-end API server (using
+[Chisel](https://pypi.org/project/chisel/)
+and
+[Gunicorn](https://pypi.org/project/gunicorn/))
+to host the
+[markdown-up JavaScript application](https://www.npmjs.com/package/markdown-up)
+and host the Markdown static files (it only hosts statics below the root directory). Once the API service has
+started, the markdown-up application opens the desired directory (index) or Markdown file for viewing.
+
+To view the markdown-up back-end API documentation, open the Chisel documentation application at "/doc".
 
 
 ## Development

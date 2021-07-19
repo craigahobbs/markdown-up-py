@@ -2,24 +2,31 @@
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 import argparse
+import os
 import webbrowser
 
 import gunicorn.app.base
+from schema_markdown import encode_query_string
 
-from .app import MarkdownUpApplication
+from .app import MarkdownUpApplication, is_markdown_file
 
 
 def main(argv=None):
 
     # Command line parsing
     parser = argparse.ArgumentParser(prog='markdown-up')
-    parser.add_argument('dir', nargs='?', default='.',
-                        help='The directory of markdown files to host (default is ".")')
+    parser.add_argument('path', nargs='?', default='.',
+                        help='The markdown file or directory to view (default is ".")')
     parser.add_argument('-p', metavar='N', dest='port', type=int, default=8080,
                         help='The application port (default is 8080)')
     parser.add_argument('-w', metavar='N', dest='workers', type=int, default=2,
                         help='The number of application workers (default is 2)')
     args = parser.parse_args(args=argv)
+
+    # Verify the path exists
+    is_file = is_markdown_file(args.path)
+    if (is_file and not os.path.isfile(args.path)) or (not is_file and not os.path.isdir(args.path)):
+        parser.exit(message=f'"{args.path}" does not exist!\n', status=2)
 
     # Run the application
     GunicornApplication(args).run()
@@ -42,10 +49,26 @@ class GunicornApplication(gunicorn.app.base.BaseApplication):
         # Helper function to load the web browser
         def load_browser(server):
             host, port = server.address[0]
-            webbrowser.open(f'http://{host}:{port}/')
+            url = f'http://{host}:{port}/'
+
+            # Opening a file?
+            if is_markdown_file(self.args.path):
+                url += f'?{encode_query_string(dict(path=os.path.basename(self.args.path)))}'
+
+            webbrowser.open(url)
 
         # When ready, open the web broswer
         self.cfg.set('when_ready', load_browser)
 
     def load(self):
-        return MarkdownUpApplication(self.args.dir)
+        # Determine the root
+        if is_markdown_file(self.args.path):
+            root = os.path.dirname(self.args.path)
+        else:
+            root = self.args.path
+
+        # Root must be a directory
+        if root == '':
+            root = '.'
+
+        return MarkdownUpApplication(root)
