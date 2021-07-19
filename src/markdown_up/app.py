@@ -63,13 +63,13 @@ class MarkdownUpApplication(chisel.Application):
 
 
 # Helper function to validate path argument
-def validate_path(ctx, req, allow_files=False):
+def validate_path(root, path, allow_files=False):
 
     # Validate the path
-    posix_path = PurePosixPath(req.get('path', ''))
+    posix_path = PurePosixPath('' if path is None else path)
     if posix_path.is_absolute() or any(part in ('.', '..') for part in posix_path.parts):
         raise chisel.ActionError('InvalidPath')
-    path = os.path.join(ctx.app.root, *posix_path.parts)
+    path = os.path.join(root, *posix_path.parts)
 
     # Are markdown files allowed?
     is_file = is_markdown_file(path)
@@ -97,8 +97,8 @@ action markdown_up_html
         GET /
 
     query
-        # The relative sub-directory or markdown file path. If path is a directory or not provided,
-        # display the markdown index. Otherwise, display the markdown file.
+        # The relative sub-directory or markdown file path. If path is a markdown file, display it.
+        # Otherwise, display the index.
         optional string(len > 0) path
 
     errors
@@ -109,15 +109,14 @@ action markdown_up_html
         FileNotFound
 ''')
 def markdown_up_html(ctx, req):
-    validate_path(ctx, req, allow_files=True)
 
     # Compute the markdown URL
     if 'path' in req:
+        validate_path(ctx.app.root, req['path'], allow_files=True)
         if is_markdown_file(req['path']):
             markdown_url = req['path']
         else:
-            query_string = encode_query_string({'path': req['path']})
-            markdown_url = f'markdown_up_index?{query_string}'
+            markdown_url = f'markdown_up_index?{encode_query_string(dict(path=req["path"]))}'
     else:
         markdown_url = 'markdown_up_index'
 
@@ -166,7 +165,7 @@ action markdown_up_index
         FileNotFound
 ''')
 def markdown_up_index(ctx, req):
-    posix_path, path = validate_path(ctx, req)
+    posix_path, path = validate_path(ctx.app.root, req.get('path'))
 
     # Get the list of markdown files and sub-directories from the current sub-directory
     files = []
