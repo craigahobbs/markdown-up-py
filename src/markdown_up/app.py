@@ -130,7 +130,7 @@ def markdown_up_html(ctx, req):
 
     # Compute the markdown URL
     if 'file' in req:
-        markdown_url = subdir.joinpath(req['file'])
+        markdown_url = str(subdir.joinpath(req['file']))
     elif 'subdir' in req:
         query_string = encode_query_string({'subdir': req['subdir']})
         markdown_url = f'markdown_up_index?{query_string}'
@@ -138,6 +138,7 @@ def markdown_up_html(ctx, req):
         markdown_url = 'markdown_up_index'
 
     # Return the customized markdown-up application stub
+    markdown_url_escaped = markdown_url.replace('\\', '\\\\').replace("'", "\\'")
     return ctx.response_text(
         HTTPStatus.OK,
         f'''\
@@ -153,7 +154,7 @@ def markdown_up_html(ctx, req):
     </body>
     <script type="module">
         import {{MarkdownUp}} from 'https://craigahobbs.github.io/markdown-up/markdown-up/index.js';
-        MarkdownUp.run(window, '{markdown_url}');
+        MarkdownUp.run(window, '{markdown_url_escaped}');
     </script>
 </html>
 ''',
