@@ -67,7 +67,7 @@ def validate_path(root, path, allow_files=False):
 
     # Validate the path
     posix_path = PurePosixPath('' if path is None else path)
-    if posix_path.is_absolute() or any(part in ('.', '..') for part in posix_path.parts):
+    if posix_path.is_absolute() or any(part == '..' for part in posix_path.parts):
         raise chisel.ActionError('InvalidPath')
     path = os.path.join(root, *posix_path.parts)
 
@@ -190,6 +190,14 @@ def markdown_up_index(ctx, req):
 
         print('', file=response)
         print(f'You are in the sub-directory, "**{req["path"]}**".', file=response)
+
+    # Empty?
+    if not files and not directories:
+        print('', file=response)
+        print('No markdown files or sub-directories found.', file=response)
+
+    # Back-link to parent sub-directory
+    if 'path' in req:
         print('', file=response)
         print(f'[Back to parent]({parent_url})', file=response)
 
