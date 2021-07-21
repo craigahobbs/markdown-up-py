@@ -21,11 +21,7 @@ $ markdown-up README.md
 
 ## How it works
 
-markdown-up first starts a back-end API server (using
-[Chisel](https://pypi.org/project/chisel/)
-and
-[Gunicorn](https://pypi.org/project/gunicorn/))
-to host the
+markdown-up first starts a [chisel](https://pypi.org/project/chisel/) back-end API server to host the
 [markdown-up JavaScript application](https://www.npmjs.com/package/markdown-up)
 and host the Markdown static files (it only hosts statics below the root directory). Once the API service has
 started, the markdown-up application opens the desired directory (index) or Markdown file for viewing.

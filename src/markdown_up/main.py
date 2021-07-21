@@ -3,9 +3,10 @@
 
 import argparse
 import os
+import threading
 import webbrowser
+import wsgiref.simple_server
 
-import gunicorn.app.base
 from schema_markdown import encode_query_string
 
 from .app import MarkdownUpApplication, is_markdown_file
@@ -28,47 +29,28 @@ def main(argv=None):
     if (is_file and not os.path.isfile(args.path)) or (not is_file and not os.path.isdir(args.path)):
         parser.exit(message=f'"{args.path}" does not exist!\n', status=2)
 
-    # Run the application
-    GunicornApplication(args).run()
+    # Determine the root
+    if is_file:
+        root = os.path.dirname(args.path)
+    else:
+        root = args.path
 
+    # Root must be a directory
+    if root == '':
+        root = '.'
 
-class GunicornApplication(gunicorn.app.base.BaseApplication):
-    # pylint: disable=abstract-method
+    # Construct the URL
+    host = '127.0.0.1'
+    url = f'http://{host}:{args.port}/'
+    if is_file:
+        url += f'?{encode_query_string(dict(path=os.path.basename(args.path)))}'
 
-    def __init__(self, args):
-        self.args = args
-        super().__init__()
+    # Launch the web browser on a thread as webbrowser.open may block
+    webbrowser_thread = threading.Thread(target=webbrowser.open, args=(url,))
+    webbrowser_thread.setDaemon(True)
+    webbrowser_thread.start()
 
-    def load_config(self):
-        self.cfg.set('bind', f'127.0.0.1:{self.args.port}')
-        self.cfg.set('workers', self.args.workers)
-        self.cfg.set('accesslog', '-')
-        self.cfg.set('errorlog', '-')
-        self.cfg.set('loglevel', 'warning')
-
-        # Helper function to load the web browser
-        def load_browser(server):
-            host, port = server.address[0]
-            url = f'http://{host}:{port}/'
-
-            # Opening a file?
-            if is_markdown_file(self.args.path):
-                url += f'?{encode_query_string(dict(path=os.path.basename(self.args.path)))}'
-
-            webbrowser.open(url)
-
-        # When ready, open the web broswer
-        self.cfg.set('when_ready', load_browser)
-
-    def load(self):
-        # Determine the root
-        if is_markdown_file(self.args.path):
-            root = os.path.dirname(self.args.path)
-        else:
-            root = self.args.path
-
-        # Root must be a directory
-        if root == '':
-            root = '.'
-
-        return MarkdownUpApplication(root)
+    # Host
+    with wsgiref.simple_server.make_server(host, args.port, MarkdownUpApplication(root)) as httpd:
+        print(f'Serving at {url} ...')
+        httpd.serve_forever()

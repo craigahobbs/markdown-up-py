@@ -38,8 +38,7 @@ def main():
         package_dir={'': 'src'},
         packages=['markdown_up'],
         install_requires=[
-            'chisel >= 1.0',
-            'gunicorn >= 20.0'
+            'chisel >= 1.0'
         ],
         entry_points={
             'console_scripts': [
