@@ -1,3 +1,7 @@
+## 1.1.0 (2021-07-21)
+
+- [3786ea1](https://github.com/craigahobbs/markdown-up-py/commit/3786ea1) - replace gunicorn with wsgiref
+
 ## 1.0.0 (2021-07-19)
 
 - [e27ff70](https://github.com/craigahobbs/markdown-up-py/commit/e27ff70) - allow opening of markdown files
