@@ -101,7 +101,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html')])
+            self.assertEqual(headers, [('Content-Type', 'text/html'), ('ETag', 'b8c619152efa3ec038331ed7accbbf7e')])
             self.assertEqual(content_bytes, b'''\
 <!DOCTYPE html>
 <html lang="en">
@@ -120,131 +120,6 @@ class TestMarkdownUpApplication(unittest.TestCase):
 </html>
 ''')
 
-    def test_markdown_up_html_file(self):
-        with create_test_files([
-                ('README.md', '# Title')
-        ]) as temp_dir:
-            app = MarkdownUpApplication(temp_dir)
-            status, headers, content_bytes = app.request('GET', '/', query_string='path=README.md')
-            self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html')])
-            self.assertEqual(content_bytes, b'''\
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/markdown-model.css">
-        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/schema-markdown-doc.css">
-    </head>
-    <body>
-    </body>
-    <script type="module">
-        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/markdown-up/index.js';
-        MarkdownUp.run(window, 'README.md');
-    </script>
-</html>
-''')
-
-    def test_markdown_up_html_path(self):
-        with create_test_files([
-                (('dir', 'README.md'), '# Title')
-        ]) as temp_dir:
-            app = MarkdownUpApplication(temp_dir)
-            status, headers, content_bytes = app.request('GET', '/', query_string='path=dir')
-            self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html')])
-            self.assertEqual(content_bytes, b'''\
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/markdown-model.css">
-        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/schema-markdown-doc.css">
-    </head>
-    <body>
-    </body>
-    <script type="module">
-        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/markdown-up/index.js';
-        MarkdownUp.run(window, 'markdown_up_index?path=dir');
-    </script>
-</html>
-''')
-
-    def test_markdown_up_html_path_escape(self):
-        with create_test_files([
-                (("a\\b 'ab'", 'README.md'), '# Title')
-        ]) as temp_dir:
-            app = MarkdownUpApplication(temp_dir)
-            status, headers, content_bytes = app.request('GET', '/', query_string="path=a\\b 'ab'/README.md")
-            self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html')])
-            self.assertEqual(content_bytes, b'''\
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/markdown-model.css">
-        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/schema-markdown-doc.css">
-    </head>
-    <body>
-    </body>
-    <script type="module">
-        import {MarkdownUp} from \'https://craigahobbs.github.io/markdown-up/markdown-up/index.js\';
-        MarkdownUp.run(window, 'a\\\\b \\\'ab\\\'/README.md');
-    </script>
-</html>
-''')
-
-    def test_markdown_up_html_path_file(self):
-        with create_test_files([
-                (('dir', 'README.md'), '# Title')
-        ]) as temp_dir:
-            app = MarkdownUpApplication(temp_dir)
-            status, headers, content_bytes = app.request('GET', '/', query_string='path=dir/README.md')
-            self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html')])
-            self.assertEqual(content_bytes, b'''\
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/markdown-model.css">
-        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/schema-markdown-doc.css">
-    </head>
-    <body>
-    </body>
-    <script type="module">
-        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/markdown-up/index.js';
-        MarkdownUp.run(window, 'dir/README.md');
-    </script>
-</html>
-''')
-
-    def test_markdown_up_html_invalid_path(self):
-        with create_test_files([]) as temp_dir:
-            app = MarkdownUpApplication(temp_dir)
-            status, headers, content_bytes = app.request('GET', '/', query_string='path=../README.md')
-            self.assertEqual(status, '400 Bad Request')
-            self.assertEqual(headers, [('Content-Type', 'application/json')])
-            self.assertEqual(content_bytes, b'{"error":"InvalidPath"}')
-
-    def test_markdown_up_html_file_not_found(self):
-        with create_test_files([]) as temp_dir:
-            app = MarkdownUpApplication(temp_dir)
-            status, headers, content_bytes = app.request('GET', '/', query_string='path=README.md')
-            self.assertEqual(status, '404 Not Found')
-            self.assertEqual(headers, [('Content-Type', 'application/json')])
-            self.assertEqual(content_bytes, b'{"error":"FileNotFound"}')
-
-            status, headers, content_bytes = app.request('GET', '/', query_string='path=dir')
-            self.assertEqual(status, '404 Not Found')
-            self.assertEqual(headers, [('Content-Type', 'application/json')])
-            self.assertEqual(content_bytes, b'{"error":"FileNotFound"}')
-
     def test_markdown_up_index(self):
         with create_test_files([
                 ('README.md', '# Title'),
@@ -262,13 +137,13 @@ class TestMarkdownUpApplication(unittest.TestCase):
 
 ### Markdown Files
 
-[README.md](?path=README.md)
+[README.md](#url=README.md)
 
 ### Directories
 
-[dir](?path=dir)
+[dir](#url=markdown_up_index%3Fpath%3Ddir)
 
-[dir2](?path=dir2)
+[dir2](#url=markdown_up_index%3Fpath%3Ddir2)
 ''')
 
     def test_markdown_up_index_empty(self):
@@ -296,11 +171,11 @@ No markdown files or sub-directories found.
 
 You are in the sub-directory, "**dir**".
 
-[Back to parent](?)
+[Back to parent](#)
 
 ### Markdown Files
 
-[README.md](?path=dir/README.md)
+[README.md](#url=dir/README.md)
 ''')
 
     def test_markdown_up_index_path_dir(self):
@@ -316,11 +191,11 @@ You are in the sub-directory, "**dir**".
 
 You are in the sub-directory, "**dir/dir2**".
 
-[Back to parent](?path=dir)
+[Back to parent](#url=markdown_up_index%3Fpath%3Ddir)
 
 ### Markdown Files
 
-[README.md](?path=dir/dir2/README.md)
+[README.md](#url=dir/dir2/README.md)
 ''')
 
     def test_markdown_up_index_escape(self):
@@ -332,19 +207,19 @@ You are in the sub-directory, "**dir/dir2**".
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=dir()[]\\*/dir2()[]\\*')
             self.assertEqual(status, '200 OK')
             self.assertEqual(headers, [('Content-Type', 'text/plain')])
-            self.assertEqual(content_bytes, rb'''## [markdown-up](https://github.com/craigahobbs/markdown-up-py#readme)
+            self.assertEqual(content_bytes.decode(), r'''## [markdown-up](https://github.com/craigahobbs/markdown-up-py#readme)
 
 You are in the sub-directory, "**dir\(\)\[\]\\\*/dir2\(\)\[\]\\\***".
 
-[Back to parent](?path=dir%28%29%5B%5D%5C%2A)
+[Back to parent](#url=markdown_up_index%3Fpath%3Ddir%2528%2529%255B%255D%255C%252A)
 
 ### Markdown Files
 
-[file\(\)\[\]\\\*.md](?path=dir%28%29%5B%5D%5C%2A/dir2%28%29%5B%5D%5C%2A/file%28%29%5B%5D%5C%2A.md)
+[file\(\)\[\]\\\*.md](#url=dir%28%29%5B%5D%5C%2A/dir2%28%29%5B%5D%5C%2A/file%28%29%5B%5D%5C%2A.md)
 
 ### Directories
 
-[dir3\(\)\[\]\\\*](?path=dir%28%29%5B%5D%5C%2A/dir2%28%29%5B%5D%5C%2A/dir3%28%29%5B%5D%5C%2A)
+[dir3\(\)\[\]\\\*](#url=markdown_up_index%3Fpath%3Ddir%2528%2529%255B%255D%255C%252A/dir2%2528%2529%255B%255D%255C%252A/dir3%2528%2529%255B%255D%255C%252A)
 ''')
 
     def test_markdown_up_index_invalid_path(self):
@@ -356,7 +231,9 @@ You are in the sub-directory, "**dir\(\)\[\]\\\*/dir2\(\)\[\]\\\***".
             self.assertEqual(content_bytes, b'{"error":"InvalidPath"}')
 
     def test_markdown_up_index_file_path(self):
-        with create_test_files([]) as temp_dir:
+        with create_test_files([
+                ('README.md', '# Title')
+        ]) as temp_dir:
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=README.md')
             self.assertEqual(status, '400 Bad Request')
@@ -367,6 +244,6 @@ You are in the sub-directory, "**dir\(\)\[\]\\\*/dir2\(\)\[\]\\\***".
         with create_test_files([]) as temp_dir:
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=dir')
-            self.assertEqual(status, '404 Not Found')
+            self.assertEqual(status, '400 Bad Request')
             self.assertEqual(headers, [('Content-Type', 'application/json')])
-            self.assertEqual(content_bytes, b'{"error":"FileNotFound"}')
+            self.assertEqual(content_bytes, b'{"error":"InvalidPath"}')

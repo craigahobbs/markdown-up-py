@@ -9,7 +9,7 @@ import wsgiref.simple_server
 
 from schema_markdown import encode_query_string
 
-from .app import MarkdownUpApplication, is_markdown_file
+from .app import MarkdownUpApplication
 
 
 def main(argv=None):
@@ -20,12 +20,10 @@ def main(argv=None):
                         help='The markdown file or directory to view (default is ".")')
     parser.add_argument('-p', metavar='N', dest='port', type=int, default=8080,
                         help='The application port (default is 8080)')
-    parser.add_argument('-w', metavar='N', dest='workers', type=int, default=2,
-                        help='The number of application workers (default is 2)')
     args = parser.parse_args(args=argv)
 
     # Verify the path exists
-    is_file = is_markdown_file(args.path)
+    is_file = args.path.endswith('.md')
     if (is_file and not os.path.isfile(args.path)) or (not is_file and not os.path.isdir(args.path)):
         parser.exit(message=f'"{args.path}" does not exist!\n', status=2)
 
@@ -43,7 +41,7 @@ def main(argv=None):
     host = '127.0.0.1'
     url = f'http://{host}:{args.port}/'
     if is_file:
-        url += f'?{encode_query_string(dict(path=os.path.basename(args.path)))}'
+        url += f'#{encode_query_string(dict(url=os.path.basename(args.path)))}'
 
     # Launch the web browser on a thread as webbrowser.open may block
     webbrowser_thread = threading.Thread(target=webbrowser.open, args=(url,))

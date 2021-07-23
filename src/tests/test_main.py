@@ -22,7 +22,7 @@ class TestMain(unittest.TestCase):
             with self.assertRaises(SystemExit) as cm_exc:
                 main(['-h'])
         self.assertEqual(cm_exc.exception.code, 0)
-        self.assertEqual(stdout.getvalue().splitlines()[0], 'usage: markdown-up [-h] [-p N] [-w N] [path]')
+        self.assertEqual(stdout.getvalue().splitlines()[0], 'usage: markdown-up [-h] [-p N] [path]')
         self.assertEqual(stderr.getvalue(), '')
 
     def test_main_file_not_found(self):
@@ -69,10 +69,10 @@ class TestMain(unittest.TestCase):
              patch('threading.Thread') as mock_thread, \
              patch('wsgiref.simple_server.make_server') as mock_make_server:
             main(['README.md'])
-        self.assertEqual(stdout.getvalue(), 'Serving at http://127.0.0.1:8080/?path=README.md ...\n')
+        self.assertEqual(stdout.getvalue(), 'Serving at http://127.0.0.1:8080/#url=README.md ...\n')
         self.assertEqual(stderr.getvalue(), '')
         mock_isfile.assert_called_with('README.md')
         self.assertEqual(mock_thread.call_count, 1)
-        mock_thread.assert_called_with(target=ANY, args=('http://127.0.0.1:8080/?path=README.md',))
+        mock_thread.assert_called_with(target=ANY, args=('http://127.0.0.1:8080/#url=README.md',))
         self.assertEqual(mock_make_server.call_count, 1)
         mock_make_server.assert_called_with('127.0.0.1', 8080, ANY)
