@@ -1,5 +1,5 @@
 # Licensed under the MIT License
-# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+# https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
 import os
 
@@ -21,7 +21,7 @@ def main():
         author='Craig Hobbs',
         author_email='craigahobbs@gmail.com',
         keywords='Markdown viewer application',
-        url='https://github.com/craigahobbs/markdown-up',
+        url='https://github.com/craigahobbs/markdown-up-py',
         license='MIT',
         classifiers=[
             'Development Status :: 5 - Production/Stable',

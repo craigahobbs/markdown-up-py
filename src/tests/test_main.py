@@ -1,5 +1,5 @@
 # Licensed under the MIT License
-# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+# https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
 from io import StringIO
 import os
