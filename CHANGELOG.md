@@ -1,3 +1,7 @@
+## 1.2.0 (2021-07-23)
+
+- [8dd43bb](https://github.com/craigahobbs/markdown-up-py/commit/8dd43bb) - simplify markdown-up javascript application hosting
+
 ## 1.1.0 (2021-07-21)
 
 - [3786ea1](https://github.com/craigahobbs/markdown-up-py/commit/3786ea1) - replace gunicorn with wsgiref
