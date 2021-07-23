@@ -1,3 +1,7 @@
+## 1.2.1 (2021-07-23)
+
+- [af99866](https://github.com/craigahobbs/markdown-up-py/commit/af99866) - fix project links
+
 ## 1.2.0 (2021-07-23)
 
 - [8dd43bb](https://github.com/craigahobbs/markdown-up-py/commit/8dd43bb) - simplify markdown-up javascript application hosting
