@@ -1,3 +1,7 @@
+## 1.2.2 (2021-07-27)
+
+- [cabf278](https://github.com/craigahobbs/markdown-up-py/commit/cabf278) - prevent theoretical double-start_response during static read failure
+
 ## 1.2.1 (2021-07-23)
 
 - [af99866](https://github.com/craigahobbs/markdown-up-py/commit/af99866) - fix project links
