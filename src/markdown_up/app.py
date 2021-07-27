@@ -46,18 +46,23 @@ class MarkdownUpApplication(chisel.Application):
         content_type = STATIC_EXT_TO_CONTENT_TYPE.get(path_info.suffix)
         if content_type is not None:
             try:
+                # Read the static file
                 path = os.path.join(self.root, *path_info.parts[1:])
                 with open(path, 'rb') as path_file:
                     status = HTTPStatus.OK
-                    start_response(f'{status.value} {status.phrase}', [('Content-Type', content_type)])
-                    return [path_file.read()]
-            except Exception as exc: # pylint: disable=broad-except
-                if isinstance(exc, FileNotFoundError):
-                    status = HTTPStatus.NOT_FOUND
-                else:
-                    status = HTTPStatus.INTERNAL_SERVER_ERROR
-                start_response(f'{status.value} {status.phrase}', [('Content-Type', 'text/plain')])
-                return [status.phrase.encode()]
+                    content = path_file.read()
+            except FileNotFoundError:
+                status = HTTPStatus.NOT_FOUND
+                content = status.phrase.encode()
+                content_type = 'text/plain'
+            except: # pylint: disable=bare-except
+                status = HTTPStatus.INTERNAL_SERVER_ERROR
+                content = status.phrase.encode()
+                content_type = 'text/plain'
+
+            # Static response
+            start_response(f'{status.value} {status.phrase}', [('Content-Type', content_type)])
+            return [content]
 
         # Run the chisel application...
         return super().__call__(environ, start_response)
