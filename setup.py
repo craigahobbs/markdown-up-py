@@ -17,7 +17,7 @@ def main():
         description='Markdown viewer application',
         long_description=long_description,
         long_description_content_type='text/markdown',
-        version='1.2.1',
+        version='1.2.2',
         author='Craig Hobbs',
         author_email='craigahobbs@gmail.com',
         keywords='Markdown viewer application',
