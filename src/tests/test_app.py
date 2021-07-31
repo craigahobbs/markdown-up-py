@@ -54,7 +54,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '200 OK')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/markdown')])
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/markdown; charset=utf-8')])
             self.assertEqual(content, [b'# Title'])
 
             # Get an image file
@@ -70,7 +70,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '404 Not Found')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain')])
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
             self.assertEqual(content, [b'Not Found'])
 
             # Get an file of unknown content type
@@ -93,7 +93,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
                 start_response = chisel.app.StartResponse()
                 content = app(environ, start_response)
                 self.assertEqual(start_response.status, '500 Internal Server Error')
-                self.assertEqual(start_response.headers, [('Content-Type', 'text/plain')])
+                self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
                 self.assertEqual(content, [b'Internal Server Error'])
 
     def test_markdown_up_html(self):
@@ -101,7 +101,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html'), ('ETag', 'b8c619152efa3ec038331ed7accbbf7e')])
+            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'b8c619152efa3ec038331ed7accbbf7e')])
             self.assertEqual(content_bytes, b'''\
 <!DOCTYPE html>
 <html lang="en">
@@ -131,7 +131,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/markdown_up_index')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/markdown')])
+            self.assertEqual(headers, [('Content-Type', 'text/markdown; charset=utf-8')])
             self.assertEqual(content_bytes, b'''\
 ## [markdown-up](https://github.com/craigahobbs/markdown-up-py#readme)
 
@@ -151,7 +151,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/markdown_up_index')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/markdown')])
+            self.assertEqual(headers, [('Content-Type', 'text/markdown; charset=utf-8')])
             self.assertEqual(content_bytes, b'''\
 ## [markdown-up](https://github.com/craigahobbs/markdown-up-py#readme)
 
@@ -165,7 +165,7 @@ No markdown files or sub-directories found.
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=dir')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/markdown')])
+            self.assertEqual(headers, [('Content-Type', 'text/markdown; charset=utf-8')])
             self.assertEqual(content_bytes, b'''\
 ## [markdown-up](https://github.com/craigahobbs/markdown-up-py#readme)
 
@@ -185,7 +185,7 @@ You are in the sub-directory, "**dir**".
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=dir/dir2')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/markdown')])
+            self.assertEqual(headers, [('Content-Type', 'text/markdown; charset=utf-8')])
             self.assertEqual(content_bytes, b'''\
 ## [markdown-up](https://github.com/craigahobbs/markdown-up-py#readme)
 
@@ -206,7 +206,7 @@ You are in the sub-directory, "**dir/dir2**".
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=dir()[]\\*/dir2()[]\\*')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/markdown')])
+            self.assertEqual(headers, [('Content-Type', 'text/markdown; charset=utf-8')])
             self.assertEqual(content_bytes.decode(), r'''## [markdown-up](https://github.com/craigahobbs/markdown-up-py#readme)
 
 You are in the sub-directory, "**dir\(\)\[\]\\\*/dir2\(\)\[\]\\\***".

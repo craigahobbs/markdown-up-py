@@ -16,7 +16,7 @@ STATIC_EXT_TO_CONTENT_TYPE = {
     '.gif': 'image/gif',
     '.jpeg': 'image/jpeg',
     '.jpg': 'image/jpeg',
-    '.md': 'text/markdown',
+    '.md': 'text/markdown; charset=utf-8',
     '.png': 'image/png',
     '.svg': 'image/svg+xml',
     '.tif': 'image/tiff',
@@ -53,12 +53,12 @@ class MarkdownUpApplication(chisel.Application):
                     content = path_file.read()
             except FileNotFoundError:
                 status = HTTPStatus.NOT_FOUND
-                content = status.phrase.encode()
-                content_type = 'text/plain'
+                content = status.phrase.encode(encoding='utf-8')
+                content_type = 'text/plain; charset=utf-8'
             except: # pylint: disable=bare-except
                 status = HTTPStatus.INTERNAL_SERVER_ERROR
-                content = status.phrase.encode()
-                content_type = 'text/plain'
+                content = status.phrase.encode(encoding='utf-8')
+                content_type = 'text/plain; charset=utf-8'
 
             # Static response
             start_response(f'{status.value} {status.phrase}', [('Content-Type', content_type)])
@@ -87,7 +87,7 @@ MARKDOWN_UP_HTML = chisel.StaticRequest(
     </script>
 </html>
 ''',
-    content_type='text/html',
+    content_type='text/html; charset=utf-8',
     urls=(('GET', '/'),),
     doc='The markdown-up HTML application stub',
     doc_group='markdown-up'
@@ -175,7 +175,7 @@ def markdown_up_index(ctx, req):
             print('', file=response)
             print(f'[{escape_markdown_span(dir_name)}]({dir_url})', file=response)
 
-    return ctx.response_text(HTTPStatus.OK, response.getvalue(), content_type='text/markdown')
+    return ctx.response_text(HTTPStatus.OK, response.getvalue(), content_type='text/markdown; charset=utf-8')
 
 
 # Helper function to escape Markdown span characters
