@@ -16,7 +16,7 @@ STATIC_EXT_TO_CONTENT_TYPE = {
     '.gif': 'image/gif',
     '.jpeg': 'image/jpeg',
     '.jpg': 'image/jpeg',
-    '.md': 'text/plain',
+    '.md': 'text/markdown',
     '.png': 'image/png',
     '.svg': 'image/svg+xml',
     '.tif': 'image/tiff',
@@ -175,7 +175,7 @@ def markdown_up_index(ctx, req):
             print('', file=response)
             print(f'[{escape_markdown_span(dir_name)}]({dir_url})', file=response)
 
-    return ctx.response_text(HTTPStatus.OK, response.getvalue())
+    return ctx.response_text(HTTPStatus.OK, response.getvalue(), content_type='text/markdown')
 
 
 # Helper function to escape Markdown span characters
