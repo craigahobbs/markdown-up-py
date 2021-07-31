@@ -1,3 +1,7 @@
+## 1.2.4 (2021-07-31)
+
+- [e0c86b8](https://github.com/craigahobbs/markdown-up-py/commit/e0c86b8) - specify response content type charset
+
 ## 1.2.3 (2021-07-30)
 
 - [c59c102](https://github.com/craigahobbs/markdown-up-py/commit/c59c102) - use correct markdown content type
