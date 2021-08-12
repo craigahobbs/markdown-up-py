@@ -1,3 +1,7 @@
+## 1.2.5 (2021-08-12)
+
+- [8ae36f8](https://github.com/craigahobbs/markdown-up-py/commit/8ae36f8) - updates from python-package-template
+
 ## 1.2.4 (2021-07-31)
 
 - [e0c86b8](https://github.com/craigahobbs/markdown-up-py/commit/e0c86b8) - specify response content type charset
