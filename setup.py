@@ -18,7 +18,7 @@ def main():
         long_description=long_description,
         long_description_content_type='text/markdown',
         version='1.2.4',
-        author='Craig Hobbs',
+        author='Craig A. Hobbs',
         author_email='craigahobbs@gmail.com',
         keywords='Markdown viewer application',
         url='https://github.com/craigahobbs/markdown-up-py',
