@@ -1,6 +1,8 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
+# pylint: disable=missing-class-docstring, missing-function-docstring, missing-module-docstring
+
 from contextlib import contextmanager
 import os
 from tempfile import TemporaryDirectory

@@ -1,6 +1,10 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
+"""
+markdown-up command-line script main module
+"""
+
 import argparse
 import os
 import threading
@@ -13,6 +17,9 @@ from .app import MarkdownUpApplication
 
 
 def main(argv=None):
+    """
+    markdown-up command-line script main entry point
+    """
 
     # Command line parsing
     parser = argparse.ArgumentParser(prog='markdown-up')

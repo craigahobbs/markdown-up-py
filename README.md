@@ -31,4 +31,14 @@ To view the markdown-up back-end API documentation, open the Chisel documentatio
 
 ## Development
 
-This project is developed using [Python Build](https://github.com/craigahobbs/python-build#readme).
+This project is developed using [Python Build](https://github.com/craigahobbs/python-build#readme). It was started
+using [python-package-template](https://github.com/craigahobbs/python-package-template#readme) as follows:
+
+```
+template-specialize python-package-template/template/ markdown-up-py/ \
+    -k package markdown-up \
+    -k name "Craig A. Hobbs" \
+    -k email "craigahobbs@gmail.com" \
+    -k github "craigahobbs" \
+    -k nodoc 1
+```

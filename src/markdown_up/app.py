@@ -1,6 +1,12 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
+# pylint: disable=missing-function-docstring
+
+"""
+The markdown-up back-end API WSGI application
+"""
+
 from http import HTTPStatus
 from io import StringIO
 import os
@@ -26,6 +32,10 @@ STATIC_EXT_TO_CONTENT_TYPE = {
 
 
 class MarkdownUpApplication(chisel.Application):
+    """
+    The markdown-up back-end API WSGI application class
+    """
+
     __slots__ = ('root',)
 
     def __init__(self, root):

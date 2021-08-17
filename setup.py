@@ -1,6 +1,8 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
+# pylint: disable=missing-function-docstring, missing-module-docstring
+
 import os
 
 from setuptools import setup
