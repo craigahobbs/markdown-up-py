@@ -35,10 +35,5 @@ This project is developed using [Python Build](https://github.com/craigahobbs/py
 using [python-package-template](https://github.com/craigahobbs/python-package-template#readme) as follows:
 
 ```
-template-specialize python-package-template/template/ markdown-up-py/ \
-    -k package markdown-up \
-    -k name "Craig A. Hobbs" \
-    -k email "craigahobbs@gmail.com" \
-    -k github "craigahobbs" \
-    -k nodoc 1
+template-specialize python-package-template/template/ markdown-up/ -k package markdown-up -k name 'Craig A. Hobbs' -k email 'craigahobbs@gmail.com' -k github 'craigahobbs' -k nodoc 1
 ```

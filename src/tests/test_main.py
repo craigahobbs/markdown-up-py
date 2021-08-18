@@ -1,8 +1,6 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
-# pylint: disable=missing-class-docstring, missing-function-docstring, missing-module-docstring
-
 from io import StringIO
 import os
 import unittest

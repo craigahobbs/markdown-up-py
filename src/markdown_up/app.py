@@ -1,8 +1,6 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
-# pylint: disable=missing-function-docstring
-
 """
 The markdown-up back-end API WSGI application
 """
