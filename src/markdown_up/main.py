@@ -21,7 +21,7 @@ def main(argv=None):
     markdown-up command-line script main entry point
     """
 
-    # Command line parsing
+    # Command line arguments
     parser = argparse.ArgumentParser(prog='markdown-up')
     parser.add_argument('path', nargs='?', default='.',
                         help='The markdown file or directory to view (default is ".")')
