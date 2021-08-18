@@ -1,3 +1,7 @@
+## 1.2.7 (2021-08-18)
+
+- [1ac9bba](https://github.com/craigahobbs/markdown-up-py/commit/1ac9bba) - updates from python-package-template
+
 ## 1.2.6 (2021-08-17)
 
 - [9f52581](https://github.com/craigahobbs/markdown-up-py/commit/9f52581) - updates from python-package-template
