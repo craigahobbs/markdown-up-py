@@ -171,7 +171,7 @@ No markdown files or sub-directories found.
 
 You are in the sub-directory, "**dir**".
 
-[Back to parent](#)
+[Back to parent](#url=markdown_up_index)
 
 ### Markdown Files
 

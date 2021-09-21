@@ -157,10 +157,10 @@ def markdown_up_index(ctx, req):
     if 'path' in req:
         parent_path = str(posix_path.parent)
         if parent_path == '.':
-            parent_url = '#'
+            markdown_url = 'markdown_up_index'
         else:
             markdown_url = f'markdown_up_index?{encode_query_string(dict(path=parent_path))}'
-            parent_url = f'#{encode_query_string(dict(url=markdown_url))}'
+        parent_url = f'#{encode_query_string(dict(url=markdown_url))}'
         print('', file=response)
         print(f'[Back to parent]({parent_url})', file=response)
 
