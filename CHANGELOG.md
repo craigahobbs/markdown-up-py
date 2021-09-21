@@ -1,3 +1,7 @@
+## 1.2.9 (2021-09-21)
+
+- [7d84420](https://github.com/craigahobbs/markdown-up-py/commit/7d84420) - fix top parent up link url
+
 ## 1.2.8 (2021-08-24)
 
 - [036beba](https://github.com/craigahobbs/markdown-up-py/commit/036beba) - update readme
