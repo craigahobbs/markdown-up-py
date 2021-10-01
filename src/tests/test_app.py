@@ -101,7 +101,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'b8c619152efa3ec038331ed7accbbf7e')])
+            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '5474a2247853d4e1585a136aa51fbbeb')])
             self.assertEqual(content_bytes, b'''\
 <!DOCTYPE html>
 <html lang="en">
@@ -110,6 +110,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/markdown-model.css">
         <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/schema-markdown-doc.css">
+        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/app.css">
     </head>
     <body>
     </body>
