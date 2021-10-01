@@ -1,3 +1,7 @@
+## 1.3.0 (2021-10-01)
+
+- [1eb577c](https://github.com/craigahobbs/markdown-up-py/commit/1eb577c) - update markdown-up app stub
+
 ## 1.2.9 (2021-09-21)
 
 - [7d84420](https://github.com/craigahobbs/markdown-up-py/commit/7d84420) - fix top parent up link url
