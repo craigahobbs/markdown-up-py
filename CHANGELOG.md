@@ -1,3 +1,7 @@
+## 1.3.1 (2021-10-04)
+
+- [5859028](https://github.com/craigahobbs/markdown-up-py/commit/5859028) - update markdown-up application stub
+
 ## 1.3.0 (2021-10-01)
 
 - [1eb577c](https://github.com/craigahobbs/markdown-up-py/commit/1eb577c) - update markdown-up app stub
