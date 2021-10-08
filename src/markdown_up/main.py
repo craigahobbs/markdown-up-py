@@ -52,7 +52,7 @@ def main(argv=None):
 
     # Launch the web browser on a thread as webbrowser.open may block
     webbrowser_thread = threading.Thread(target=webbrowser.open, args=(url,))
-    webbrowser_thread.setDaemon(True)
+    webbrowser_thread.daemon = True
     webbrowser_thread.start()
 
     # Host
