@@ -20,6 +20,7 @@ STATIC_EXT_TO_CONTENT_TYPE = {
     '.gif': 'image/gif',
     '.jpeg': 'image/jpeg',
     '.jpg': 'image/jpeg',
+    '.markdown': 'text/markdown; charset=utf-8',
     '.md': 'text/markdown; charset=utf-8',
     '.png': 'image/png',
     '.svg': 'image/svg+xml',
@@ -137,7 +138,7 @@ def markdown_up_index(ctx, req):
     for entry in os.scandir(path):
         if entry.is_dir() and not entry.name.startswith('.'):
             directories.append(entry.name)
-        elif entry.is_file() and entry.name.endswith('.md'):
+        elif entry.is_file() and entry.name.endswith(('.md', '.markdown')):
             files.append(entry.name)
 
     # Build the index markdown response
