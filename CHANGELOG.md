@@ -1,3 +1,9 @@
+## 1.3.2 (2021-10-19)
+
+- [df1327e](https://github.com/craigahobbs/markdown-up-py/commit/df1327e) - add support for .markdown file extension
+
+- [9e74008](https://github.com/craigahobbs/markdown-up-py/commit/9e74008) - use thread daemon attribute, not setDaemon
+
 ## 1.3.1 (2021-10-04)
 
 - [5859028](https://github.com/craigahobbs/markdown-up-py/commit/5859028) - update markdown-up application stub
