@@ -28,6 +28,7 @@ STATIC_EXT_TO_CONTENT_TYPE = {
     '.tiff': 'image/tiff',
     '.webp': 'image/webp'
 }
+MARKDOWN_EXTS = ('.md', '.markdown')
 
 
 class MarkdownUpApplication(chisel.Application):
@@ -138,7 +139,7 @@ def markdown_up_index(ctx, req):
     for entry in os.scandir(path):
         if entry.is_dir() and not entry.name.startswith('.'):
             directories.append(entry.name)
-        elif entry.is_file() and entry.name.endswith(('.md', '.markdown')):
+        elif entry.is_file() and entry.name.endswith(MARKDOWN_EXTS):
             files.append(entry.name)
 
     # Build the index markdown response
