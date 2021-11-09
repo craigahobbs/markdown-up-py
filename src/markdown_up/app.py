@@ -17,9 +17,11 @@ from schema_markdown import encode_query_string
 
 # The map of static file extension to content-type
 STATIC_EXT_TO_CONTENT_TYPE = {
+    '.csv': 'text/csv',
     '.gif': 'image/gif',
     '.jpeg': 'image/jpeg',
     '.jpg': 'image/jpeg',
+    '.json': 'application/json',
     '.markdown': 'text/markdown; charset=utf-8',
     '.md': 'text/markdown; charset=utf-8',
     '.png': 'image/png',
