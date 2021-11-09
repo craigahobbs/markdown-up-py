@@ -1,3 +1,7 @@
+## 1.3.3 (2021-11-09)
+
+- [e6ac2ba](https://github.com/craigahobbs/markdown-up-py/commit/e6ac2ba) - add support for .csv and .json file extensions
+
 ## 1.3.2 (2021-10-19)
 
 - [df1327e](https://github.com/craigahobbs/markdown-up-py/commit/df1327e) - add support for .markdown file extension
