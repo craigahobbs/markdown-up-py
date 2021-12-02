@@ -1,3 +1,7 @@
+## 1.4.0 (2021-12-01)
+
+- [c01ac89](https://github.com/craigahobbs/markdown-up-py/commit/c01ac89) - update markdown-up web application stub
+
 ## 1.3.3 (2021-11-09)
 
 - [e6ac2ba](https://github.com/craigahobbs/markdown-up-py/commit/e6ac2ba) - add support for .csv and .json file extensions
