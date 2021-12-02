@@ -139,13 +139,13 @@ class TestMarkdownUpApplication(unittest.TestCase):
 
 ### Markdown Files
 
-[README.md](#url=README.md)
+[README.md](#url=/README.md)
 
 ### Directories
 
-[dir](#url=markdown_up_index%3Fpath%3Ddir)
+[dir](#url=/markdown_up_index%3Fpath%3Ddir)
 
-[dir2](#url=markdown_up_index%3Fpath%3Ddir2)
+[dir2](#url=/markdown_up_index%3Fpath%3Ddir2)
 ''')
 
     def test_markdown_up_index_empty(self):
@@ -173,11 +173,11 @@ No markdown files or sub-directories found.
 
 You are in the sub-directory, "**dir**".
 
-[Back to parent](#url=markdown_up_index)
+[Back to parent](#url=/markdown_up_index)
 
 ### Markdown Files
 
-[README.md](#url=dir/README.md)
+[README.md](#url=/dir/README.md)
 ''')
 
     def test_markdown_up_index_path_dir(self):
@@ -193,11 +193,11 @@ You are in the sub-directory, "**dir**".
 
 You are in the sub-directory, "**dir/dir2**".
 
-[Back to parent](#url=markdown_up_index%3Fpath%3Ddir)
+[Back to parent](#url=/markdown_up_index%3Fpath%3Ddir)
 
 ### Markdown Files
 
-[README.md](#url=dir/dir2/README.md)
+[README.md](#url=/dir/dir2/README.md)
 ''')
 
     def test_markdown_up_index_escape(self):
@@ -213,15 +213,15 @@ You are in the sub-directory, "**dir/dir2**".
 
 You are in the sub-directory, "**dir\(\)\[\]\\\*/dir2\(\)\[\]\\\***".
 
-[Back to parent](#url=markdown_up_index%3Fpath%3Ddir%2528%2529%255B%255D%255C%252A)
+[Back to parent](#url=/markdown_up_index%3Fpath%3Ddir%2528%2529%255B%255D%255C%252A)
 
 ### Markdown Files
 
-[file\(\)\[\]\\\*.md](#url=dir%28%29%5B%5D%5C%2A/dir2%28%29%5B%5D%5C%2A/file%28%29%5B%5D%5C%2A.md)
+[file\(\)\[\]\\\*.md](#url=/dir%28%29%5B%5D%5C%2A/dir2%28%29%5B%5D%5C%2A/file%28%29%5B%5D%5C%2A.md)
 
 ### Directories
 
-[dir3\(\)\[\]\\\*](#url=markdown_up_index%3Fpath%3Ddir%2528%2529%255B%255D%255C%252A/dir2%2528%2529%255B%255D%255C%252A/dir3%2528%2529%255B%255D%255C%252A)
+[dir3\(\)\[\]\\\*](#url=/markdown_up_index%3Fpath%3Ddir%2528%2529%255B%255D%255C%252A/dir2%2528%2529%255B%255D%255C%252A/dir3%2528%2529%255B%255D%255C%252A)
 ''')
 
     def test_markdown_up_index_invalid_path(self):

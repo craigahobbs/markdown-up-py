@@ -163,9 +163,9 @@ def markdown_up_index(ctx, req):
     if 'path' in req:
         parent_path = str(posix_path.parent)
         if parent_path == '.':
-            markdown_url = 'markdown_up_index'
+            markdown_url = '/markdown_up_index'
         else:
-            markdown_url = f'markdown_up_index?{encode_query_string(dict(path=parent_path))}'
+            markdown_url = f'/markdown_up_index?{encode_query_string(dict(path=parent_path))}'
         parent_url = f'#{encode_query_string(dict(url=markdown_url))}'
         print('', file=response)
         print(f'[Back to parent]({parent_url})', file=response)
@@ -174,8 +174,9 @@ def markdown_up_index(ctx, req):
     if files:
         print('', file=response)
         print('### Markdown Files', file=response)
+        posix_path_abs = PurePosixPath('/').joinpath(posix_path)
         for file_name in sorted(files):
-            file_url = f'#{encode_query_string(dict(url=str(posix_path.joinpath(file_name))))}'
+            file_url = f'#{encode_query_string(dict(url=str(posix_path_abs.joinpath(file_name))))}'
             print('', file=response)
             print(f'[{escape_markdown_span(file_name)}]({file_url})', file=response)
 
@@ -184,7 +185,7 @@ def markdown_up_index(ctx, req):
         print('', file=response)
         print('### Directories', file=response)
         for dir_name in sorted(directories):
-            markdown_url = f'markdown_up_index?{encode_query_string(dict(path=posix_path.joinpath(dir_name)))}'
+            markdown_url = f'/markdown_up_index?{encode_query_string(dict(path=posix_path.joinpath(dir_name)))}'
             dir_url = f'#{encode_query_string(dict(url=markdown_url))}'
             print('', file=response)
             print(f'[{escape_markdown_span(dir_name)}]({dir_url})', file=response)
