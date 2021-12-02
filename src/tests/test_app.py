@@ -101,7 +101,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '3634d347d908ea58f92ed7d79dd25837')])
+            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '06b59c0b5f15125db09895f770d06158')])
             self.assertEqual(content_bytes, b'''\
 <!DOCTYPE html>
 <html lang="en">
@@ -115,8 +115,9 @@ class TestMarkdownUpApplication(unittest.TestCase):
     <body>
     </body>
     <script type="module">
-        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/markdown-up/index.js';
-        MarkdownUp.run(window, {'url': 'markdown_up_index'});
+        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/lib/app.js';
+        const app = new MarkdownUp(window, {'url': 'markdown_up_index'});
+        app.run();
     </script>
 </html>
 ''')

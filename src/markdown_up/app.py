@@ -95,8 +95,9 @@ MARKDOWN_UP_HTML = chisel.StaticRequest(
     <body>
     </body>
     <script type="module">
-        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/markdown-up/index.js';
-        MarkdownUp.run(window, {'url': 'markdown_up_index'});
+        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/lib/app.js';
+        const app = new MarkdownUp(window, {'url': 'markdown_up_index'});
+        app.run();
     </script>
 </html>
 ''',
