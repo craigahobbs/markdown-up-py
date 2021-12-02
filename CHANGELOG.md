@@ -1,3 +1,7 @@
+## 1.4.1 (2021-12-01)
+
+- [8edd71e](https://github.com/craigahobbs/markdown-up-py/commit/8edd71e) - use absolute markdown-up url paths
+
 ## 1.4.0 (2021-12-01)
 
 - [c01ac89](https://github.com/craigahobbs/markdown-up-py/commit/c01ac89) - update markdown-up web application stub
