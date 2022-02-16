@@ -1,3 +1,7 @@
+## 1.4.2 (2022-02-16)
+
+- [73e241e](https://github.com/craigahobbs/markdown-up-py/commit/73e241e) - add mds extension
+
 ## 1.4.1 (2021-12-01)
 
 - [8edd71e](https://github.com/craigahobbs/markdown-up-py/commit/8edd71e) - use absolute markdown-up url paths
