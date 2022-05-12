@@ -1,3 +1,9 @@
+## 1.4.3 (2022-05-12)
+
+- [29dd452](https://github.com/craigahobbs/markdown-up-py/commit/29dd452) - update markdown-up app stub
+
+- [94abe35](https://github.com/craigahobbs/markdown-up-py/commit/94abe35) - add python 3.11 support, remove python 3.6
+
 ## 1.4.2 (2022-02-16)
 
 - [73e241e](https://github.com/craigahobbs/markdown-up-py/commit/73e241e) - add mds extension
