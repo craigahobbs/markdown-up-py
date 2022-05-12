@@ -1,3 +1,7 @@
+## 1.4.4 (2022-05-12)
+
+- [a94ea02](https://github.com/craigahobbs/markdown-up-py/commit/a94ea02) - add .smd \(Schema Markdown\) extension
+
 ## 1.4.3 (2022-05-12)
 
 - [29dd452](https://github.com/craigahobbs/markdown-up-py/commit/29dd452) - update markdown-up app stub
