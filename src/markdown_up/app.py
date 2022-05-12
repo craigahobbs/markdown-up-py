@@ -26,6 +26,7 @@ STATIC_EXT_TO_CONTENT_TYPE = {
     '.md': 'text/markdown; charset=utf-8',
     '.mds': 'text/plain; charset=utf-8',
     '.png': 'image/png',
+    '.smd': 'text/plain; charset=utf-8',
     '.svg': 'image/svg+xml',
     '.tif': 'image/tiff',
     '.tiff': 'image/tiff',
