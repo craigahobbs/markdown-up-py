@@ -17,7 +17,7 @@ def main():
         description='The MarkdownUp launcher',
         long_description=long_description,
         long_description_content_type='text/markdown',
-        version='1.4.5',
+        version='1.4.6',
         author='Craig A. Hobbs',
         author_email='craigahobbs@gmail.com',
         keywords='MarkdownUp,Markdown,viewer',
