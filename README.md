@@ -14,15 +14,14 @@ is a Markdown viewer.
 
 ## View Local Markdown Files
 
-To view Markdown files in the current directory, run the markdown-up command-line application from a
-terminal prompt:
+To view local Markdown files, run the markdown-up command-line application from a terminal prompt:
 
 ~~~
 pip install markdown-up
 markdown-up
 ~~~
 
-You can open a specific file or directory as follows:
+You can also open a specific file or directory:
 
 ~~~
 markdown-up README.md
