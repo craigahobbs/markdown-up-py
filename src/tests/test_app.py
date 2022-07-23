@@ -101,12 +101,14 @@ class TestMarkdownUpApplication(unittest.TestCase):
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'b16c268777a73f8e4f7ac98f16a522ba')])
-            self.assertEqual(content_bytes, b'''\
+            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '5e81837db54ce3bdab44d8eb7caea439')])
+            self.assertEqual(content_bytes.decode('utf-8'), '''\
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <title>MarkdownUp</title>
         <meta charset="UTF-8">
+        <meta name="description" content="MarkdownUp is a Markdown viewer">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/markdown-model.css">
         <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/app.css">
@@ -133,14 +135,16 @@ class TestMarkdownUpApplication(unittest.TestCase):
             status, headers, content_bytes = app.request('GET', '/markdown_up_index')
             self.assertEqual(status, '200 OK')
             self.assertEqual(headers, [('Content-Type', 'text/markdown; charset=utf-8')])
-            self.assertEqual(content_bytes, b'''\
-## [markdown-up](https://github.com/craigahobbs/markdown-up-py#readme)
+            self.assertEqual(content_bytes.decode('utf-8').replace(temp_dir, 'tmp'), '''\
+[Root](#url=) | [Parent](#url=) | [MarkdownUp](https://craigahobbs.github.io/markdown-up/)
 
-### Markdown Files
+# MarkdownUp - tmp
+
+## Markdown Files
 
 [README.md](#url=/README.md)
 
-### Directories
+## Directories
 
 [dir](#url=/markdown_up_index%3Fpath%3Ddir)
 
@@ -153,8 +157,10 @@ class TestMarkdownUpApplication(unittest.TestCase):
             status, headers, content_bytes = app.request('GET', '/markdown_up_index')
             self.assertEqual(status, '200 OK')
             self.assertEqual(headers, [('Content-Type', 'text/markdown; charset=utf-8')])
-            self.assertEqual(content_bytes, b'''\
-## [markdown-up](https://github.com/craigahobbs/markdown-up-py#readme)
+            self.assertEqual(content_bytes.decode('utf-8').replace(temp_dir, 'tmp'), '''\
+[Root](#url=) | [Parent](#url=) | [MarkdownUp](https://craigahobbs.github.io/markdown-up/)
+
+# MarkdownUp - tmp
 
 No markdown files or sub-directories found.
 ''')
@@ -167,14 +173,12 @@ No markdown files or sub-directories found.
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=dir')
             self.assertEqual(status, '200 OK')
             self.assertEqual(headers, [('Content-Type', 'text/markdown; charset=utf-8')])
-            self.assertEqual(content_bytes, b'''\
-## [markdown-up](https://github.com/craigahobbs/markdown-up-py#readme)
+            self.assertEqual(content_bytes.decode('utf-8').replace(temp_dir, 'tmp'), '''\
+[Root](#url=) | [Parent](#url=) | [MarkdownUp](https://craigahobbs.github.io/markdown-up/)
 
-You are in the sub-directory, "**dir**".
+# MarkdownUp - tmp/dir
 
-[Back to parent](#url=/markdown_up_index)
-
-### Markdown Files
+## Markdown Files
 
 [README.md](#url=/dir/README.md)
 ''')
@@ -187,14 +191,12 @@ You are in the sub-directory, "**dir**".
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=dir/dir2')
             self.assertEqual(status, '200 OK')
             self.assertEqual(headers, [('Content-Type', 'text/markdown; charset=utf-8')])
-            self.assertEqual(content_bytes, b'''\
-## [markdown-up](https://github.com/craigahobbs/markdown-up-py#readme)
+            self.assertEqual(content_bytes.decode('utf-8').replace(temp_dir, 'tmp'), '''\
+[Root](#url=) | [Parent](#url=/markdown_up_index%3Fpath%3Ddir) | [MarkdownUp](https://craigahobbs.github.io/markdown-up/)
 
-You are in the sub-directory, "**dir/dir2**".
+# MarkdownUp - tmp/dir/dir2
 
-[Back to parent](#url=/markdown_up_index%3Fpath%3Ddir)
-
-### Markdown Files
+## Markdown Files
 
 [README.md](#url=/dir/dir2/README.md)
 ''')
@@ -208,17 +210,18 @@ You are in the sub-directory, "**dir/dir2**".
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=dir()[]\\*/dir2()[]\\*')
             self.assertEqual(status, '200 OK')
             self.assertEqual(headers, [('Content-Type', 'text/markdown; charset=utf-8')])
-            self.assertEqual(content_bytes.decode(), r'''## [markdown-up](https://github.com/craigahobbs/markdown-up-py#readme)
+            self.assertEqual(
+                content_bytes.decode('utf-8').replace(temp_dir, 'tmp'),
+                # pylint: disable-next=line-too-long
+                r'''[Root](#url=) | [Parent](#url=/markdown_up_index%3Fpath%3Ddir%2528%2529%255B%255D%255C%252A) | [MarkdownUp](https://craigahobbs.github.io/markdown-up/)
 
-You are in the sub-directory, "**dir\(\)\[\]\\\*/dir2\(\)\[\]\\\***".
+# MarkdownUp - tmp/dir\(\)\[\]\\\*/dir2\(\)\[\]\\\*
 
-[Back to parent](#url=/markdown_up_index%3Fpath%3Ddir%2528%2529%255B%255D%255C%252A)
-
-### Markdown Files
+## Markdown Files
 
 [file\(\)\[\]\\\*.md](#url=/dir%28%29%5B%5D%5C%2A/dir2%28%29%5B%5D%5C%2A/file%28%29%5B%5D%5C%2A.md)
 
-### Directories
+## Directories
 
 [dir3\(\)\[\]\\\*](#url=/markdown_up_index%3Fpath%3Ddir%2528%2529%255B%255D%255C%252A/dir2%2528%2529%255B%255D%255C%252A/dir3%2528%2529%255B%255D%255C%252A)
 ''')

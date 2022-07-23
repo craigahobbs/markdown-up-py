@@ -88,7 +88,9 @@ MARKDOWN_UP_HTML = chisel.StaticRequest(
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <title>MarkdownUp</title>
         <meta charset="UTF-8">
+        <meta name="description" content="MarkdownUp is a Markdown viewer">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/markdown-model.css">
         <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/app.css">
@@ -146,35 +148,35 @@ def markdown_up_index(ctx, req):
         elif entry.is_file() and entry.name.endswith(MARKDOWN_EXTS):
             files.append(entry.name)
 
+    # Compute the menu links
+    menu_links = []
+    parent_path = None
+    if 'path' in req:
+        parent_path = str(posix_path.parent)
+        if parent_path != '.':
+            parent_url = f'/markdown_up_index?{encode_query_string(dict(path=parent_path))}'
+            menu_links.append(('Root', '#url='))
+            menu_links.append(('Parent', f'#{encode_query_string(dict(url=parent_url))}'))
+    if not menu_links:
+        menu_links.append(('Root', '#url='))
+        menu_links.append(('Parent','#url='))
+    menu_links.append(('MarkdownUp', 'https://craigahobbs.github.io/markdown-up/'))
+
     # Build the index markdown response
     response = StringIO()
-    print('## [markdown-up](https://github.com/craigahobbs/markdown-up-py#readme)', file=response)
-
-    # Sub-directory? If so, report...
-    if 'path' in req:
-        print('', file=response)
-        print(f'You are in the sub-directory, "**{escape_markdown_span(req["path"])}**".', file=response)
+    print(' | '.join(f'[{link_text}]({link_url})' for link_text, link_url in menu_links), file=response)
+    print('', file=response)
+    print(f'# MarkdownUp - {escape_markdown_span(path)}', file=response)
 
     # Empty?
     if not files and not directories:
         print('', file=response)
         print('No markdown files or sub-directories found.', file=response)
 
-    # Back-link to parent sub-directory
-    if 'path' in req:
-        parent_path = str(posix_path.parent)
-        if parent_path == '.':
-            markdown_url = '/markdown_up_index'
-        else:
-            markdown_url = f'/markdown_up_index?{encode_query_string(dict(path=parent_path))}'
-        parent_url = f'#{encode_query_string(dict(url=markdown_url))}'
-        print('', file=response)
-        print(f'[Back to parent]({parent_url})', file=response)
-
     # Add the markdown file links
     if files:
         print('', file=response)
-        print('### Markdown Files', file=response)
+        print('## Markdown Files', file=response)
         posix_path_abs = PurePosixPath('/').joinpath(posix_path)
         for file_name in sorted(files):
             file_url = f'#{encode_query_string(dict(url=str(posix_path_abs.joinpath(file_name))))}'
@@ -184,7 +186,7 @@ def markdown_up_index(ctx, req):
     # Add the sub-directory links
     if directories:
         print('', file=response)
-        print('### Directories', file=response)
+        print('## Directories', file=response)
         for dir_name in sorted(directories):
             markdown_url = f'/markdown_up_index?{encode_query_string(dict(path=posix_path.joinpath(dir_name)))}'
             dir_url = f'#{encode_query_string(dict(url=markdown_url))}'
