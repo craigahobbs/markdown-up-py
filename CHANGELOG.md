@@ -1,3 +1,11 @@
+## 1.4.7 (2022-07-23)
+
+- [b146952](https://github.com/craigahobbs/markdown-up-py/commit/b146952) - improve index markdown
+
+## 1.4.6 (2022-07-22)
+
+- [698f142](https://github.com/craigahobbs/markdown-up-py/commit/698f142) - update readme
+
 ## 1.4.5 (2022-07-22)
 
 - [631bcc2](https://github.com/craigahobbs/markdown-up-py/commit/631bcc2) - update readme
