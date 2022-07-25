@@ -6,13 +6,10 @@ The markdown-up back-end API WSGI application
 """
 
 from http import HTTPStatus
-from io import StringIO
 import os
 from pathlib import PurePosixPath
-import re
 
 import chisel
-from schema_markdown import encode_query_string
 
 
 # The map of static file extension to content-type
@@ -99,22 +96,29 @@ MARKDOWN_UP_HTML = chisel.StaticRequest(
     </body>
     <script type="module">
         import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/lib/app.js';
-        const app = new MarkdownUp(window, {'url': 'markdown_up_index'});
+        const app = new MarkdownUp(window, {
+            'markdownText': `\\
+~~~ markdown-script
+include 'https://craigahobbs.github.io/markdown-up/launcher-index/app.mds'
+markdownUpIndex()
+~~~
+`
+        });
         app.run();
     </script>
 </html>
 ''',
     content_type='text/html; charset=utf-8',
     urls=(('GET', '/'),),
-    doc='The markdown-up HTML application stub',
-    doc_group='markdown-up'
+    doc='The MarkdownUp launcher index application',
+    doc_group='MarkdownUp'
 )
 
 
-@chisel.action(wsgi_response=True, spec='''\
-group "markdown-up"
+@chisel.action(spec='''\
+group "MarkdownUp"
 
-# The markdown-up index markdown
+# The MarkdownUp launcher index API
 action markdown_up_index
     urls
         GET
@@ -122,6 +126,19 @@ action markdown_up_index
     query
         # The relative sub-directory path
         optional string(len > 0) path
+
+    output
+        # The index path
+        string path
+
+        # The parent path
+        optional string parent
+
+        # The path's Markdown files
+        optional string[len > 0] files
+
+        # The path's sub-directories
+        optional string[len > 0] directories
 
     errors
         # The path is invalid
@@ -139,6 +156,9 @@ def markdown_up_index(ctx, req):
     if not os.path.isdir(path):
         raise chisel.ActionError('InvalidPath')
 
+    # Compute parent path
+    parent_path = str(posix_path.parent) if 'path' in req else None
+
     # Get the list of markdown files and sub-directories from the current sub-directory
     files = []
     directories = []
@@ -148,56 +168,12 @@ def markdown_up_index(ctx, req):
         elif entry.is_file() and entry.name.endswith(MARKDOWN_EXTS):
             files.append(entry.name)
 
-    # Compute the menu links
-    menu_links = []
-    parent_path = None
-    if 'path' in req:
-        parent_path = str(posix_path.parent)
-        if parent_path != '.':
-            parent_url = f'/markdown_up_index?{encode_query_string(dict(path=parent_path))}'
-            menu_links.append(('Root', '#url='))
-            menu_links.append(('Parent', f'#{encode_query_string(dict(url=parent_url))}'))
-    if not menu_links:
-        menu_links.append(('Root', '#url='))
-        menu_links.append(('Parent','#url='))
-    menu_links.append(('MarkdownUp', 'https://craigahobbs.github.io/markdown-up/'))
-
-    # Build the index markdown response
-    response = StringIO()
-    print(' | '.join(f'[{link_text}]({link_url})' for link_text, link_url in menu_links), file=response)
-    print('', file=response)
-    print(f'# MarkdownUp - {escape_markdown_span(path)}', file=response)
-
-    # Empty?
-    if not files and not directories:
-        print('', file=response)
-        print('No markdown files or sub-directories found.', file=response)
-
-    # Add the markdown file links
+    # Return the response
+    response = {'path': path}
+    if parent_path is not None and parent_path != '.':
+        response['parent'] = parent_path
     if files:
-        print('', file=response)
-        print('## Markdown Files', file=response)
-        posix_path_abs = PurePosixPath('/').joinpath(posix_path)
-        for file_name in sorted(files):
-            file_url = f'#{encode_query_string(dict(url=str(posix_path_abs.joinpath(file_name))))}'
-            print('', file=response)
-            print(f'[{escape_markdown_span(file_name)}]({file_url})', file=response)
-
-    # Add the sub-directory links
+        response['files'] = sorted(files)
     if directories:
-        print('', file=response)
-        print('## Directories', file=response)
-        for dir_name in sorted(directories):
-            markdown_url = f'/markdown_up_index?{encode_query_string(dict(path=posix_path.joinpath(dir_name)))}'
-            dir_url = f'#{encode_query_string(dict(url=markdown_url))}'
-            print('', file=response)
-            print(f'[{escape_markdown_span(dir_name)}]({dir_url})', file=response)
-
-    return ctx.response_text(HTTPStatus.OK, response.getvalue(), content_type='text/markdown; charset=utf-8')
-
-
-# Helper function to escape Markdown span characters
-def escape_markdown_span(text):
-    return re_escape_markdown_span.sub(r'\\\1', text)
-
-re_escape_markdown_span = re.compile(r'([\\\[\]()*])')
+        response['directories'] = sorted(directories)
+    return response
