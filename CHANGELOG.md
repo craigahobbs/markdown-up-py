@@ -1,3 +1,7 @@
+## 1.4.8 (2022-07-25)
+
+- [a4653fc](https://github.com/craigahobbs/markdown-up-py/commit/a4653fc) - port index application to markdown-script
+
 ## 1.4.7 (2022-07-23)
 
 - [b146952](https://github.com/craigahobbs/markdown-up-py/commit/b146952) - improve index markdown
