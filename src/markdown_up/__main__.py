@@ -2,7 +2,7 @@
 # https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
 """
-markdown-up top-level script environment
+The MarkdownUp launcher command-line application stub
 """
 
 from .main import main

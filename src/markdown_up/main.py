@@ -2,7 +2,7 @@
 # https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
 """
-markdown-up command-line script main module
+The MarkdownUp launcher command-line application
 """
 
 import argparse

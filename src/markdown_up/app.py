@@ -2,7 +2,7 @@
 # https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
 """
-The markdown-up back-end API WSGI application
+The MarkdownUp launcher back-end application
 """
 
 from http import HTTPStatus
