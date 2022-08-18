@@ -102,7 +102,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '57e2cbab00d49dc0182e805d5289031c')])
+            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '635313c7b4710699bc17571452633054')])
             self.assertEqual(content_bytes.decode('utf-8'), '''\
 <!DOCTYPE html>
 <html lang="en">
@@ -120,7 +120,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
         const app = new MarkdownUp(window, {
             'markdownText': `\\
 ~~~ markdown-script
-include 'https://craigahobbs.github.io/markdown-up/launcher-index/app.mds'
+include 'https://craigahobbs.github.io/markdown-up/launcher/app.mds'
 markdownUpIndex()
 ~~~
 `
