@@ -1,3 +1,7 @@
+## 1.4.9 (2022-08-18)
+
+- [14e66c6](https://github.com/craigahobbs/markdown-up-py/commit/14e66c6) - simplify MarkdownUp app stub
+
 ## 1.4.8 (2022-07-25)
 
 - [a4653fc](https://github.com/craigahobbs/markdown-up-py/commit/a4653fc) - port index application to markdown-script
