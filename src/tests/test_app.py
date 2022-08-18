@@ -111,7 +111,6 @@ class TestMarkdownUpApplication(unittest.TestCase):
         <meta charset="UTF-8">
         <meta name="description" content="MarkdownUp is a Markdown viewer">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/markdown-model.css">
         <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/app.css">
     </head>
     <body>
