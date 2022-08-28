@@ -1,3 +1,5 @@
+# Changelog
+
 ## 1.4.10 (2022-08-18)
 
 - [2a0bf89](https://github.com/craigahobbs/markdown-up-py/commit/2a0bf89) - update launcher app stub
