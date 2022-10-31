@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.11 (2022-10-31)
+
+- [abbff30](https://github.com/craigahobbs/markdown-up-py/commit/abbff30) - add pyproject.toml and setup.cfg, remove setup.py
+
 ## 1.4.10 (2022-08-18)
 
 - [2a0bf89](https://github.com/craigahobbs/markdown-up-py/commit/2a0bf89) - update launcher app stub
