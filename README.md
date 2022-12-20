@@ -12,6 +12,11 @@ launcher.
 is a Markdown viewer.
 
 
+## Links
+
+- [Source code](https://github.com/craigahobbs/markdown-up-py)
+
+
 ## View Local Markdown Files
 
 To view local Markdown files, run the markdown-up command-line application from a terminal prompt:
@@ -30,8 +35,8 @@ markdown-up README.md
 
 ## Development
 
-This project is developed using [python-build](https://github.com/craigahobbs/python-build#readme). It was started
-using [python-template](https://github.com/craigahobbs/python-template#readme) as follows:
+This package is developed using [python-build](https://github.com/craigahobbs/python-build#readme).
+It was started using [python-template](https://github.com/craigahobbs/python-template#readme) as follows:
 
 ~~~
 template-specialize python-template/template/ markdown-up-py/ -k package markdown-up -k name 'Craig A. Hobbs' -k email 'craigahobbs@gmail.com' -k github 'craigahobbs' -k noapi 1
