@@ -48,6 +48,7 @@ def main(argv=None):
     host = '127.0.0.1'
     url = f'http://{host}:{args.port}/'
     if is_file:
+        # pylint: disable=use-dict-literal
         url += f'#{encode_query_string(dict(url=os.path.basename(args.path)))}'
 
     # Launch the web browser on a thread as webbrowser.open may block
