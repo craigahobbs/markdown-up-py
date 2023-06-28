@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.12 (2023-06-28)
+
+- [5ea0ffa](https://github.com/craigahobbs/markdown-up-py/commit/5ea0ffa) - add python 3.12 support, remove python 3.7 support \(end-of-life\)
+
 ## 1.4.11 (2022-10-31)
 
 - [abbff30](https://github.com/craigahobbs/markdown-up-py/commit/abbff30) - add pyproject.toml and setup.cfg, remove setup.py
