@@ -14,6 +14,7 @@ import chisel
 
 # The map of static file extension to content-type
 STATIC_EXT_TO_CONTENT_TYPE = {
+    '.bare': 'text/plain; charset=utf-8',
     '.csv': 'text/csv',
     '.gif': 'image/gif',
     '.jpeg': 'image/jpeg',
