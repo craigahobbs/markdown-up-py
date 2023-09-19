@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.13 (2023-09-19)
+
+- [2f31fb0](https://github.com/craigahobbs/markdown-up-py/commit/2f31fb0) - add .bare extension
+
 ## 1.4.12 (2023-06-28)
 
 - [5ea0ffa](https://github.com/craigahobbs/markdown-up-py/commit/5ea0ffa) - add python 3.12 support, remove python 3.7 support \(end-of-life\)
