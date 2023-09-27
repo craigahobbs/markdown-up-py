@@ -24,9 +24,11 @@ def main(argv=None):
     # Command line arguments
     parser = argparse.ArgumentParser(prog='markdown-up')
     parser.add_argument('path', nargs='?', default='.',
-                        help='The markdown file or directory to view (default is ".")')
+                        help='the markdown file or directory to view (default is ".")')
     parser.add_argument('-p', metavar='N', dest='port', type=int, default=8080,
-                        help='The application port (default is 8080)')
+                        help='the application port (default is 8080)')
+    parser.add_argument('-n', dest='no_browser', action='store_true',
+                        help="don't open a web browser")
     args = parser.parse_args(args=argv)
 
     # Verify the path exists
@@ -52,9 +54,10 @@ def main(argv=None):
         url += f'#{encode_query_string(dict(url=os.path.basename(args.path)))}'
 
     # Launch the web browser on a thread as webbrowser.open may block
-    webbrowser_thread = threading.Thread(target=webbrowser.open, args=(url,))
-    webbrowser_thread.daemon = True
-    webbrowser_thread.start()
+    if not args.no_browser:
+        webbrowser_thread = threading.Thread(target=webbrowser.open, args=(url,))
+        webbrowser_thread.daemon = True
+        webbrowser_thread.start()
 
     # Host
     with wsgiref.simple_server.make_server(host, args.port, MarkdownUpApplication(root)) as httpd:
