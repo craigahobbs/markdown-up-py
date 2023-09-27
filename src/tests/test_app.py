@@ -133,8 +133,9 @@ markdownUpIndex()
     def test_markdown_up_index(self):
         with create_test_files([
                 ('README.md', '# Title'),
-                ('text.txt', 'Text'),
+                ('index.html', '<html>'),
                 ('image.svg', '<svg>'),
+                ('text.txt', 'Text'),
                 (('dir', 'info.md'), '# Info'),
                 (('dir2', 'info2.md'), '# Info 2')
         ]) as temp_dir:
@@ -145,6 +146,7 @@ markdownUpIndex()
             self.assertDictEqual(json.loads(content_bytes.decode('utf-8')), {
                 'path': temp_dir,
                 'files': ['README.md'],
+                'htmlFiles': ['index.html'],
                 'directories': ['dir', 'dir2']
             })
 

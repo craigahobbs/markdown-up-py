@@ -17,6 +17,7 @@ STATIC_EXT_TO_CONTENT_TYPE = {
     '.bare': 'text/plain; charset=utf-8',
     '.csv': 'text/csv',
     '.gif': 'image/gif',
+    '.html': 'text/html; charset=utf-8',
     '.jpeg': 'image/jpeg',
     '.jpg': 'image/jpeg',
     '.json': 'application/json',
@@ -31,6 +32,7 @@ STATIC_EXT_TO_CONTENT_TYPE = {
     '.webp': 'image/webp'
 }
 MARKDOWN_EXTS = ('.md', '.markdown')
+HTML_EXTS = ('.htm', '.html')
 
 
 class MarkdownUpApplication(chisel.Application):
@@ -137,6 +139,9 @@ action markdown_up_index
         # The path's Markdown files
         optional string[len > 0] files
 
+        # The path's HTML files
+        optional string[len > 0] htmlFiles
+
         # The path's sub-directories
         optional string[len > 0] directories
 
@@ -161,12 +166,16 @@ def markdown_up_index(ctx, req):
 
     # Get the list of markdown files and sub-directories from the current sub-directory
     files = []
+    html_files = []
     directories = []
     for entry in os.scandir(path):
         if entry.is_dir() and not entry.name.startswith('.'):
             directories.append(entry.name)
-        elif entry.is_file() and entry.name.endswith(MARKDOWN_EXTS):
-            files.append(entry.name)
+        elif entry.is_file(): # pragma: no branch
+            if entry.name.endswith(MARKDOWN_EXTS):
+                files.append(entry.name)
+            if entry.name.endswith(HTML_EXTS):
+                html_files.append(entry.name)
 
     # Return the response
     response = {'path': path}
@@ -174,6 +183,8 @@ def markdown_up_index(ctx, req):
         response['parent'] = parent_path
     if files:
         response['files'] = sorted(files)
+    if html_files:
+        response['htmlFiles'] = sorted(html_files)
     if directories:
         response['directories'] = sorted(directories)
     return response
