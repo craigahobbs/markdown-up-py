@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.1 (2023-09-27)
+
+- [eb9ea10](https://github.com/craigahobbs/markdown-up-py/commit/eb9ea10) - add no-browser command-line argument \(-n\)
+
 ## 1.5.0 (2023-09-27)
 
 - [fabe4f8](https://github.com/craigahobbs/markdown-up-py/commit/fabe4f8) - add HTML files to the index API
