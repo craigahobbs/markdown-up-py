@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.0 (2023-09-27)
+
+- [fabe4f8](https://github.com/craigahobbs/markdown-up-py/commit/fabe4f8) - add HTML files to the index API
+
 ## 1.4.13 (2023-09-19)
 
 - [2f31fb0](https://github.com/craigahobbs/markdown-up-py/commit/2f31fb0) - add .bare extension
