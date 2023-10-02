@@ -18,6 +18,7 @@ STATIC_EXT_TO_CONTENT_TYPE = {
     '.css': 'text/css',
     '.csv': 'text/csv',
     '.gif': 'image/gif',
+    '.htm': 'text/html; charset=utf-8',
     '.html': 'text/html; charset=utf-8',
     '.jpeg': 'image/jpeg',
     '.jpg': 'image/jpeg',
@@ -34,7 +35,8 @@ STATIC_EXT_TO_CONTENT_TYPE = {
     '.webp': 'image/webp'
 }
 MARKDOWN_EXTS = ('.md', '.markdown')
-HTML_EXTS = ('.htm', '.html')
+HTML_EXTS = ('.html', '.htm')
+INDEX_FILES = ('index.html', 'index.htm')
 
 
 class MarkdownUpApplication(chisel.Application):
@@ -56,32 +58,50 @@ class MarkdownUpApplication(chisel.Application):
         self.add_request(markdown_up_index)
 
     def __call__(self, environ, start_response):
+        request_method = environ.get('REQUEST_METHOD')
+        path_info = environ['PATH_INFO']
 
-        # Handle markdown static requests
-        path_info = PurePosixPath(environ['PATH_INFO'])
-        content_type = STATIC_EXT_TO_CONTENT_TYPE.get(path_info.suffix)
-        if content_type is not None:
-            try:
-                # Read the static file
-                path = os.path.join(self.root, *path_info.parts[1:])
-                with open(path, 'rb') as path_file:
-                    status = HTTPStatus.OK
-                    content = path_file.read()
-            except FileNotFoundError:
-                status = HTTPStatus.NOT_FOUND
-                content = status.phrase.encode(encoding='utf-8')
-                content_type = 'text/plain; charset=utf-8'
-            except: # pylint: disable=bare-except
-                status = HTTPStatus.INTERNAL_SERVER_ERROR
-                content = status.phrase.encode(encoding='utf-8')
-                content_type = 'text/plain; charset=utf-8'
+        # Chisel API request? Otherwise, its a static request...
+        if request_method == 'GET' and path_info in ('/', '/markdown_up_index'):
+            return super().__call__(environ, start_response)
 
-            # Static response
-            start_response(f'{status.value} {status.phrase}', [('Content-Type', content_type)])
-            return [content]
+        # Compute the static file path
+        posix_path_info = PurePosixPath(path_info)
+        path = os.path.join(self.root, *posix_path_info.parts[1:])
 
-        # Run the chisel application...
-        return super().__call__(environ, start_response)
+        # Directory index file?
+        if os.path.isdir(path):
+            for index_file in INDEX_FILES:
+                index_posix_path = posix_path_info.joinpath(index_file)
+                index_path = os.path.join(self.root, *index_posix_path.parts[1:])
+                if os.path.isfile(index_path):
+                    posix_path_info = index_posix_path
+                    path = index_path
+                    break
+
+        # Read the static file
+        try:
+            # Unknown method or content type?
+            content_type = STATIC_EXT_TO_CONTENT_TYPE.get(posix_path_info.suffix)
+            if request_method != 'GET' or content_type is None:
+                raise FileNotFoundError(path)
+
+            # Read the static file
+            with open(path, 'rb') as path_file:
+                status = HTTPStatus.OK
+                content = path_file.read()
+        except FileNotFoundError:
+            status = HTTPStatus.NOT_FOUND
+            content = status.phrase.encode(encoding='utf-8')
+            content_type = 'text/plain; charset=utf-8'
+        except: # pylint: disable=bare-except
+            status = HTTPStatus.INTERNAL_SERVER_ERROR
+            content = status.phrase.encode(encoding='utf-8')
+            content_type = 'text/plain; charset=utf-8'
+
+        # Static response
+        start_response(f'{status.value} {status.phrase}', [('Content-Type', content_type)])
+        return [content]
 
 
 MARKDOWN_UP_HTML = chisel.StaticRequest(

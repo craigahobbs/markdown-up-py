@@ -79,7 +79,89 @@ class TestMarkdownUpApplication(unittest.TestCase):
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '404 Not Found')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain')])
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(content, [b'Not Found'])
+
+    def test_static_index(self):
+        with create_test_files([
+                (('html', 'index.html'), '<html></html>'),
+        ]) as temp_dir:
+            app = MarkdownUpApplication(temp_dir)
+
+            # Get the index file directly
+            environ = chisel.Context.create_environ('GET', '/html/index.html')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/html; charset=utf-8')])
+            self.assertEqual(content, [b'<html></html>'])
+
+            # Get the index file
+            environ = chisel.Context.create_environ('GET', '/html/')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/html; charset=utf-8')])
+            self.assertEqual(content, [b'<html></html>'])
+
+            # Get the index file (alternate)
+            environ = chisel.Context.create_environ('GET', '/html')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/html; charset=utf-8')])
+            self.assertEqual(content, [b'<html></html>'])
+
+    def test_static_index_other(self):
+        with create_test_files([
+                (('html', 'index.htm'), '<html></html>'),
+        ]) as temp_dir:
+            app = MarkdownUpApplication(temp_dir)
+
+            # Get the index file directly
+            environ = chisel.Context.create_environ('GET', '/html/index.htm')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/html; charset=utf-8')])
+            self.assertEqual(content, [b'<html></html>'])
+
+            # Get the index file
+            environ = chisel.Context.create_environ('GET', '/html/')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/html; charset=utf-8')])
+            self.assertEqual(content, [b'<html></html>'])
+
+            # Get the index file (alternate)
+            environ = chisel.Context.create_environ('GET', '/html')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/html; charset=utf-8')])
+            self.assertEqual(content, [b'<html></html>'])
+
+    def test_static_index_none(self):
+        with create_test_files([
+                (('html', 'README.md'), '# Title'),
+        ]) as temp_dir:
+            app = MarkdownUpApplication(temp_dir)
+
+            # Get the index file
+            environ = chisel.Context.create_environ('GET', '/html/')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '404 Not Found')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(content, [b'Not Found'])
+
+            # Get the index file (alternate)
+            environ = chisel.Context.create_environ('GET', '/html')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '404 Not Found')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
             self.assertEqual(content, [b'Not Found'])
 
     def test_static_internal_server_error(self):
