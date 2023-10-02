@@ -21,6 +21,7 @@ STATIC_EXT_TO_CONTENT_TYPE = {
     '.html': 'text/html; charset=utf-8',
     '.jpeg': 'image/jpeg',
     '.jpg': 'image/jpeg',
+    '.js': 'application/javascript',
     '.json': 'application/json',
     '.markdown': 'text/markdown; charset=utf-8',
     '.md': 'text/markdown; charset=utf-8',
