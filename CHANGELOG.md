@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.2 (2023-10-02)
+
+- [8bcd69b](https://github.com/craigahobbs/markdown-up-py/commit/8bcd69b) - add .css extension
+
 ## 1.5.1 (2023-09-27)
 
 - [eb9ea10](https://github.com/craigahobbs/markdown-up-py/commit/eb9ea10) - add no-browser command-line argument \(-n\)
