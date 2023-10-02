@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.4 (2023-10-02)
+
+- [29dd7a2](https://github.com/craigahobbs/markdown-up-py/commit/29dd7a2) - add directory index HTML files
+
 ## 1.5.3 (2023-10-02)
 
 - [4fbc45e](https://github.com/craigahobbs/markdown-up-py/commit/4fbc45e) - add .js extension
