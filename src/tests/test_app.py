@@ -184,7 +184,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '635313c7b4710699bc17571452633054')])
+            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '170effcc8fbc57f95c3ef8219028bec5')])
             self.assertEqual(content_bytes.decode('utf-8'), '''\
 <!DOCTYPE html>
 <html lang="en">
@@ -194,6 +194,34 @@ class TestMarkdownUpApplication(unittest.TestCase):
         <meta name="description" content="MarkdownUp is a Markdown viewer">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/app.css">
+
+        <!-- Preloads -->
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/data.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/library.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/model.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/parser.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/runtime.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/runtimeAsync.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/element-model/lib/elementModel.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/lib/app.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/lib/dataTable.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/lib/dataUtil.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/lib/lineChart.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/lib/script.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/lib/scriptLibrary.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/markdown-model/lib/elements.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/markdown-model/lib/parser.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/schema-markdown-doc/lib/schemaMarkdownDoc.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/schema-markdown/lib/encode.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/schema-markdown/lib/parser.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/schema-markdown/lib/schema.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/schema-markdown/lib/schemaUtil.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/schema-markdown/lib/typeModel.js" as="script">
+        <link rel="preload" href="https://craigahobbs.github.io/markdown-up/app.css" as="style">
+        <link rel="preload" href="https://craigahobbs.github.io/markdown-up/include/args.mds" as="fetch">
+        <link rel="preload" href="https://craigahobbs.github.io/markdown-up/include/forms.mds" as="fetch">
+        <link rel="preload" href="https://craigahobbs.github.io/markdown-up/markdown-model/static/markdown-model.css" as="style">
+        <link rel="preload" href="https://craigahobbs.github.io/markdown-up/launcher/app.mds" as="fetch">
     </head>
     <body>
     </body>
