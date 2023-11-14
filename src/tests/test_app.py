@@ -184,7 +184,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '170effcc8fbc57f95c3ef8219028bec5')])
+            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '06aa8f8893b669112370c8ff1a08df74')])
             self.assertEqual(content_bytes.decode('utf-8'), '''\
 <!DOCTYPE html>
 <html lang="en">
@@ -218,10 +218,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
         <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/schema-markdown/lib/schemaUtil.js" as="script">
         <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/schema-markdown/lib/typeModel.js" as="script">
         <link rel="preload" href="https://craigahobbs.github.io/markdown-up/app.css" as="style">
-        <link rel="preload" href="https://craigahobbs.github.io/markdown-up/include/args.mds" as="fetch">
-        <link rel="preload" href="https://craigahobbs.github.io/markdown-up/include/forms.mds" as="fetch">
         <link rel="preload" href="https://craigahobbs.github.io/markdown-up/markdown-model/static/markdown-model.css" as="style">
-        <link rel="preload" href="https://craigahobbs.github.io/markdown-up/launcher/app.mds" as="fetch">
     </head>
     <body>
     </body>

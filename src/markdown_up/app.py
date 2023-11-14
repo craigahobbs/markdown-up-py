@@ -139,10 +139,7 @@ MARKDOWN_UP_HTML = chisel.StaticRequest(
         <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/schema-markdown/lib/schemaUtil.js" as="script">
         <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/schema-markdown/lib/typeModel.js" as="script">
         <link rel="preload" href="https://craigahobbs.github.io/markdown-up/app.css" as="style">
-        <link rel="preload" href="https://craigahobbs.github.io/markdown-up/include/args.mds" as="fetch">
-        <link rel="preload" href="https://craigahobbs.github.io/markdown-up/include/forms.mds" as="fetch">
         <link rel="preload" href="https://craigahobbs.github.io/markdown-up/markdown-model/static/markdown-model.css" as="style">
-        <link rel="preload" href="https://craigahobbs.github.io/markdown-up/launcher/app.mds" as="fetch">
     </head>
     <body>
     </body>
