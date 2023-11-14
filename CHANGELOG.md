@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.5 (2023-11-14)
+
+- [9720da7](https://github.com/craigahobbs/markdown-up-py/commit/9720da7) - add html index preloads
+
 ## 1.5.4 (2023-10-02)
 
 - [29dd7a2](https://github.com/craigahobbs/markdown-up-py/commit/29dd7a2) - add directory index HTML files
