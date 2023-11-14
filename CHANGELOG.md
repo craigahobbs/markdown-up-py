@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.6 (2023-11-14)
+
+- [b24544b](https://github.com/craigahobbs/markdown-up-py/commit/b24544b) - cleanup html preloads
+
 ## 1.5.5 (2023-11-14)
 
 - [9720da7](https://github.com/craigahobbs/markdown-up-py/commit/9720da7) - add html index preloads
