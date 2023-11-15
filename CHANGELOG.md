@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.1 (2023-11-15)
+
+- [44f4c4b](https://github.com/craigahobbs/markdown-up-py/commit/44f4c4b) - improve gunicorn integration
+
 ## 1.6.0 (2023-11-14)
 
 - [fba39db](https://github.com/craigahobbs/markdown-up-py/commit/fba39db) - use gunicorn to host wsgi application to fix macos safari
