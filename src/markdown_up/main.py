@@ -60,25 +60,28 @@ def main(argv=None):
         webbrowser_thread.start()
 
     # Host
-    options = {
-        'accesslog': '-',
-        'errorlog': '-',
-        'bind': f'{host}:{args.port}',
-        'workers': 2
-    }
-    _StandaloneApplication(MarkdownUpApplication(root), options).run()
+    GunicornServer.make_server(host, args.port, MarkdownUpApplication(root))
 
 
 
 # A stand-alone WSGI application using Gunicorn
-class _StandaloneApplication(gunicorn.app.base.BaseApplication):
+class GunicornServer(gunicorn.app.base.BaseApplication):
     # pylint: disable=abstract-method
 
-    def __init__(self, application, options):
-        self.options = options
+    def __init__(self, host, port, app):
+        self.options = {
+            'accesslog': '-',
+            'errorlog': '-',
+            'bind': f'{host}:{port}',
+            'workers': 2
+        }
         super().__init__()
-        self.callable = application
+        self.callable = app
 
     def load_config(self):
         for key, value in self.options.items():
             self.cfg.set(key, value)
+
+    @classmethod
+    def make_server(cls, host, port, app):
+        cls(host, port, app).run()
