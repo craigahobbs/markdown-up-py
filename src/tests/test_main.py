@@ -52,41 +52,41 @@ class TestMain(unittest.TestCase):
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isdir', return_value=True) as mock_isfile, \
              patch('threading.Thread') as mock_thread, \
-             patch('wsgiref.simple_server.make_server') as mock_make_server:
+             patch('gunicorn.app.base.BaseApplication.run') as mock_run:
             main([])
-        self.assertEqual(stdout.getvalue(), 'Serving at http://127.0.0.1:8080/ ...\n')
+        self.assertEqual(stdout.getvalue(), '')
         self.assertEqual(stderr.getvalue(), '')
         mock_isfile.assert_called_with('.')
         self.assertEqual(mock_thread.call_count, 1)
         mock_thread.assert_called_with(target=ANY, args=('http://127.0.0.1:8080/',))
-        self.assertEqual(mock_make_server.call_count, 1)
-        mock_make_server.assert_called_with('127.0.0.1', 8080, ANY)
+        self.assertEqual(mock_run.call_count, 1)
+        mock_run.assert_called_once_with()
 
     def test_main_run_file(self):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isfile', return_value=True) as mock_isfile, \
              patch('threading.Thread') as mock_thread, \
-             patch('wsgiref.simple_server.make_server') as mock_make_server:
+             patch('gunicorn.app.base.BaseApplication.run') as mock_run:
             main(['README.md'])
-        self.assertEqual(stdout.getvalue(), 'Serving at http://127.0.0.1:8080/#url=README.md ...\n')
+        self.assertEqual(stdout.getvalue(), '')
         self.assertEqual(stderr.getvalue(), '')
         mock_isfile.assert_called_with('README.md')
         self.assertEqual(mock_thread.call_count, 1)
         mock_thread.assert_called_with(target=ANY, args=('http://127.0.0.1:8080/#url=README.md',))
-        self.assertEqual(mock_make_server.call_count, 1)
-        mock_make_server.assert_called_with('127.0.0.1', 8080, ANY)
+        self.assertEqual(mock_run.call_count, 1)
+        mock_run.assert_called_once_with()
 
     def test_main_run_no_browser(self):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isdir', return_value=True) as mock_isfile, \
              patch('threading.Thread') as mock_thread, \
-             patch('wsgiref.simple_server.make_server') as mock_make_server:
+             patch('gunicorn.app.base.BaseApplication.run') as mock_run:
             main(['-n'])
-        self.assertEqual(stdout.getvalue(), 'Serving at http://127.0.0.1:8080/ ...\n')
+        self.assertEqual(stdout.getvalue(), '')
         self.assertEqual(stderr.getvalue(), '')
         mock_isfile.assert_called_with('.')
         self.assertEqual(mock_thread.call_count, 0)
-        self.assertEqual(mock_make_server.call_count, 1)
-        mock_make_server.assert_called_with('127.0.0.1', 8080, ANY)
+        self.assertEqual(mock_run.call_count, 1)
+        mock_run.assert_called_once_with()

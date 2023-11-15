@@ -9,9 +9,9 @@ import argparse
 import os
 import threading
 import webbrowser
-import wsgiref.simple_server
 
 from schema_markdown import encode_query_string
+import gunicorn.app.base
 
 from .app import MarkdownUpApplication
 
@@ -60,6 +60,25 @@ def main(argv=None):
         webbrowser_thread.start()
 
     # Host
-    with wsgiref.simple_server.make_server(host, args.port, MarkdownUpApplication(root)) as httpd:
-        print(f'Serving at {url} ...')
-        httpd.serve_forever()
+    options = {
+        'accesslog': '-',
+        'errorlog': '-',
+        'bind': f'{host}:{args.port}',
+        'workers': 2
+    }
+    _StandaloneApplication(MarkdownUpApplication(root), options).run()
+
+
+
+# A stand-alone WSGI application using Gunicorn
+class _StandaloneApplication(gunicorn.app.base.BaseApplication):
+    # pylint: disable=abstract-method
+
+    def __init__(self, application, options):
+        self.options = options
+        super().__init__()
+        self.callable = application
+
+    def load_config(self):
+        for key, value in self.options.items():
+            self.cfg.set(key, value)
