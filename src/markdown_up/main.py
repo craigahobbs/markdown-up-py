@@ -46,35 +46,41 @@ def main(argv=None):
     if root == '':
         root = '.'
 
-    # Construct the URL
+    # If opening in the browser, define the when_ready function
     host = '127.0.0.1'
-    url = f'http://{host}:{args.port}/'
-    if is_file:
-        # pylint: disable=use-dict-literal
-        url += f'#{encode_query_string(dict(url=os.path.basename(args.path)))}'
+    if args.no_browser:
+        when_ready = None
+    else:
+        def when_ready(_):
+            # Construct the URL
+            if is_file:
+                hash_args = encode_query_string({'url': os.path.basename(args.path)})
+                url = f'http://{host}:{args.port}/#{hash_args}'
+            else:
+                url = f'http://{host}:{args.port}/'
 
-    # Launch the web browser on a thread as webbrowser.open may block
-    if not args.no_browser:
-        webbrowser_thread = threading.Thread(target=webbrowser.open, args=(url,))
-        webbrowser_thread.daemon = True
-        webbrowser_thread.start()
+            # Launch the web browser on a thread as webbrowser.open may block
+            webbrowser_thread = threading.Thread(target=webbrowser.open, args=(url,))
+            webbrowser_thread.daemon = True
+            webbrowser_thread.start()
 
-    # Host
-    GunicornServer.make_server(host, args.port, MarkdownUpApplication(root))
-
+    # Host the application
+    GunicornServer.make_server(MarkdownUpApplication(root), host, args.port, when_ready)
 
 
 # A stand-alone WSGI application using Gunicorn
 class GunicornServer(gunicorn.app.base.BaseApplication):
     # pylint: disable=abstract-method
 
-    def __init__(self, host, port, app):
+    def __init__(self, app, host, port, when_ready):
         self.options = {
+            'access_log_format': '%(h)s %(l)s "%(r)s" %(s)s %(b)s',
             'accesslog': '-',
             'errorlog': '-',
-            'bind': f'{host}:{port}',
-            'workers': 2
+            'bind': f'{host}:{port}'
         }
+        if when_ready is not None:
+            self.options['when_ready'] = when_ready
         super().__init__()
         self.callable = app
 
@@ -83,5 +89,5 @@ class GunicornServer(gunicorn.app.base.BaseApplication):
             self.cfg.set(key, value)
 
     @classmethod
-    def make_server(cls, host, port, app):
-        cls(host, port, app).run()
+    def make_server(cls, app, host, port, when_ready = None):
+        cls(app, host, port, when_ready).run()
