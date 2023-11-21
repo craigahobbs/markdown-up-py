@@ -47,7 +47,7 @@ def main(argv=None):
     if root == '':
         root = '.'
 
-    # If opening in the browser, define the when_ready function
+    # Define the server's when_ready function
     host = '127.0.0.1'
     def when_ready(_):
         # Do nothing?
