@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.3 (2023-11-21)
+
+- [f9fdbae](https://github.com/craigahobbs/markdown-up-py/commit/f9fdbae) - use documented gunicorn standalone application
+
 ## 1.6.2 (2023-11-21)
 
 - [990ff3d](https://github.com/craigahobbs/markdown-up-py/commit/990ff3d) - improve reliability of browser launch
