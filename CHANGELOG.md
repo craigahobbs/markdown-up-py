@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.2 (2023-11-21)
+
+- [990ff3d](https://github.com/craigahobbs/markdown-up-py/commit/990ff3d) - improve reliability of browser launch
+
 ## 1.6.1 (2023-11-15)
 
 - [44f4c4b](https://github.com/craigahobbs/markdown-up-py/commit/44f4c4b) - improve gunicorn integration
