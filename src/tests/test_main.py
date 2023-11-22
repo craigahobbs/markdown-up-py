@@ -71,7 +71,7 @@ class TestMain(unittest.TestCase):
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isdir', return_value=True) as mock_isdir, \
              patch('os.path.isfile', return_value=False) as mock_isfile, \
-             patch('threading.Thread') as mock_thread, \
+             patch('webbrowser.open') as mock_webbrowser_open, \
              patch('markdown_up.main.StandaloneApplication') as mock_server:
             main([])
 
@@ -79,12 +79,13 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('.')
             mock_isfile.assert_not_called()
-            mock_thread.assert_not_called()
+            mock_webbrowser_open.assert_not_called()
             mock_server.assert_called_once_with(ANY, {
                 'access_log_format': '%(h)s %(l)s "%(r)s" %(s)s %(b)s',
                 'accesslog': '-',
                 'errorlog': '-',
                 'bind': '127.0.0.1:8080',
+                'workers': 2,
                 'when_ready': ANY
             })
             mock_server.return_value.run.assert_called_once_with()
@@ -93,15 +94,14 @@ class TestMain(unittest.TestCase):
             when_ready = mock_server.mock_calls[0].args[1]['when_ready']
             self.assertTrue(callable(when_ready))
             when_ready(None)
-            mock_thread.assert_called_once_with(target=ANY, args=('http://127.0.0.1:8080/',))
-            mock_thread.return_value.start.assert_called_once()
+            mock_webbrowser_open.assert_called_once_with('http://127.0.0.1:8080/')
 
     def test_main_run_port(self):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isdir', return_value=True) as mock_isdir, \
              patch('os.path.isfile', return_value=False) as mock_isfile, \
-             patch('threading.Thread') as mock_thread, \
+             patch('webbrowser.open') as mock_webbrowser_open, \
              patch('markdown_up.main.StandaloneApplication') as mock_server:
             main(['-p', '8081'])
 
@@ -109,12 +109,13 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('.')
             mock_isfile.assert_not_called()
-            mock_thread.assert_not_called()
+            mock_webbrowser_open.assert_not_called()
             mock_server.assert_called_once_with(ANY, {
                 'access_log_format': '%(h)s %(l)s "%(r)s" %(s)s %(b)s',
                 'accesslog': '-',
                 'errorlog': '-',
                 'bind': '127.0.0.1:8081',
+                'workers': 2,
                 'when_ready': ANY
             })
             mock_server.return_value.run.assert_called_once_with()
@@ -123,15 +124,14 @@ class TestMain(unittest.TestCase):
             when_ready = mock_server.mock_calls[0].args[1]['when_ready']
             self.assertTrue(callable(when_ready))
             when_ready(None)
-            mock_thread.assert_called_once_with(target=ANY, args=('http://127.0.0.1:8081/',))
-            mock_thread.return_value.start.assert_called_once()
+            mock_webbrowser_open.assert_called_once_with('http://127.0.0.1:8081/')
 
     def test_main_run_file(self):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isdir', return_value=False) as mock_isdir, \
              patch('os.path.isfile', return_value=True) as mock_isfile, \
-             patch('threading.Thread') as mock_thread, \
+             patch('webbrowser.open') as mock_webbrowser_open, \
              patch('markdown_up.main.StandaloneApplication') as mock_server:
             main(['README.md'])
 
@@ -139,12 +139,13 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('README.md')
             mock_isfile.assert_called_once_with('README.md')
-            mock_thread.assert_not_called()
+            mock_webbrowser_open.assert_not_called()
             mock_server.assert_called_once_with(ANY, {
                 'access_log_format': '%(h)s %(l)s "%(r)s" %(s)s %(b)s',
                 'accesslog': '-',
                 'errorlog': '-',
                 'bind': '127.0.0.1:8080',
+                'workers': 2,
                 'when_ready': ANY
             })
             mock_server.return_value.run.assert_called_once_with()
@@ -153,16 +154,14 @@ class TestMain(unittest.TestCase):
             when_ready = mock_server.mock_calls[0].args[1]['when_ready']
             self.assertTrue(callable(when_ready))
             when_ready(None)
-            mock_thread.return_value.start.assert_called_once()
-            mock_thread.assert_called_once_with(target=ANY, args=('http://127.0.0.1:8080/#url=README.md',))
-            mock_thread.return_value.start.assert_called_once()
+            mock_webbrowser_open.assert_called_once_with('http://127.0.0.1:8080/#url=README.md')
 
     def test_main_run_file_subdir(self):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isdir', return_value=False) as mock_isdir, \
              patch('os.path.isfile', return_value=True) as mock_isfile, \
-             patch('threading.Thread') as mock_thread, \
+             patch('webbrowser.open') as mock_webbrowser_open, \
              patch('markdown_up.main.StandaloneApplication') as mock_server:
             main(['subdir/README.md'])
 
@@ -170,12 +169,13 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('subdir/README.md')
             mock_isfile.assert_called_once_with('subdir/README.md')
-            mock_thread.assert_not_called()
+            mock_webbrowser_open.assert_not_called()
             mock_server.assert_called_once_with(ANY, {
                 'access_log_format': '%(h)s %(l)s "%(r)s" %(s)s %(b)s',
                 'accesslog': '-',
                 'errorlog': '-',
                 'bind': '127.0.0.1:8080',
+                'workers': 2,
                 'when_ready': ANY
             })
             mock_server.return_value.run.assert_called_once_with()
@@ -184,15 +184,14 @@ class TestMain(unittest.TestCase):
             when_ready = mock_server.mock_calls[0].args[1]['when_ready']
             self.assertTrue(callable(when_ready))
             when_ready(None)
-            mock_thread.assert_called_once_with(target=ANY, args=('http://127.0.0.1:8080/#url=README.md',))
-            mock_thread.return_value.start.assert_called_once()
+            mock_webbrowser_open.assert_called_once_with('http://127.0.0.1:8080/#url=README.md')
 
     def test_main_run_no_browser(self):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isdir', return_value=True) as mock_isdir, \
              patch('os.path.isfile', return_value=False) as mock_isfile, \
-             patch('threading.Thread') as mock_thread, \
+             patch('webbrowser.open') as mock_webbrowser_open, \
              patch('markdown_up.main.StandaloneApplication') as mock_server:
             main(['-n'])
 
@@ -200,12 +199,13 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('.')
             mock_isfile.assert_not_called()
-            mock_thread.assert_not_called()
+            mock_webbrowser_open.assert_not_called()
             mock_server.assert_called_once_with(ANY, {
                 'access_log_format': '%(h)s %(l)s "%(r)s" %(s)s %(b)s',
                 'accesslog': '-',
                 'errorlog': '-',
                 'bind': '127.0.0.1:8080',
+                'workers': 2,
                 'when_ready': ANY
             })
             mock_server.return_value.run.assert_called_once_with()
@@ -214,4 +214,4 @@ class TestMain(unittest.TestCase):
             when_ready = mock_server.mock_calls[0].args[1]['when_ready']
             self.assertTrue(callable(when_ready))
             when_ready(None)
-            mock_thread.assert_not_called()
+            mock_webbrowser_open.assert_not_called()

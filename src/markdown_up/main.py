@@ -7,7 +7,6 @@ The MarkdownUp launcher command-line application
 
 import argparse
 import os
-import threading
 import webbrowser
 
 from schema_markdown import encode_query_string
@@ -61,10 +60,8 @@ def main(argv=None):
         else:
             url = f'http://{host}:{args.port}/'
 
-        # Launch the web browser on a thread as webbrowser.open may block
-        webbrowser_thread = threading.Thread(target=webbrowser.open, args=(url,))
-        webbrowser_thread.daemon = True
-        webbrowser_thread.start()
+        # Launch the web browser
+        webbrowser.open(url)
 
     # Host the application
     StandaloneApplication(MarkdownUpApplication(root), {
@@ -72,6 +69,7 @@ def main(argv=None):
         'accesslog': '-',
         'errorlog': '-',
         'bind': f'{host}:{args.port}',
+        'workers': 2,
         'when_ready': when_ready
     }).run()
 
