@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.6.4 (2023-11-22)
+
+- [5c5d3ae](https://github.com/craigahobbs/markdown-up-py/commit/5c5d3ae)
+  - call webbrowser.open directly and don't worry about blocking because any browser that does block won't work anyway (e.g. lynx)
+  - set gunicorn workers to 2 to fix safari issues
+
 ## 1.6.3 (2023-11-21)
 
 - [f9fdbae](https://github.com/craigahobbs/markdown-up-py/commit/f9fdbae) - use documented gunicorn standalone application
