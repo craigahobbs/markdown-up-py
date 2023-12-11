@@ -149,6 +149,7 @@ MARKDOWN_UP_HTML = chisel.StaticRequest(
             'markdownText': `\\
 ~~~ markdown-script
 include 'https://craigahobbs.github.io/markdown-up/launcher/app.mds'
+
 markdownUpIndex()
 ~~~
 `
