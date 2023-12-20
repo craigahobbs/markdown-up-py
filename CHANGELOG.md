@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.5 (2023-12-20)
+
+- [aa13098](https://github.com/craigahobbs/markdown-up-py/commit/aa13098) - fix command-line opening of html files
+
 ## 1.6.4 (2023-11-22)
 
 - [5c5d3ae](https://github.com/craigahobbs/markdown-up-py/commit/5c5d3ae)
