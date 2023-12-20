@@ -12,7 +12,7 @@ import webbrowser
 from schema_markdown import encode_query_string
 import gunicorn.app.base
 
-from .app import MarkdownUpApplication
+from .app import HTML_EXTS, MarkdownUpApplication
 
 
 def main(argv=None):
@@ -55,8 +55,11 @@ def main(argv=None):
 
         # Construct the URL
         if is_file:
-            hash_args = encode_query_string({'url': os.path.basename(args.path)})
-            url = f'http://{host}:{args.port}/#{hash_args}'
+            if args.path.endswith(HTML_EXTS):
+                url = f'http://{host}:{args.port}/{os.path.basename(args.path)}'
+            else:
+                hash_args = encode_query_string({'url': os.path.basename(args.path)})
+                url = f'http://{host}:{args.port}/#{hash_args}'
         else:
             url = f'http://{host}:{args.port}/'
 

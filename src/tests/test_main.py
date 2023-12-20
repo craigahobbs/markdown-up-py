@@ -156,6 +156,36 @@ class TestMain(unittest.TestCase):
             when_ready(None)
             mock_webbrowser_open.assert_called_once_with('http://127.0.0.1:8080/#url=README.md')
 
+    def test_main_run_file_html(self):
+        with patch('sys.stdout', StringIO()) as stdout, \
+             patch('sys.stderr', StringIO()) as stderr, \
+             patch('os.path.isdir', return_value=False) as mock_isdir, \
+             patch('os.path.isfile', return_value=True) as mock_isfile, \
+             patch('webbrowser.open') as mock_webbrowser_open, \
+             patch('markdown_up.main.StandaloneApplication') as mock_server:
+            main(['index.html'])
+
+            self.assertEqual(stdout.getvalue(), '')
+            self.assertEqual(stderr.getvalue(), '')
+            mock_isdir.assert_called_once_with('index.html')
+            mock_isfile.assert_called_once_with('index.html')
+            mock_webbrowser_open.assert_not_called()
+            mock_server.assert_called_once_with(ANY, {
+                'access_log_format': '%(h)s %(l)s "%(r)s" %(s)s %(b)s',
+                'accesslog': '-',
+                'errorlog': '-',
+                'bind': '127.0.0.1:8080',
+                'workers': 2,
+                'when_ready': ANY
+            })
+            mock_server.return_value.run.assert_called_once_with()
+            self.assertIsInstance(mock_server.mock_calls[0].args[0], MarkdownUpApplication)
+            self.assertEqual(mock_server.mock_calls[0].args[0].root, '.')
+            when_ready = mock_server.mock_calls[0].args[1]['when_ready']
+            self.assertTrue(callable(when_ready))
+            when_ready(None)
+            mock_webbrowser_open.assert_called_once_with('http://127.0.0.1:8080/index.html')
+
     def test_main_run_file_subdir(self):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
@@ -185,6 +215,36 @@ class TestMain(unittest.TestCase):
             self.assertTrue(callable(when_ready))
             when_ready(None)
             mock_webbrowser_open.assert_called_once_with('http://127.0.0.1:8080/#url=README.md')
+
+    def test_main_run_file_html_subdir(self):
+        with patch('sys.stdout', StringIO()) as stdout, \
+             patch('sys.stderr', StringIO()) as stderr, \
+             patch('os.path.isdir', return_value=False) as mock_isdir, \
+             patch('os.path.isfile', return_value=True) as mock_isfile, \
+             patch('webbrowser.open') as mock_webbrowser_open, \
+             patch('markdown_up.main.StandaloneApplication') as mock_server:
+            main(['subdir/index.html'])
+
+            self.assertEqual(stdout.getvalue(), '')
+            self.assertEqual(stderr.getvalue(), '')
+            mock_isdir.assert_called_once_with('subdir/index.html')
+            mock_isfile.assert_called_once_with('subdir/index.html')
+            mock_webbrowser_open.assert_not_called()
+            mock_server.assert_called_once_with(ANY, {
+                'access_log_format': '%(h)s %(l)s "%(r)s" %(s)s %(b)s',
+                'accesslog': '-',
+                'errorlog': '-',
+                'bind': '127.0.0.1:8080',
+                'workers': 2,
+                'when_ready': ANY
+            })
+            mock_server.return_value.run.assert_called_once_with()
+            self.assertIsInstance(mock_server.mock_calls[0].args[0], MarkdownUpApplication)
+            self.assertEqual(mock_server.mock_calls[0].args[0].root, 'subdir')
+            when_ready = mock_server.mock_calls[0].args[1]['when_ready']
+            self.assertTrue(callable(when_ready))
+            when_ready(None)
+            mock_webbrowser_open.assert_called_once_with('http://127.0.0.1:8080/index.html')
 
     def test_main_run_no_browser(self):
         with patch('sys.stdout', StringIO()) as stdout, \
