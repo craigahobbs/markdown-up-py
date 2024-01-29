@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.0 (2024-01-29)
+
+- [4f816c4](https://github.com/craigahobbs/markdown-up-py/commit/4f816c4) - use waitress to host wsgi application \(not gunicorn\) for windows support
+
 ## 1.6.5 (2023-12-20)
 
 - [aa13098](https://github.com/craigahobbs/markdown-up-py/commit/aa13098) - fix command-line opening of html files
