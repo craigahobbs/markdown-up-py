@@ -6,8 +6,9 @@ import os
 import unittest
 from unittest.mock import ANY, patch
 
+import chisel
+
 import markdown_up.__main__
-from markdown_up.app import MarkdownUpApplication
 from markdown_up.main import main
 
 
@@ -29,7 +30,7 @@ class TestMain(unittest.TestCase):
             mock_isdir.assert_not_called()
             mock_isfile.assert_not_called()
             self.assertEqual(cm_exc.exception.code, 0)
-            self.assertEqual(stdout.getvalue().splitlines()[0], 'usage: markdown-up [-h] [-p N] [-n] [path]')
+            self.assertEqual(stdout.getvalue().splitlines()[0], 'usage: markdown-up [-h] [-p N] [-n] [-q] [path]')
             self.assertEqual(stderr.getvalue(), '')
 
     def test_main_file_not_found(self):
@@ -41,13 +42,13 @@ class TestMain(unittest.TestCase):
                 main([os.path.join('missing', 'README.md')])
 
             self.assertEqual(stdout.getvalue(), '')
-            self.assertEqual(stderr.getvalue(), '"missing/README.md" does not exist!\n')
-            mock_isdir.assert_called_once_with('missing/README.md')
-            mock_isfile.assert_called_once_with('missing/README.md')
+            self.assertEqual(stderr.getvalue(), f"\"{os.path.join('missing', 'README.md')}\" does not exist!\n")
+            mock_isdir.assert_called_once_with(os.path.join('missing', 'README.md'))
+            mock_isfile.assert_called_once_with(os.path.join('missing', 'README.md'))
             self.assertEqual(cm_exc.exception.code, 2)
             self.assertEqual(stdout.getvalue(), '')
-            self.assertTrue(stderr.getvalue(), '"missing/README.md" does not exist!\n')
-            mock_isfile.assert_called_once_with('missing/README.md')
+            self.assertEqual(stderr.getvalue(), f"\"{os.path.join('missing', 'README.md')}\" does not exist!\n")
+            mock_isfile.assert_called_once_with(os.path.join('missing', 'README.md'))
 
     def test_main_dir_not_found(self):
         with patch('sys.stdout', StringIO()) as stdout, \
@@ -72,29 +73,55 @@ class TestMain(unittest.TestCase):
              patch('os.path.isdir', return_value=True) as mock_isdir, \
              patch('os.path.isfile', return_value=False) as mock_isfile, \
              patch('webbrowser.open') as mock_webbrowser_open, \
-             patch('markdown_up.main.StandaloneApplication') as mock_server:
+             patch('waitress.serve') as mock_waitress_serve:
             main([])
+
+            self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/ ...\n')
+            self.assertEqual(stderr.getvalue(), '')
+            mock_isdir.assert_called_once_with('.')
+            mock_isfile.assert_not_called()
+            mock_webbrowser_open.assert_called_once_with('http://127.0.0.1:8080/')
+            mock_waitress_serve.assert_called_once_with(ANY, port=8080)
+            wsgiapp = mock_waitress_serve.call_args[0][0]
+            self.assertTrue(callable(wsgiapp))
+
+            # Test calling the WSGI application
+            environ = chisel.Context.create_environ('GET', '/doc')
+            start_response = chisel.app.StartResponse()
+            content = wsgiapp(environ, start_response)
+            self.assertEqual(start_response.status, '301 Moved Permanently')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain'), ('Location', '/doc/')])
+            self.assertEqual(content, [b'/doc/'])
+            self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/ ...\nmarkdown-up: GET /doc \n')
+            self.assertEqual(stderr.getvalue(), '')
+
+    def test_main_run_quiet(self):
+        with patch('sys.stdout', StringIO()) as stdout, \
+             patch('sys.stderr', StringIO()) as stderr, \
+             patch('os.path.isdir', return_value=True) as mock_isdir, \
+             patch('os.path.isfile', return_value=False) as mock_isfile, \
+             patch('webbrowser.open') as mock_webbrowser_open, \
+             patch('waitress.serve') as mock_waitress_serve:
+            main(['-q'])
 
             self.assertEqual(stdout.getvalue(), '')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('.')
             mock_isfile.assert_not_called()
-            mock_webbrowser_open.assert_not_called()
-            mock_server.assert_called_once_with(ANY, {
-                'access_log_format': '%(h)s %(l)s "%(r)s" %(s)s %(b)s',
-                'accesslog': '-',
-                'errorlog': '-',
-                'bind': '127.0.0.1:8080',
-                'workers': 2,
-                'when_ready': ANY
-            })
-            mock_server.return_value.run.assert_called_once_with()
-            self.assertIsInstance(mock_server.mock_calls[0].args[0], MarkdownUpApplication)
-            self.assertEqual(mock_server.mock_calls[0].args[0].root, '.')
-            when_ready = mock_server.mock_calls[0].args[1]['when_ready']
-            self.assertTrue(callable(when_ready))
-            when_ready(None)
             mock_webbrowser_open.assert_called_once_with('http://127.0.0.1:8080/')
+            mock_waitress_serve.assert_called_once_with(ANY, port=8080)
+            wsgiapp = mock_waitress_serve.call_args[0][0]
+            self.assertTrue(callable(wsgiapp))
+
+            # Test calling the WSGI application
+            environ = chisel.Context.create_environ('GET', '/doc')
+            start_response = chisel.app.StartResponse()
+            content = wsgiapp(environ, start_response)
+            self.assertEqual(start_response.status, '301 Moved Permanently')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain'), ('Location', '/doc/')])
+            self.assertEqual(content, [b'/doc/'])
+            self.assertEqual(stdout.getvalue(), '')
+            self.assertEqual(stderr.getvalue(), '')
 
     def test_main_run_port(self):
         with patch('sys.stdout', StringIO()) as stdout, \
@@ -102,29 +129,17 @@ class TestMain(unittest.TestCase):
              patch('os.path.isdir', return_value=True) as mock_isdir, \
              patch('os.path.isfile', return_value=False) as mock_isfile, \
              patch('webbrowser.open') as mock_webbrowser_open, \
-             patch('markdown_up.main.StandaloneApplication') as mock_server:
+             patch('waitress.serve') as mock_waitress_serve:
             main(['-p', '8081'])
 
-            self.assertEqual(stdout.getvalue(), '')
+            self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8081/ ...\n')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('.')
             mock_isfile.assert_not_called()
-            mock_webbrowser_open.assert_not_called()
-            mock_server.assert_called_once_with(ANY, {
-                'access_log_format': '%(h)s %(l)s "%(r)s" %(s)s %(b)s',
-                'accesslog': '-',
-                'errorlog': '-',
-                'bind': '127.0.0.1:8081',
-                'workers': 2,
-                'when_ready': ANY
-            })
-            mock_server.return_value.run.assert_called_once_with()
-            self.assertIsInstance(mock_server.mock_calls[0].args[0], MarkdownUpApplication)
-            self.assertEqual(mock_server.mock_calls[0].args[0].root, '.')
-            when_ready = mock_server.mock_calls[0].args[1]['when_ready']
-            self.assertTrue(callable(when_ready))
-            when_ready(None)
             mock_webbrowser_open.assert_called_once_with('http://127.0.0.1:8081/')
+            mock_waitress_serve.assert_called_once_with(ANY, port=8081)
+            wsgiapp = mock_waitress_serve.call_args[0][0]
+            self.assertTrue(callable(wsgiapp))
 
     def test_main_run_file(self):
         with patch('sys.stdout', StringIO()) as stdout, \
@@ -132,29 +147,17 @@ class TestMain(unittest.TestCase):
              patch('os.path.isdir', return_value=False) as mock_isdir, \
              patch('os.path.isfile', return_value=True) as mock_isfile, \
              patch('webbrowser.open') as mock_webbrowser_open, \
-             patch('markdown_up.main.StandaloneApplication') as mock_server:
+             patch('waitress.serve') as mock_waitress_serve:
             main(['README.md'])
 
-            self.assertEqual(stdout.getvalue(), '')
+            self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/#url=README.md ...\n')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('README.md')
             mock_isfile.assert_called_once_with('README.md')
-            mock_webbrowser_open.assert_not_called()
-            mock_server.assert_called_once_with(ANY, {
-                'access_log_format': '%(h)s %(l)s "%(r)s" %(s)s %(b)s',
-                'accesslog': '-',
-                'errorlog': '-',
-                'bind': '127.0.0.1:8080',
-                'workers': 2,
-                'when_ready': ANY
-            })
-            mock_server.return_value.run.assert_called_once_with()
-            self.assertIsInstance(mock_server.mock_calls[0].args[0], MarkdownUpApplication)
-            self.assertEqual(mock_server.mock_calls[0].args[0].root, '.')
-            when_ready = mock_server.mock_calls[0].args[1]['when_ready']
-            self.assertTrue(callable(when_ready))
-            when_ready(None)
             mock_webbrowser_open.assert_called_once_with('http://127.0.0.1:8080/#url=README.md')
+            mock_waitress_serve.assert_called_once_with(ANY, port=8080)
+            wsgiapp = mock_waitress_serve.call_args[0][0]
+            self.assertTrue(callable(wsgiapp))
 
     def test_main_run_file_html(self):
         with patch('sys.stdout', StringIO()) as stdout, \
@@ -162,29 +165,17 @@ class TestMain(unittest.TestCase):
              patch('os.path.isdir', return_value=False) as mock_isdir, \
              patch('os.path.isfile', return_value=True) as mock_isfile, \
              patch('webbrowser.open') as mock_webbrowser_open, \
-             patch('markdown_up.main.StandaloneApplication') as mock_server:
+             patch('waitress.serve') as mock_waitress_serve:
             main(['index.html'])
 
-            self.assertEqual(stdout.getvalue(), '')
+            self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/index.html ...\n')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('index.html')
             mock_isfile.assert_called_once_with('index.html')
-            mock_webbrowser_open.assert_not_called()
-            mock_server.assert_called_once_with(ANY, {
-                'access_log_format': '%(h)s %(l)s "%(r)s" %(s)s %(b)s',
-                'accesslog': '-',
-                'errorlog': '-',
-                'bind': '127.0.0.1:8080',
-                'workers': 2,
-                'when_ready': ANY
-            })
-            mock_server.return_value.run.assert_called_once_with()
-            self.assertIsInstance(mock_server.mock_calls[0].args[0], MarkdownUpApplication)
-            self.assertEqual(mock_server.mock_calls[0].args[0].root, '.')
-            when_ready = mock_server.mock_calls[0].args[1]['when_ready']
-            self.assertTrue(callable(when_ready))
-            when_ready(None)
             mock_webbrowser_open.assert_called_once_with('http://127.0.0.1:8080/index.html')
+            mock_waitress_serve.assert_called_once_with(ANY, port=8080)
+            wsgiapp = mock_waitress_serve.call_args[0][0]
+            self.assertTrue(callable(wsgiapp))
 
     def test_main_run_file_subdir(self):
         with patch('sys.stdout', StringIO()) as stdout, \
@@ -192,29 +183,17 @@ class TestMain(unittest.TestCase):
              patch('os.path.isdir', return_value=False) as mock_isdir, \
              patch('os.path.isfile', return_value=True) as mock_isfile, \
              patch('webbrowser.open') as mock_webbrowser_open, \
-             patch('markdown_up.main.StandaloneApplication') as mock_server:
+             patch('waitress.serve') as mock_waitress_serve:
             main(['subdir/README.md'])
 
-            self.assertEqual(stdout.getvalue(), '')
+            self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/#url=README.md ...\n')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('subdir/README.md')
             mock_isfile.assert_called_once_with('subdir/README.md')
-            mock_webbrowser_open.assert_not_called()
-            mock_server.assert_called_once_with(ANY, {
-                'access_log_format': '%(h)s %(l)s "%(r)s" %(s)s %(b)s',
-                'accesslog': '-',
-                'errorlog': '-',
-                'bind': '127.0.0.1:8080',
-                'workers': 2,
-                'when_ready': ANY
-            })
-            mock_server.return_value.run.assert_called_once_with()
-            self.assertIsInstance(mock_server.mock_calls[0].args[0], MarkdownUpApplication)
-            self.assertEqual(mock_server.mock_calls[0].args[0].root, 'subdir')
-            when_ready = mock_server.mock_calls[0].args[1]['when_ready']
-            self.assertTrue(callable(when_ready))
-            when_ready(None)
             mock_webbrowser_open.assert_called_once_with('http://127.0.0.1:8080/#url=README.md')
+            mock_waitress_serve.assert_called_once_with(ANY, port=8080)
+            wsgiapp = mock_waitress_serve.call_args[0][0]
+            self.assertTrue(callable(wsgiapp))
 
     def test_main_run_file_html_subdir(self):
         with patch('sys.stdout', StringIO()) as stdout, \
@@ -222,29 +201,17 @@ class TestMain(unittest.TestCase):
              patch('os.path.isdir', return_value=False) as mock_isdir, \
              patch('os.path.isfile', return_value=True) as mock_isfile, \
              patch('webbrowser.open') as mock_webbrowser_open, \
-             patch('markdown_up.main.StandaloneApplication') as mock_server:
+             patch('waitress.serve') as mock_waitress_serve:
             main(['subdir/index.html'])
 
-            self.assertEqual(stdout.getvalue(), '')
+            self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/index.html ...\n')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('subdir/index.html')
             mock_isfile.assert_called_once_with('subdir/index.html')
-            mock_webbrowser_open.assert_not_called()
-            mock_server.assert_called_once_with(ANY, {
-                'access_log_format': '%(h)s %(l)s "%(r)s" %(s)s %(b)s',
-                'accesslog': '-',
-                'errorlog': '-',
-                'bind': '127.0.0.1:8080',
-                'workers': 2,
-                'when_ready': ANY
-            })
-            mock_server.return_value.run.assert_called_once_with()
-            self.assertIsInstance(mock_server.mock_calls[0].args[0], MarkdownUpApplication)
-            self.assertEqual(mock_server.mock_calls[0].args[0].root, 'subdir')
-            when_ready = mock_server.mock_calls[0].args[1]['when_ready']
-            self.assertTrue(callable(when_ready))
-            when_ready(None)
             mock_webbrowser_open.assert_called_once_with('http://127.0.0.1:8080/index.html')
+            mock_waitress_serve.assert_called_once_with(ANY, port=8080)
+            wsgiapp = mock_waitress_serve.call_args[0][0]
+            self.assertTrue(callable(wsgiapp))
 
     def test_main_run_no_browser(self):
         with patch('sys.stdout', StringIO()) as stdout, \
@@ -252,26 +219,14 @@ class TestMain(unittest.TestCase):
              patch('os.path.isdir', return_value=True) as mock_isdir, \
              patch('os.path.isfile', return_value=False) as mock_isfile, \
              patch('webbrowser.open') as mock_webbrowser_open, \
-             patch('markdown_up.main.StandaloneApplication') as mock_server:
+             patch('waitress.serve') as mock_waitress_serve:
             main(['-n'])
 
-            self.assertEqual(stdout.getvalue(), '')
+            self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/ ...\n')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('.')
             mock_isfile.assert_not_called()
             mock_webbrowser_open.assert_not_called()
-            mock_server.assert_called_once_with(ANY, {
-                'access_log_format': '%(h)s %(l)s "%(r)s" %(s)s %(b)s',
-                'accesslog': '-',
-                'errorlog': '-',
-                'bind': '127.0.0.1:8080',
-                'workers': 2,
-                'when_ready': ANY
-            })
-            mock_server.return_value.run.assert_called_once_with()
-            self.assertIsInstance(mock_server.mock_calls[0].args[0], MarkdownUpApplication)
-            self.assertEqual(mock_server.mock_calls[0].args[0].root, '.')
-            when_ready = mock_server.mock_calls[0].args[1]['when_ready']
-            self.assertTrue(callable(when_ready))
-            when_ready(None)
-            mock_webbrowser_open.assert_not_called()
+            mock_waitress_serve.assert_called_once_with(ANY, port=8080)
+            wsgiapp = mock_waitress_serve.call_args[0][0]
+            self.assertTrue(callable(wsgiapp))

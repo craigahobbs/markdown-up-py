@@ -277,7 +277,7 @@ markdownUpIndex()
             self.assertEqual(status, '200 OK')
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertDictEqual(json.loads(content_bytes.decode('utf-8')), {
-                'path': temp_dir + '/dir',
+                'path': os.path.join(temp_dir, 'dir'),
                 'files': ['README.md']
             })
 
@@ -290,25 +290,25 @@ markdownUpIndex()
             self.assertEqual(status, '200 OK')
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertDictEqual(json.loads(content_bytes.decode('utf-8')), {
-                'path': temp_dir + '/dir/dir2',
+                'path': os.path.join(temp_dir, 'dir', 'dir2'),
                 'parent': 'dir',
                 'files': ['README.md']
             })
 
     def test_markdown_up_index_escape(self):
         with create_test_files([
-                (('dir()[]\\*', 'dir2()[]\\*', 'file()[]\\*.md'), '# File'),
-                (('dir()[]\\*', 'dir2()[]\\*', 'dir3()[]\\*', 'file2()[]\\*.md'), '# File 2')
+                (('dir()[]', 'dir2()[]', 'file()[].md'), '# File'),
+                (('dir()[]', 'dir2()[]', 'dir3()[]', 'file2()[].md'), '# File 2')
         ]) as temp_dir:
             app = MarkdownUpApplication(temp_dir)
-            status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=dir()[]\\*/dir2()[]\\*')
+            status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=dir()[]/dir2()[]')
             self.assertEqual(status, '200 OK')
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertDictEqual(json.loads(content_bytes.decode('utf-8')), {
-                'path': temp_dir + '/dir()[]\\*/dir2()[]\\*',
-                'parent': 'dir()[]\\*',
-                'files': ['file()[]\\*.md'],
-                'directories': ['dir3()[]\\*']
+                'path': os.path.join(temp_dir, 'dir()[]', 'dir2()[]'),
+                'parent': 'dir()[]',
+                'files': ['file()[].md'],
+                'directories': ['dir3()[]']
             })
 
     def test_markdown_up_index_invalid_path(self):

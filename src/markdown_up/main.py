@@ -10,7 +10,7 @@ import os
 import webbrowser
 
 from schema_markdown import encode_query_string
-import gunicorn.app.base
+import waitress
 
 from .app import HTML_EXTS, MarkdownUpApplication
 
@@ -28,6 +28,8 @@ def main(argv=None):
                         help='the application port (default is 8080)')
     parser.add_argument('-n', dest='no_browser', action='store_true',
                         help="don't open a web browser")
+    parser.add_argument('-q', dest='quiet', action='store_true',
+                        help="don't display access logging")
     args = parser.parse_args(args=argv)
 
     # Verify the path exists
@@ -46,49 +48,29 @@ def main(argv=None):
     if root == '':
         root = '.'
 
-    # Define the server's when_ready function
+    # Construct the URL
     host = '127.0.0.1'
-    def when_ready(_):
-        # Do nothing?
-        if args.no_browser:
-            return
-
-        # Construct the URL
-        if is_file:
-            if args.path.endswith(HTML_EXTS):
-                url = f'http://{host}:{args.port}/{os.path.basename(args.path)}'
-            else:
-                hash_args = encode_query_string({'url': os.path.basename(args.path)})
-                url = f'http://{host}:{args.port}/#{hash_args}'
+    if is_file:
+        if args.path.endswith(HTML_EXTS):
+            url = f'http://{host}:{args.port}/{os.path.basename(args.path)}'
         else:
-            url = f'http://{host}:{args.port}/'
+            hash_args = encode_query_string({'url': os.path.basename(args.path)})
+            url = f'http://{host}:{args.port}/#{hash_args}'
+    else:
+        url = f'http://{host}:{args.port}/'
 
-        # Launch the web browser
+    # Launch the web browser
+    if not args.no_browser:
         webbrowser.open(url)
 
+    # Create the WSGI application
+    wsgiapp = MarkdownUpApplication(root)
+    def wsgiapp_wrap(environ, start_response):
+        if not args.quiet:
+            print(f'markdown-up: {environ["REQUEST_METHOD"]} {environ["PATH_INFO"]} {environ["QUERY_STRING"]}')
+        return wsgiapp(environ, start_response)
+
     # Host the application
-    StandaloneApplication(MarkdownUpApplication(root), {
-        'access_log_format': '%(h)s %(l)s "%(r)s" %(s)s %(b)s',
-        'accesslog': '-',
-        'errorlog': '-',
-        'bind': f'{host}:{args.port}',
-        'workers': 2,
-        'when_ready': when_ready
-    }).run()
-
-
-# A stand-alone WSGI server using Gunicorn - see https://docs.gunicorn.org/en/stable/custom.html
-class StandaloneApplication(gunicorn.app.base.BaseApplication):
-    # pylint: disable=abstract-method
-
-    def __init__(self, application, options): # pragma: no cover
-        self.options = options
-        self.application = application
-        super().__init__()
-
-    def load_config(self): # pragma: no cover
-        for key, value in self.options.items():
-            self.cfg.set(key, value)
-
-    def load(self): # pragma: no cover
-        return self.application
+    if not args.quiet:
+        print(f'markdown-up: Serving at {url} ...')
+    waitress.serve(wsgiapp_wrap, port=args.port)
