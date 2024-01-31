@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.1 (2024-01-31)
+
+- [00dbc6b](https://github.com/craigahobbs/markdown-up-py/commit/00dbc6b) - fix browser launch/startup issue
+
 ## 1.7.0 (2024-01-29)
 
 - [4f816c4](https://github.com/craigahobbs/markdown-up-py/commit/4f816c4) - use waitress to host wsgi application \(not gunicorn\) for windows support
