@@ -62,7 +62,8 @@ class MarkdownUpApplication(chisel.Application):
         path_info = environ['PATH_INFO']
 
         # Chisel API request? Otherwise, its a static request...
-        if request_method == 'GET' and path_info in ('/', '/doc', '/doc/', '/doc/doc_index', '/doc/doc_request', '/markdown_up_index'):
+        request, _ = self.match_request(request_method, path_info)
+        if request is not None:
             return super().__call__(environ, start_response)
 
         # Compute the static file path
