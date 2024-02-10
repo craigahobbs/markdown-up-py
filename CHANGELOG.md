@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.2 (2024-02-10)
+
+- [0ad630a](https://github.com/craigahobbs/markdown-up-py/commit/0ad630a) - use chisel.Application.match_request
+
 ## 1.7.1 (2024-01-31)
 
 - [00dbc6b](https://github.com/craigahobbs/markdown-up-py/commit/00dbc6b) - fix browser launch/startup issue
