@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.7.4 (2024-02-12)
+
+- [522a3b4](https://github.com/craigahobbs/markdown-up-py/commit/522a3b4) - log request status
+
+## 1.7.3 (2024-02-10)
+
+- [815e906](https://github.com/craigahobbs/markdown-up-py/commit/815e906) - update chisel version
+
 ## 1.7.2 (2024-02-10)
 
 - [0ad630a](https://github.com/craigahobbs/markdown-up-py/commit/0ad630a) - use chisel.Application.match_request
