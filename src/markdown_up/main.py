@@ -68,10 +68,14 @@ def main(argv=None):
 
     # Create the WSGI application
     wsgiapp = MarkdownUpApplication(root)
+
+    # Wrap the WSGI application and the start_response function so we can log status and environ
     def wsgiapp_wrap(environ, start_response):
-        if not args.quiet:
-            print(f'markdown-up: {environ["REQUEST_METHOD"]} {environ["PATH_INFO"]} {environ["QUERY_STRING"]}')
-        return wsgiapp(environ, start_response)
+        def log_start_response(status, response_headers):
+            if not args.quiet:
+                print(f'markdown-up: {status[0:3]} {environ["REQUEST_METHOD"]} {environ["PATH_INFO"]} {environ["QUERY_STRING"]}')
+            return start_response(status, response_headers)
+        return wsgiapp(environ, log_start_response)
 
     # Host the application
     if not args.quiet:

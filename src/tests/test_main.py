@@ -94,7 +94,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(start_response.status, '301 Moved Permanently')
             self.assertEqual(start_response.headers, [('Content-Type', 'text/plain'), ('Location', '/doc/')])
             self.assertEqual(content, [b'/doc/'])
-            self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/ ...\nmarkdown-up: GET /doc \n')
+            self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/ ...\nmarkdown-up: 301 GET /doc \n')
             self.assertEqual(stderr.getvalue(), '')
 
     def test_main_run_no_browser(self):
