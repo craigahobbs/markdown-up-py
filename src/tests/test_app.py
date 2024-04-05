@@ -184,7 +184,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '89f69a56ca38f1cb8f71a29fb271df86')])
+            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '75ce33f6259f098dea2c5998353a4e1b')])
             self.assertEqual(content_bytes.decode('utf-8'), '''\
 <!DOCTYPE html>
 <html lang="en">
@@ -199,9 +199,11 @@ class TestMarkdownUpApplication(unittest.TestCase):
         <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/data.js" as="script">
         <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/library.js" as="script">
         <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/model.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/options.js" as="script">
         <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/parser.js" as="script">
         <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/runtime.js" as="script">
         <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/runtimeAsync.js" as="script">
+        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/value.js" as="script">
         <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/element-model/lib/elementModel.js" as="script">
         <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/lib/app.js" as="script">
         <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/lib/dataTable.js" as="script">
