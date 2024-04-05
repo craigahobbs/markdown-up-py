@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.5 (2024-04-05)
+
+- [9cb4fd7](https://github.com/craigahobbs/markdown-up-py/commit/9cb4fd7) - update index app stub
+
 ## 1.7.4 (2024-02-12)
 
 - [522a3b4](https://github.com/craigahobbs/markdown-up-py/commit/522a3b4) - log request status
