@@ -12,11 +12,6 @@ launcher.
 is a Markdown viewer.
 
 
-## Links
-
-- [Source code](https://github.com/craigahobbs/markdown-up-py)
-
-
 ## View Local Markdown Files
 
 To view local Markdown files, run the markdown-up command-line application from a terminal prompt:
