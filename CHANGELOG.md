@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.0 (2024-09-22)
+
+- [efae993](https://github.com/craigahobbs/markdown-up-py/commit/efae993) - move index app to package data
+
 ## 1.7.5 (2024-04-05)
 
 - [9cb4fd7](https://github.com/craigahobbs/markdown-up-py/commit/9cb4fd7) - update index app stub
