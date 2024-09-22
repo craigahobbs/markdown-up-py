@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.1 (2024-09-22)
+
+- [b98a1b8](https://github.com/craigahobbs/markdown-up-py/commit/b98a1b8) - only preload remote resources
+
 ## 1.8.0 (2024-09-22)
 
 - [efae993](https://github.com/craigahobbs/markdown-up-py/commit/efae993) - move index app to package data
