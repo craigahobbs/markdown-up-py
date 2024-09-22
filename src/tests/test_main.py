@@ -17,6 +17,7 @@ class TestMain(unittest.TestCase):
     def test_main_submodule(self):
         self.assertTrue(markdown_up.__main__)
 
+
     def test_main_help(self):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
@@ -32,6 +33,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(cm_exc.exception.code, 0)
             self.assertEqual(stdout.getvalue().splitlines()[0], 'usage: markdown-up [-h] [-p N] [-n] [-q] [path]')
             self.assertEqual(stderr.getvalue(), '')
+
 
     def test_main_file_not_found(self):
         with patch('sys.stdout', StringIO()) as stdout, \
@@ -50,6 +52,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stderr.getvalue(), f"\"{os.path.join('missing', 'README.md')}\" does not exist!\n")
             mock_isfile.assert_called_once_with(os.path.join('missing', 'README.md'))
 
+
     def test_main_dir_not_found(self):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
@@ -66,6 +69,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stdout.getvalue(), '')
             self.assertEqual(stderr.getvalue(), '"missing" does not exist!\n')
             mock_isdir.assert_called_once_with('missing')
+
 
     def test_main_run(self):
         with patch('sys.stdout', StringIO()) as stdout, \
@@ -97,6 +101,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/ ...\nmarkdown-up: 301 GET /doc \n')
             self.assertEqual(stderr.getvalue(), '')
 
+
     def test_main_run_no_browser(self):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
@@ -114,6 +119,7 @@ class TestMain(unittest.TestCase):
             mock_waitress_serve.assert_called_once_with(ANY, port=8080)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
+
 
     def test_main_run_quiet(self):
         with patch('sys.stdout', StringIO()) as stdout, \
@@ -141,6 +147,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stdout.getvalue(), '')
             self.assertEqual(stderr.getvalue(), '')
 
+
     def test_main_run_port(self):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
@@ -156,6 +163,7 @@ class TestMain(unittest.TestCase):
             mock_waitress_serve.assert_called_once_with(ANY, port=8081)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
+
 
     def test_main_run_file(self):
         with patch('sys.stdout', StringIO()) as stdout, \
@@ -173,6 +181,7 @@ class TestMain(unittest.TestCase):
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
 
+
     def test_main_run_file_html(self):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
@@ -189,6 +198,7 @@ class TestMain(unittest.TestCase):
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
 
+
     def test_main_run_file_subdir(self):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
@@ -204,6 +214,7 @@ class TestMain(unittest.TestCase):
             mock_waitress_serve.assert_called_once_with(ANY, port=8080)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
+
 
     def test_main_run_file_html_subdir(self):
         with patch('sys.stdout', StringIO()) as stdout, \

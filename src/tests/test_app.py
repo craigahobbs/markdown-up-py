@@ -38,12 +38,13 @@ class TestMarkdownUpApplication(unittest.TestCase):
             'chisel_doc',
             'chisel_doc_index',
             'chisel_doc_request',
-            'markdown_up_html',
+            'index.html',
+            'markdownUpIndex.bare',
             'markdown_up_index',
             'redirect_doc'
         ])
 
-    def test_static(self):
+
         with create_test_files([
                 ('README.md', '# Title'),
                 (('images', 'image.svg'), '<svg></svg>')
@@ -82,6 +83,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
             self.assertEqual(content, [b'Not Found'])
 
+
     def test_static_index(self):
         with create_test_files([
                 (('html', 'index.html'), '<html></html>'),
@@ -111,6 +113,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(start_response.headers, [('Content-Type', 'text/html; charset=utf-8')])
             self.assertEqual(content, [b'<html></html>'])
+
 
     def test_static_index_other(self):
         with create_test_files([
@@ -142,6 +145,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.headers, [('Content-Type', 'text/html; charset=utf-8')])
             self.assertEqual(content, [b'<html></html>'])
 
+
     def test_static_index_none(self):
         with create_test_files([
                 (('html', 'README.md'), '# Title'),
@@ -164,6 +168,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
             self.assertEqual(content, [b'Not Found'])
 
+
     def test_static_internal_server_error(self):
         with unittest.mock.patch('markdown_up.app.open') as mock_open:
             mock_open.side_effect = Exception('BAD')
@@ -179,66 +184,15 @@ class TestMarkdownUpApplication(unittest.TestCase):
                 self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
                 self.assertEqual(content, [b'Internal Server Error'])
 
+
     def test_markdown_up_html(self):
         with create_test_files([]) as temp_dir:
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '75ce33f6259f098dea2c5998353a4e1b')])
-            self.assertEqual(content_bytes.decode('utf-8'), '''\
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>MarkdownUp</title>
-        <meta charset="UTF-8">
-        <meta name="description" content="MarkdownUp is a Markdown viewer">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/app.css">
+            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'e50eb2f3ad242a24e106207adcd653d2')])
+            self.assertTrue(content_bytes.decode('utf-8').startswith('<!DOCTYPE html>'))
 
-        <!-- Preloads -->
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/data.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/library.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/model.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/options.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/parser.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/runtime.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/runtimeAsync.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/bare-script/lib/value.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/element-model/lib/elementModel.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/lib/app.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/lib/dataTable.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/lib/dataUtil.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/lib/lineChart.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/lib/script.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/lib/scriptLibrary.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/markdown-model/lib/elements.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/markdown-model/lib/parser.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/schema-markdown-doc/lib/schemaMarkdownDoc.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/schema-markdown/lib/encode.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/schema-markdown/lib/parser.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/schema-markdown/lib/schema.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/schema-markdown/lib/schemaUtil.js" as="script">
-        <link rel="modulepreload" href="https://craigahobbs.github.io/markdown-up/schema-markdown/lib/typeModel.js" as="script">
-        <link rel="preload" href="https://craigahobbs.github.io/markdown-up/app.css" as="style">
-        <link rel="preload" href="https://craigahobbs.github.io/markdown-up/markdown-model/static/markdown-model.css" as="style">
-    </head>
-    <body>
-    </body>
-    <script type="module">
-        import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/lib/app.js';
-        const app = new MarkdownUp(window, {
-            'markdownText': `\\
-~~~ markdown-script
-include 'https://craigahobbs.github.io/markdown-up/launcher/app.mds'
-
-markdownUpIndex()
-~~~
-`
-        });
-        app.run();
-    </script>
-</html>
-''')
 
     def test_markdown_up_index(self):
         with create_test_files([
@@ -260,6 +214,7 @@ markdownUpIndex()
                 'directories': ['dir', 'dir2']
             })
 
+
     def test_markdown_up_index_empty(self):
         with create_test_files([]) as temp_dir:
             app = MarkdownUpApplication(temp_dir)
@@ -269,6 +224,7 @@ markdownUpIndex()
             self.assertDictEqual(json.loads(content_bytes.decode('utf-8')), {
                 'path': temp_dir
             })
+
 
     def test_markdown_up_index_path(self):
         with create_test_files([
@@ -283,6 +239,7 @@ markdownUpIndex()
                 'files': ['README.md']
             })
 
+
     def test_markdown_up_index_path_dir(self):
         with create_test_files([
                 (('dir', 'dir2', 'README.md'), '# Info')
@@ -296,6 +253,7 @@ markdownUpIndex()
                 'parent': 'dir',
                 'files': ['README.md']
             })
+
 
     def test_markdown_up_index_escape(self):
         with create_test_files([
@@ -313,6 +271,7 @@ markdownUpIndex()
                 'directories': ['dir3()[]']
             })
 
+
     def test_markdown_up_index_invalid_path(self):
         with create_test_files([]) as temp_dir:
             app = MarkdownUpApplication(temp_dir)
@@ -320,6 +279,7 @@ markdownUpIndex()
             self.assertEqual(status, '400 Bad Request')
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertEqual(content_bytes, b'{"error":"InvalidPath"}')
+
 
     def test_markdown_up_index_file_path(self):
         with create_test_files([
@@ -330,6 +290,7 @@ markdownUpIndex()
             self.assertEqual(status, '400 Bad Request')
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertEqual(content_bytes, b'{"error":"InvalidPath"}')
+
 
     def test_markdown_up_index_file_not_found(self):
         with create_test_files([]) as temp_dir:

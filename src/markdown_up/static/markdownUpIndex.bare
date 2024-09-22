@@ -1,0 +1,71 @@
+# Licensed under the MIT License
+# https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
+
+include <args.mds>
+
+
+#
+# The MarkdownUp launcher index application main entry point
+#
+async function markdownUpIndex():
+    # Parse arguments
+    arguments = argsValidate(arrayNew(objectNew('name', 'path')))
+    args = argsParse(arguments)
+    path = objectGet(args, 'path')
+
+    # Fetch the index files/directories/parent API
+    index_url = 'markdown_up_index' + if(path != null, '?path=' + urlEncodeComponent(path), '')
+    index = jsonParse(systemFetch(index_url))
+
+    # Set the document title
+    title = 'MarkdownUp - ' + objectGet(index, 'path')
+    documentSetTitle(title)
+
+    # Menu and title
+    parent = objectGet(index, 'parent')
+    markdownPrint( \
+        if(path == null, 'Root', argsLink(arguments, 'Root', objectNew('path', null))) + ' |', \
+        if(path == null, 'Parent', if(parent == null, \
+            argsLink(arguments, 'Parent', objectNew('path', null)), \
+            argsLink(arguments, 'Parent', objectNew('path', parent)))) + ' |', \
+        '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
+        '', \
+        '# ' + markdownEscape(title) \
+    )
+
+    # Render file links
+    files = arrayNew()
+    markdownFiles = objectGet(index, 'files')
+    if markdownFiles != null:
+        arrayExtend(files, markdownFiles)
+    endif
+    if objectHas(index, 'htmlFiles'):
+        arrayExtend(files, objectGet(index, 'htmlFiles'))
+    endif
+    if arrayLength(files):
+        markdownPrint('', '## Files')
+        for file in arraySort(files):
+            fileURL = if(path != null, path + '/', '') + file
+            if markdownFiles != null && arrayIndexOf(markdownFiles, file) != -1:
+                markdownPrint('', '[' + markdownEscape(file) + '](#url=' + urlEncodeComponent(fileURL, true) + '&var=&' + argsTopHeaderId + ')')
+            else:
+                markdownPrint('', '[' + markdownEscape(file) + '](' + urlEncode(fileURL, true) + ')')
+            endif
+        endfor
+    endif
+
+    # Render directory links
+    directories = objectGet(index, 'directories')
+    if directories != null:
+        markdownPrint('', '## Directories')
+        for directory in arraySort(directories):
+            directoryURL = if(path != null, path + '/', '') + directory
+            markdownPrint('', argsLink(arguments, directory, objectNew('path', directoryURL)))
+        endfor
+    endif
+
+    # Empty path?
+    if !arrayLength(files) && directories == null:
+        markdownPrint('', 'No Markdown files or sub-directories found')
+    endif
+endfunction
