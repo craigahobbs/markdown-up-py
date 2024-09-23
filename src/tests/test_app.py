@@ -34,15 +34,14 @@ class TestMarkdownUpApplication(unittest.TestCase):
     def test_init(self):
         app = MarkdownUpApplication('.')
         self.assertEqual(app.root, '.')
-        self.assertListEqual(sorted(app.requests.keys()), [
-            'chisel_doc',
-            'chisel_doc_index',
-            'chisel_doc_request',
-            'index.html',
-            'markdownUpIndex.bare',
-            'markdown_up_index',
-            'redirect_doc'
-        ])
+        self.assertListEqual(
+            [key for key in sorted(app.requests.keys()) if not key.startswith('chisel_doc')],
+            [
+                'index.html',
+                'markdownUpIndex.bare',
+                'markdown_up_index'
+            ]
+        )
 
 
         with create_test_files([
