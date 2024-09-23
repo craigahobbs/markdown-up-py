@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.2 (2024-09-23)
+
+- [4bad903](https://github.com/craigahobbs/markdown-up-py/commit/4bad903) - fix viewing of root index.html files
+
 ## 1.8.1 (2024-09-22)
 
 - [b98a1b8](https://github.com/craigahobbs/markdown-up-py/commit/b98a1b8) - only preload remote resources
