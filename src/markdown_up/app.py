@@ -35,7 +35,7 @@ class MarkdownUpApplication(chisel.Application):
         self.add_static(
             'index.html',
             'text/html; charset=utf-8',
-            (('GET', None), ('GET', '/')),
+            (('GET', '/'),),
             'The MarkdownUp index HTML'
         )
         self.add_static(

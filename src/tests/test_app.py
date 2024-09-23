@@ -190,7 +190,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '962cfb28add5afac831a4910187a73ba')])
+            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '9bf112409babff95e55a1dff63516806')])
             self.assertTrue(content_bytes.decode('utf-8').startswith('<!DOCTYPE html>'))
 
 
