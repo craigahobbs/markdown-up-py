@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.3 (2024-09-23)
+
+- [5ad61de](https://github.com/craigahobbs/markdown-up-py/commit/5ad61de) - remove extra argument from urlEncode and urlEncodeComponent calls
+
 ## 1.8.2 (2024-09-23)
 
 - [4bad903](https://github.com/craigahobbs/markdown-up-py/commit/4bad903) - fix viewing of root index.html files
