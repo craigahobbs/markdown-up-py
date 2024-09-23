@@ -47,9 +47,9 @@ async function markdownUpIndex():
         for file in arraySort(files):
             fileURL = if(path != null, path + '/', '') + file
             if markdownFiles != null && arrayIndexOf(markdownFiles, file) != -1:
-                markdownPrint('', '[' + markdownEscape(file) + '](#url=' + urlEncodeComponent(fileURL, true) + '&var=&' + argsTopHeaderId + ')')
+                markdownPrint('', '[' + markdownEscape(file) + '](#url=' + urlEncodeComponent(fileURL) + '&var=&' + argsTopHeaderId + ')')
             else:
-                markdownPrint('', '[' + markdownEscape(file) + '](' + urlEncode(fileURL, true) + ')')
+                markdownPrint('', '[' + markdownEscape(file) + '](' + urlEncode(fileURL) + ')')
             endif
         endfor
     endif
