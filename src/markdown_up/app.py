@@ -28,7 +28,7 @@ class MarkdownUpApplication(chisel.Application):
         # Add the chisel documentation application
         self.add_requests(chisel.create_doc_requests())
 
-        # Add the markdown-up application
+        # Add the markdown-up APIs
         self.add_request(markdown_up_index)
 
         # Add the markdown-up statics
