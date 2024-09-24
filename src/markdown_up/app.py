@@ -127,7 +127,7 @@ INDEX_FILES = ('index.html', 'index.htm')
 
 
 @chisel.action(spec='''\
-group "MarkdownUp"
+group "MarkdownUp API"
 
 # The MarkdownUp launcher index API
 action markdown_up_index
