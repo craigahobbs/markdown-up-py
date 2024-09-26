@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.6 (2024-09-26)
+
+- [b1529e8](https://github.com/craigahobbs/markdown-up-py/commit/b1529e8) - update markdown-up stub
+
 ## 1.8.5 (2024-09-23)
 
 - [4df0114](https://github.com/craigahobbs/markdown-up-py/commit/4df0114) - improved fix for distribution for Python 3.9
