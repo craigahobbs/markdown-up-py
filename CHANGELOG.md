@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.8.8 (2024-10-02)
+
+- [fc9dd86](https://github.com/craigahobbs/markdown-up-py/commit/fc9dd86) - add Python 3.13 \(really this time\)
+
 ## 1.8.7 (2024-10-02)
 
 - [6b35748](https://github.com/craigahobbs/markdown-up-py/commit/6b35748) - add Python 3.13, remove Python 3.8 \(end-of-life\)
