@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.9.0 (2025-02-19)
+
+- [d68ac9f](https://github.com/craigahobbs/markdown-up-py/commit/d68ac9f) - run entirely offline
+
+## 1.8.9 (2024-11-26)
+
+- [051a45b](https://github.com/craigahobbs/markdown-up-py/commit/051a45b) - update dependency version requirements
+
 ## 1.8.8 (2024-10-02)
 
 - [fc9dd86](https://github.com/craigahobbs/markdown-up-py/commit/fc9dd86) - add Python 3.13 \(really this time\)
