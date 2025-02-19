@@ -9,6 +9,7 @@ from http import HTTPStatus
 import importlib.resources
 import os
 from pathlib import PurePosixPath
+import tarfile
 
 import chisel
 
@@ -26,29 +27,33 @@ class MarkdownUpApplication(chisel.Application):
         self.root = root
 
         # Add the chisel documentation application
-        self.add_requests(chisel.create_doc_requests())
+        self.add_requests(chisel.create_doc_requests(markdown_up='../markdown-up/'))
 
         # Add the markdown-up APIs
         self.add_request(markdown_up_index)
 
         # Add the markdown-up statics
-        self.add_static(
-            'index.html',
-            'text/html; charset=utf-8',
-            (('GET', '/'),),
-            'The MarkdownUp index HTML'
-        )
-        self.add_static(
-            'markdownUpIndex.bare',
-            'text/plain; charset=utf-8',
-            (('GET', None),),
-            'The MarkdownUp index application'
-        )
+        self.add_static('index.html', urls=(('GET', '/'),))
+        self.add_static('markdownUpIndex.bare')
+
+        # Markdown-Up application statics
+        with importlib.resources.files('markdown_up.static').joinpath('markdown-up.tar.gz').open('rb') as tgz:
+            with tarfile.open(fileobj=tgz, mode='r:gz') as tar:
+                for member in tar.getmembers():
+                    if member.isfile():
+                        self.add_request(chisel.StaticRequest(
+                            member.name,
+                            tar.extractfile(member).read(),
+                            content_type=_CONTENT_TYPES.get(os.path.splitext(member.name)[1], 'text/plain; charset=utf-8'),
+                            urls=(('GET', None),),
+                            doc_group='MarkdownUp Statics'
+                        ))
 
 
-    def add_static(self, filename, content_type, urls, doc, doc_group='MarkdownUp Statics'):
+    def add_static(self, filename, urls=(('GET', None),), doc_group='MarkdownUp Index Statics'):
+        content_type = _CONTENT_TYPES.get(os.path.splitext(filename)[1], 'text/plain; charset=utf-8')
         with importlib.resources.files('markdown_up.static').joinpath(filename).open('rb') as fh:
-            self.add_request(chisel.StaticRequest(filename, fh.read(), content_type, urls, doc, doc_group))
+            self.add_request(chisel.StaticRequest(filename, fh.read(), content_type, urls, doc_group=doc_group))
 
 
     def __call__(self, environ, start_response):
@@ -99,6 +104,13 @@ class MarkdownUpApplication(chisel.Application):
         return [content]
 
 
+_CONTENT_TYPES = {
+    '.css': 'text/css; charset=utf-8',
+    '.js': 'text/javascript; charset=utf-8',
+    '.html': 'text/html; charset=utf-8'
+}
+
+
 # The map of static file extension to content-type
 STATIC_EXT_TO_CONTENT_TYPE = {
     '.bare': 'text/plain; charset=utf-8',
@@ -127,7 +139,7 @@ INDEX_FILES = ('index.html', 'index.htm')
 
 
 @chisel.action(spec='''\
-group "MarkdownUp API"
+group "MarkdownUp Index API"
 
 # The MarkdownUp launcher index API
 action markdown_up_index

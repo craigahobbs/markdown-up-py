@@ -35,7 +35,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
         app = MarkdownUpApplication('.')
         self.assertEqual(app.root, '.')
         self.assertListEqual(
-            [key for key in sorted(app.requests.keys()) if not key.startswith('chisel_doc')],
+            sorted(request.name for request in app.requests.values() if request.doc_group.startswith('MarkdownUp Index ')),
             [
                 'index.html',
                 'markdownUpIndex.bare',
@@ -189,7 +189,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/')
             self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '93341c482b46cb9ee76b7795825c4c14')])
+            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'abb5157ca009ed55bc9bb14813cdb6c7')])
             self.assertTrue(content_bytes.decode('utf-8').startswith('<!DOCTYPE html>'))
 
 

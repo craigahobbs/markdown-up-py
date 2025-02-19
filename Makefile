@@ -39,3 +39,13 @@ commit: test-app
 test-app: $(DEFAULT_VENV_BUILD)
 	$(DEFAULT_VENV_BIN)/bare -s src/markdown_up/static/*.bare src/markdown_up/static/test/*.bare
 	$(DEFAULT_VENV_BIN)/bare -c 'include <markdownUp.bare>' src/markdown_up/static/test/runTests.bare$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'")
+
+
+.PHONY: run
+run: $(DEFAULT_VENV_BUILD)
+	$(DEFAULT_VENV_BIN)/markdown-up$(if $(ARGS), $(ARGS))
+
+
+.PHONY: markdown-up
+markdown-up:
+	cd src/markdown_up/static && $(call WGET_CMD, https://craigahobbs.github.io/markdown-up/markdown-up.tar.gz)

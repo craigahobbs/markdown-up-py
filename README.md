@@ -12,9 +12,9 @@ launcher.
 is a Markdown viewer.
 
 
-## View Local Markdown Files
+## View Local Markdown Files Offline
 
-To view local Markdown files, run the markdown-up command-line application from a terminal prompt:
+To view local Markdown files entirely offline, run the markdown-up command-line application from a terminal prompt:
 
 ~~~
 pip install markdown-up
