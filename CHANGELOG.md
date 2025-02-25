@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.1 (2025-02-25)
+
+- [89c692e](https://github.com/craigahobbs/markdown-up-py/commit/89c692e) - update markdown-up.tar.gz
+
 ## 1.9.0 (2025-02-19)
 
 - [d68ac9f](https://github.com/craigahobbs/markdown-up-py/commit/d68ac9f) - run entirely offline
