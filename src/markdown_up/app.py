@@ -5,13 +5,17 @@
 The MarkdownUp launcher back-end application
 """
 
+from functools import partial
 from http import HTTPStatus
 import importlib.resources
+import json
 import os
 from pathlib import PurePosixPath
 import tarfile
 
+import bare_script
 import chisel
+import schema_markdown
 
 
 class MarkdownUpApplication(chisel.Application):
@@ -32,7 +36,7 @@ class MarkdownUpApplication(chisel.Application):
         # Add the markdown-up APIs
         self.add_request(markdown_up_index)
 
-        # Add the markdown-up statics
+        # Add the markdown-up index statics
         self.add_static('index.html', urls=(('GET', '/'),))
         self.add_static('markdownUpIndex.bare')
 
@@ -49,11 +53,52 @@ class MarkdownUpApplication(chisel.Application):
                             doc_group='MarkdownUp Statics'
                         ))
 
+        # Add the backend APIs
+        self.add_backend()
+
 
     def add_static(self, filename, urls=(('GET', None),), doc_group='MarkdownUp Index Statics'):
         content_type = _CONTENT_TYPES.get(os.path.splitext(filename)[1], 'text/plain; charset=utf-8')
         with importlib.resources.files('markdown_up.static').joinpath(filename).open('rb') as fh:
             self.add_request(chisel.StaticRequest(filename, fh.read(), content_type, urls, doc_group=doc_group))
+
+
+    def add_backend(self):
+        backend_path = 'markdown-up.json'
+
+        # Read the "markdown-up.json" file - do nothing if it doesn't exist
+        if not os.path.isfile(backend_path):
+            return
+        with open(backend_path, 'r', encoding='utf-8') as backend_file:
+            backend = schema_markdown.validate_type(BACKEND_TYPES, 'BackendConfig', json.load(backend_file))
+
+        # Load the schema markdown files
+        types = {}
+        for smd_path in backend['schemaFiles']:
+            with open(smd_path, 'r', encoding='utf-8') as smd_file:
+                schema_markdown.parse_schema_markdown(smd_file, types, filename=smd_path, validate=False)
+        schema_markdown.validate_type_model(types)
+
+        # Add an action for each backend API
+        for api in backend['apis']:
+
+            # Parse the script
+            with open(api['script'], 'r', encoding='utf-8') as script_file:
+                script = bare_script.parse_script(script_file)
+            script_globals = {}
+            script_options = {
+                'fetchFn': bare_script.fetch_read_write,
+                'globals': script_globals,
+                'logFn': bare_script.log_stdout,
+                'urlFile': bare_script.url_file_relative,
+                'systemPrefix': 'https://craigahobbs.github.io/markdown-up/include/'
+            }
+            bare_script.execute_script(script, script_options)
+
+            # Add the API action
+            script_fn = script_globals[api['name']]
+            action_fn = partial(_bare_script_action_fn, script_fn, script_options)
+            self.add_request(chisel.Action(action_fn, name=api['name'], types=types))
 
 
     def __call__(self, environ, start_response):
@@ -102,6 +147,34 @@ class MarkdownUpApplication(chisel.Application):
         # Static response
         start_response(f'{status.value} {status.phrase}', [('Content-Type', content_type)])
         return [content]
+
+
+# Action function wrapper for a MarkdownUp backend API function
+def _bare_script_action_fn(script_fn, script_options, _ctx, req):
+    return script_fn([req], script_options)
+
+
+# The backend configuration schema
+BACKEND_TYPES = schema_markdown.parse_schema_markdown('''\
+# The MarkdownUp backend API configuration file schemax
+struct BackendConfig
+
+    # The list of schema markdown files
+    string[] schemaFiles
+
+    # The list of APIs
+    BackendAPI[] apis
+
+
+# The backend API model
+struct BackendAPI
+
+    # The API name
+    string name
+
+    # The BareScript file containing the API function
+    string script
+''')
 
 
 _CONTENT_TYPES = {
