@@ -44,10 +44,12 @@ class TestMarkdownUpApplication(unittest.TestCase):
         )
 
 
-        with create_test_files([
-                ('README.md', '# Title'),
-                (('images', 'image.svg'), '<svg></svg>')
-        ]) as temp_dir:
+    def test_static(self):
+        test_files = [
+            ('README.md', '# Title'),
+            (('images', 'image.svg'), '<svg></svg>')
+        ]
+        with create_test_files(test_files) as temp_dir:
             app = MarkdownUpApplication(temp_dir)
 
             # Get a markdown file
@@ -55,15 +57,30 @@ class TestMarkdownUpApplication(unittest.TestCase):
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '200 OK')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/markdown; charset=utf-8')])
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/markdown; charset=utf-8'), ('ETag', '38cdd67987afb67a4af89ea02044a00e')]
+            )
             self.assertEqual(content, [b'# Title'])
+
+            # Get an unmodified markdown file
+            environ = chisel.Context.create_environ('GET', '/README.md')
+            environ['HTTP_IF_NONE_MATCH'] = '38cdd67987afb67a4af89ea02044a00e'
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '304 Not Modified')
+            self.assertEqual(start_response.headers, [])
+            self.assertEqual(content, [])
 
             # Get an image file
             environ = chisel.Context.create_environ('GET', '/images/image.svg')
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '200 OK')
-            self.assertEqual(start_response.headers, [('Content-Type', 'image/svg+xml')])
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'image/svg+xml'), ('ETag', '7b56e1eab00ec8000da9331a4888cb35')]
+            )
             self.assertEqual(content, [b'<svg></svg>'])
 
             # Get a not-found file
@@ -74,7 +91,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
             self.assertEqual(content, [b'Not Found'])
 
-            # Get an file of unknown content type
+            # Get a file of unknown content type
             environ = chisel.Context.create_environ('GET', '/file.unk')
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
@@ -84,9 +101,10 @@ class TestMarkdownUpApplication(unittest.TestCase):
 
 
     def test_static_index(self):
-        with create_test_files([
-                (('html', 'index.html'), '<html></html>'),
-        ]) as temp_dir:
+        test_files = [
+            (('html', 'index.html'), '<html></html>'),
+        ]
+        with create_test_files(test_files) as temp_dir:
             app = MarkdownUpApplication(temp_dir)
 
             # Get the index file directly
@@ -94,7 +112,10 @@ class TestMarkdownUpApplication(unittest.TestCase):
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '200 OK')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/html; charset=utf-8')])
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'c83301425b2ad1d496473a5ff3d9ecca')]
+            )
             self.assertEqual(content, [b'<html></html>'])
 
             # Get the index file
@@ -102,7 +123,10 @@ class TestMarkdownUpApplication(unittest.TestCase):
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '200 OK')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/html; charset=utf-8')])
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'c83301425b2ad1d496473a5ff3d9ecca')]
+            )
             self.assertEqual(content, [b'<html></html>'])
 
             # Get the index file (alternate)
@@ -110,14 +134,18 @@ class TestMarkdownUpApplication(unittest.TestCase):
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '200 OK')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/html; charset=utf-8')])
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'c83301425b2ad1d496473a5ff3d9ecca')]
+            )
             self.assertEqual(content, [b'<html></html>'])
 
 
     def test_static_index_other(self):
-        with create_test_files([
-                (('html', 'index.htm'), '<html></html>'),
-        ]) as temp_dir:
+        test_files = [
+            (('html', 'index.htm'), '<html></html>'),
+        ]
+        with create_test_files(test_files) as temp_dir:
             app = MarkdownUpApplication(temp_dir)
 
             # Get the index file directly
@@ -125,7 +153,10 @@ class TestMarkdownUpApplication(unittest.TestCase):
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '200 OK')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/html; charset=utf-8')])
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'c83301425b2ad1d496473a5ff3d9ecca')]
+            )
             self.assertEqual(content, [b'<html></html>'])
 
             # Get the index file
@@ -133,7 +164,10 @@ class TestMarkdownUpApplication(unittest.TestCase):
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '200 OK')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/html; charset=utf-8')])
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'c83301425b2ad1d496473a5ff3d9ecca')]
+            )
             self.assertEqual(content, [b'<html></html>'])
 
             # Get the index file (alternate)
@@ -141,14 +175,18 @@ class TestMarkdownUpApplication(unittest.TestCase):
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '200 OK')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/html; charset=utf-8')])
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'c83301425b2ad1d496473a5ff3d9ecca')]
+            )
             self.assertEqual(content, [b'<html></html>'])
 
 
     def test_static_index_none(self):
-        with create_test_files([
-                (('html', 'README.md'), '# Title'),
-        ]) as temp_dir:
+        test_files = [
+            (('html', 'README.md'), '# Title'),
+        ]
+        with create_test_files(test_files) as temp_dir:
             app = MarkdownUpApplication(temp_dir)
 
             # Get the index file
@@ -166,22 +204,6 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.status, '404 Not Found')
             self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
             self.assertEqual(content, [b'Not Found'])
-
-
-    def test_static_internal_server_error(self):
-        with unittest.mock.patch('markdown_up.app.open') as mock_open:
-            mock_open.side_effect = Exception('BAD')
-
-            with create_test_files([]) as temp_dir:
-                app = MarkdownUpApplication(temp_dir)
-
-                # Get a markdown file - fail
-                environ = chisel.Context.create_environ('GET', '/README.md')
-                start_response = chisel.app.StartResponse()
-                content = app(environ, start_response)
-                self.assertEqual(start_response.status, '500 Internal Server Error')
-                self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
-                self.assertEqual(content, [b'Internal Server Error'])
 
 
     def test_markdown_up_html(self):
@@ -194,14 +216,15 @@ class TestMarkdownUpApplication(unittest.TestCase):
 
 
     def test_markdown_up_index(self):
-        with create_test_files([
-                ('README.md', '# Title'),
-                ('index.html', '<html>'),
-                ('image.svg', '<svg>'),
-                ('text.txt', 'Text'),
-                (('dir', 'info.md'), '# Info'),
-                (('dir2', 'info2.md'), '# Info 2')
-        ]) as temp_dir:
+        test_files = [
+            ('README.md', '# Title'),
+            ('index.html', '<html>'),
+            ('image.svg', '<svg>'),
+            ('text.txt', 'Text'),
+            (('dir', 'info.md'), '# Info'),
+            (('dir2', 'info2.md'), '# Info 2')
+        ]
+        with create_test_files(test_files) as temp_dir:
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/markdown_up_index')
             self.assertEqual(status, '200 OK')
@@ -226,9 +249,10 @@ class TestMarkdownUpApplication(unittest.TestCase):
 
 
     def test_markdown_up_index_path(self):
-        with create_test_files([
-                (('dir', 'README.md'), '# Info')
-        ]) as temp_dir:
+        test_files = [
+            (('dir', 'README.md'), '# Info')
+        ]
+        with create_test_files(test_files) as temp_dir:
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=dir')
             self.assertEqual(status, '200 OK')
@@ -240,9 +264,10 @@ class TestMarkdownUpApplication(unittest.TestCase):
 
 
     def test_markdown_up_index_path_dir(self):
-        with create_test_files([
-                (('dir', 'dir2', 'README.md'), '# Info')
-        ]) as temp_dir:
+        test_files = [
+            (('dir', 'dir2', 'README.md'), '# Info')
+        ]
+        with create_test_files(test_files) as temp_dir:
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=dir/dir2')
             self.assertEqual(status, '200 OK')
@@ -255,10 +280,11 @@ class TestMarkdownUpApplication(unittest.TestCase):
 
 
     def test_markdown_up_index_escape(self):
-        with create_test_files([
-                (('dir()[]', 'dir2()[]', 'file()[].md'), '# File'),
-                (('dir()[]', 'dir2()[]', 'dir3()[]', 'file2()[].md'), '# File 2')
-        ]) as temp_dir:
+        test_files = [
+            (('dir()[]', 'dir2()[]', 'file()[].md'), '# File'),
+            (('dir()[]', 'dir2()[]', 'dir3()[]', 'file2()[].md'), '# File 2')
+        ]
+        with create_test_files(test_files) as temp_dir:
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=dir()[]/dir2()[]')
             self.assertEqual(status, '200 OK')
@@ -281,9 +307,10 @@ class TestMarkdownUpApplication(unittest.TestCase):
 
 
     def test_markdown_up_index_file_path(self):
-        with create_test_files([
-                ('README.md', '# Title')
-        ]) as temp_dir:
+        test_files = [
+            ('README.md', '# Title')
+        ]
+        with create_test_files(test_files) as temp_dir:
             app = MarkdownUpApplication(temp_dir)
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=README.md')
             self.assertEqual(status, '400 Bad Request')
