@@ -10,6 +10,7 @@ import json
 import os
 
 import bare_script
+from bare_script.value import value_args_model, value_args_validate
 import chisel
 import schema_markdown
 
@@ -36,7 +37,10 @@ def load_backend_requests(config_path):
         # Parse the script
         with open(api['script'], 'r', encoding='utf-8') as script_file:
             script = bare_script.parse_script(script_file)
-        script_globals = {}
+        script_globals = {
+            _BACKEND_GLOBAL_HEADERS: {},
+            'backendAddHeader': _backend_add_header
+        }
         script_options = {
             'fetchFn': bare_script.fetch_read_write,
             'globals': script_globals,
@@ -54,9 +58,33 @@ def load_backend_requests(config_path):
     return requests
 
 
+# $function: backendAddHeader
+# $group: Backend
+# $doc: Add a backend API response header
+# $arg key: The key string
+# $arg value: The value string
+def _backend_add_header(args, options):
+    key, value = value_args_validate(_BACKEND_ADD_HEADER_ARGS, args)
+    options['globals'][_BACKEND_GLOBAL_HEADERS][key] = value
+
+_BACKEND_ADD_HEADER_ARGS = value_args_model([
+    {'name': 'key', 'type': 'string'},
+    {'name': 'value', 'type': 'string'}
+])
+
+
 # Action function wrapper for a MarkdownUp backend API function
-def _bare_script_action_fn(script_fn, script_options, _ctx, req):
-    return script_fn([req], script_options)
+def _bare_script_action_fn(script_fn, script_options, ctx, req):
+    response = script_fn([req], script_options)
+
+    # Add response headers, if any
+    ctx.headers.update(script_options['globals'][_BACKEND_GLOBAL_HEADERS])
+
+    return response
+
+
+# Special backend global variables
+_BACKEND_GLOBAL_HEADERS = '__markdown_up_headers__'
 
 
 # The backend configuration schema
