@@ -15,6 +15,29 @@ import chisel
 import schema_markdown
 
 
+# The backend configuration schema
+BACKEND_TYPES = schema_markdown.parse_schema_markdown('''\
+# The MarkdownUp backend API configuration file schemax
+struct BackendConfig
+
+    # The list of schema markdown files
+    string[] schemaFiles
+
+    # The list of APIs
+    BackendAPI[] apis
+
+
+# The backend API model
+struct BackendAPI
+
+    # The API name
+    string name
+
+    # The BareScript file containing the API function
+    string script
+''')
+
+
 def load_backend_requests(config_path):
     requests = []
 
@@ -37,8 +60,10 @@ def load_backend_requests(config_path):
         # Parse the script
         with open(api['script'], 'r', encoding='utf-8') as script_file:
             script = bare_script.parse_script(script_file)
+
+        # Execute the script
         script_globals = {
-            _BACKEND_GLOBAL_HEADERS: {},
+            _BACKEND_GLOBAL: {'headers': {}},
             'backendAddHeader': _backend_add_header
         }
         script_options = {
@@ -58,19 +83,8 @@ def load_backend_requests(config_path):
     return requests
 
 
-# $function: backendAddHeader
-# $group: Backend
-# $doc: Add a backend API response header
-# $arg key: The key string
-# $arg value: The value string
-def _backend_add_header(args, options):
-    key, value = value_args_validate(_BACKEND_ADD_HEADER_ARGS, args)
-    options['globals'][_BACKEND_GLOBAL_HEADERS][key] = value
-
-_BACKEND_ADD_HEADER_ARGS = value_args_model([
-    {'name': 'key', 'type': 'string'},
-    {'name': 'value', 'type': 'string'}
-])
+# Special backend global variables
+_BACKEND_GLOBAL = '__markdown_up__'
 
 
 # Action function wrapper for a MarkdownUp backend API function
@@ -78,33 +92,23 @@ def _bare_script_action_fn(script_fn, script_options, ctx, req):
     response = script_fn([req], script_options)
 
     # Add response headers, if any
-    ctx.headers.update(script_options['globals'][_BACKEND_GLOBAL_HEADERS])
+    backend_state = script_options['globals'][_BACKEND_GLOBAL]
+    ctx.headers.update(backend_state['headers'])
 
     return response
 
 
-# Special backend global variables
-_BACKEND_GLOBAL_HEADERS = '__markdown_up_headers__'
+# $function: backendAddHeader
+# $group: Backend
+# $doc: Add a backend API response header
+# $arg key: The key string
+# $arg value: The value string
+def _backend_add_header(args, options):
+    key, value = value_args_validate(_BACKEND_ADD_HEADER_ARGS, args)
+    backend_state = options['globals'][_BACKEND_GLOBAL]
+    backend_state['headers'][key] = value
 
-
-# The backend configuration schema
-BACKEND_TYPES = schema_markdown.parse_schema_markdown('''\
-# The MarkdownUp backend API configuration file schemax
-struct BackendConfig
-
-    # The list of schema markdown files
-    string[] schemaFiles
-
-    # The list of APIs
-    BackendAPI[] apis
-
-
-# The backend API model
-struct BackendAPI
-
-    # The API name
-    string name
-
-    # The BareScript file containing the API function
-    string script
-''')
+_BACKEND_ADD_HEADER_ARGS = value_args_model([
+    {'name': 'key', 'type': 'string'},
+    {'name': 'value', 'type': 'string'}
+])
