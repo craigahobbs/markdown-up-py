@@ -17,24 +17,34 @@ import schema_markdown
 
 # The backend configuration schema
 BACKEND_TYPES = schema_markdown.parse_schema_markdown('''\
-# The MarkdownUp backend API configuration file schemax
+# The MarkdownUp backend API configuration file
 struct BackendConfig
 
-    # The list of schema markdown files
-    string[] schemaFiles
+    # The schema markdown files
+    string[len > 0] schemas
 
-    # The list of APIs
-    BackendAPI[] apis
+    # The BareScript API files
+    BackendScript[len > 0] scripts
 
 
-# The backend API model
+# A backend API script
+struct BackendScript
+
+    # The BareScript file
+    string script
+
+    # The APIs
+    BackendAPI[len > 0] apis
+
+
+# A backend API
 struct BackendAPI
 
-    # The API name
+    # The schema type name
     string name
 
-    # The BareScript file containing the API function
-    string script
+    # The script function name. If unspecified, use the schema type name.
+    optional string function
 ''')
 
 
@@ -44,41 +54,46 @@ def load_backend_requests(config_path):
     # Read the "markdown-up.json" file - do nothing if it doesn't exist
     if not os.path.isfile(config_path):
         return requests
-    with open(config_path, 'r', encoding='utf-8') as backend_file:
-        backend = schema_markdown.validate_type(BACKEND_TYPES, 'BackendConfig', json.load(backend_file))
+    with open(config_path, 'r', encoding='utf-8') as config_file:
+        config = schema_markdown.validate_type(BACKEND_TYPES, 'BackendConfig', json.load(config_file))
 
     # Load the schema markdown files
     types = {}
-    for smd_path in backend['schemaFiles']:
+    for smd_path in config['schemas']:
         with open(smd_path, 'r', encoding='utf-8') as smd_file:
             schema_markdown.parse_schema_markdown(smd_file, types, filename=smd_path, validate=False)
     schema_markdown.validate_type_model(types)
 
-    # Add an action for each backend API
-    for api in backend['apis']:
+    # Load the BareScript API files
+    for backend_script in config['scripts']:
 
         # Parse the script
-        with open(api['script'], 'r', encoding='utf-8') as script_file:
-            script = bare_script.parse_script(script_file)
+        with open(backend_script['script'], 'r', encoding='utf-8') as script_file:
+            api_script = bare_script.parse_script(script_file)
 
-        # Execute the script
-        script_globals = {
-            _BACKEND_GLOBAL: {'headers': {}},
-            'backendAddHeader': _backend_add_header
-        }
-        script_options = {
-            'fetchFn': bare_script.fetch_read_write,
-            'globals': script_globals,
-            'logFn': bare_script.log_stdout,
-            'urlFile': bare_script.url_file_relative,
-            'systemPrefix': 'https://craigahobbs.github.io/markdown-up/include/'
-        }
-        bare_script.execute_script(script, script_options)
+        # Create the backend API requests
+        for backend_api in backend_script['apis']:
+            api_name = backend_api['name']
+            api_fn = backend_api.get('function', api_name)
 
-        # Add the API action
-        script_fn = script_globals[api['name']]
-        action_fn = partial(_bare_script_action_fn, script_fn, script_options)
-        requests.append(chisel.Action(action_fn, name=api['name'], types=types))
+            # Execute the script
+            script_globals = {
+                _BACKEND_GLOBAL: {'headers': {}},
+                'backendAddHeader': _backend_add_header
+            }
+            script_options = {
+                'fetchFn': bare_script.fetch_read_write,
+                'globals': script_globals,
+                'logFn': bare_script.log_stdout,
+                'urlFile': bare_script.url_file_relative,
+                'systemPrefix': 'https://craigahobbs.github.io/markdown-up/include/'
+            }
+            bare_script.execute_script(api_script, script_options)
+
+            # Add the API action
+            script_fn = script_globals[api_fn]
+            action_fn = partial(_bare_script_action_fn, script_fn, script_options)
+            requests.append(chisel.Action(action_fn, name=api_name, types=types))
 
     return requests
 
