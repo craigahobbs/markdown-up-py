@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.2 (2025-03-14)
+
+- [4662f69](https://github.com/craigahobbs/markdown-up-py/commit/4662f69) - respond 304 for not modified statics
+
 ## 1.9.1 (2025-02-25)
 
 - [89c692e](https://github.com/craigahobbs/markdown-up-py/commit/89c692e) - update markdown-up.tar.gz
