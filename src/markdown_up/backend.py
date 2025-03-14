@@ -85,8 +85,7 @@ def load_backend_requests(config_path):
                 'fetchFn': bare_script.fetch_read_write,
                 'globals': script_globals,
                 'logFn': bare_script.log_stdout,
-                'urlFile': bare_script.url_file_relative,
-                'systemPrefix': 'https://craigahobbs.github.io/markdown-up/include/'
+                'urlFile': bare_script.url_file_relative
             }
             bare_script.execute_script(api_script, script_options)
 
