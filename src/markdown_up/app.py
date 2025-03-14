@@ -25,7 +25,7 @@ class MarkdownUpApplication(chisel.Application):
     __slots__ = ('root',)
 
 
-    def __init__(self, root):
+    def __init__(self, root, debug=False):
         super().__init__()
         self.root = root
 
@@ -53,7 +53,7 @@ class MarkdownUpApplication(chisel.Application):
                         ))
 
         # Add the backend APIs
-        self.add_requests(load_backend_requests('markdown-up.json'))
+        self.add_requests(load_backend_requests('markdown-up.json', debug))
 
 
     def add_static(self, filename, urls=(('GET', None),), doc_group='MarkdownUp Index Statics'):

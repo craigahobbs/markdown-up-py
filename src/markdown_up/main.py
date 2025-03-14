@@ -31,6 +31,8 @@ def main(argv=None):
                         help="don't open a web browser")
     parser.add_argument('-q', dest='quiet', action='store_true',
                         help="don't display access logging")
+    parser.add_argument('-d', dest='debug', action='store_true', default=False,
+                        help='backend debug mode')
     args = parser.parse_args(args=argv)
 
     # Verify the path exists
@@ -67,7 +69,7 @@ def main(argv=None):
         webbrowser_thread.start()
 
     # Create the WSGI application
-    wsgiapp = MarkdownUpApplication(root)
+    wsgiapp = MarkdownUpApplication(root, args.debug)
 
     # Wrap the WSGI application and the start_response function so we can log status and environ
     def wsgiapp_wrap(environ, start_response):

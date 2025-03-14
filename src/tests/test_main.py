@@ -31,7 +31,7 @@ class TestMain(unittest.TestCase):
             mock_isdir.assert_not_called()
             mock_isfile.assert_not_called()
             self.assertEqual(cm_exc.exception.code, 0)
-            self.assertEqual(stdout.getvalue().splitlines()[0], 'usage: markdown-up [-h] [-p N] [-n] [-q] [path]')
+            self.assertEqual(stdout.getvalue().splitlines()[0], 'usage: markdown-up [-h] [-p N] [-n] [-q] [-d] [path]')
             self.assertEqual(stderr.getvalue(), '')
 
 
@@ -83,7 +83,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/ ...\n')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('.')
-            mock_isfile.assert_not_called()
+            mock_isfile.assert_called_once()
             mock_thread.assert_called_once_with(target=ANY, args=('http://127.0.0.1:8080/',))
             thread_fn = mock_thread.call_args.kwargs['target']
             self.assertTrue(callable(thread_fn))
@@ -114,7 +114,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/ ...\n')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('.')
-            mock_isfile.assert_not_called()
+            mock_isfile.assert_called_once()
             mock_thread.assert_not_called()
             mock_waitress_serve.assert_called_once_with(ANY, port=8080)
             wsgiapp = mock_waitress_serve.call_args[0][0]
@@ -132,7 +132,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stdout.getvalue(), '')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('.')
-            mock_isfile.assert_not_called()
+            mock_isfile.assert_called_once()
             mock_waitress_serve.assert_called_once_with(ANY, port=8080)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
@@ -159,7 +159,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8081/ ...\n')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('.')
-            mock_isfile.assert_not_called()
+            mock_isfile.assert_called_once()
             mock_waitress_serve.assert_called_once_with(ANY, port=8081)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
@@ -169,14 +169,16 @@ class TestMain(unittest.TestCase):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isdir', return_value=False) as mock_isdir, \
-             patch('os.path.isfile', return_value=True) as mock_isfile, \
+             patch('os.path.isfile', side_effect=[True, False]) as mock_isfile, \
              patch('waitress.serve') as mock_waitress_serve:
             main(['-n', 'README.md'])
 
             self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/#url=README.md ...\n')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('README.md')
-            mock_isfile.assert_called_once_with('README.md')
+            self.assertEqual(mock_isfile.call_count, 2)
+            self.assertTupleEqual(mock_isfile.call_args_list[0].args, ('README.md',))
+            self.assertTupleEqual(mock_isfile.call_args_list[1].args, ('markdown-up.json',))
             mock_waitress_serve.assert_called_once_with(ANY, port=8080)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
@@ -186,14 +188,16 @@ class TestMain(unittest.TestCase):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isdir', return_value=False) as mock_isdir, \
-             patch('os.path.isfile', return_value=True) as mock_isfile, \
+             patch('os.path.isfile', side_effect=[True, False]) as mock_isfile, \
              patch('waitress.serve') as mock_waitress_serve:
             main(['-n', 'index.html'])
 
             self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/index.html ...\n')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('index.html')
-            mock_isfile.assert_called_once_with('index.html')
+            self.assertEqual(mock_isfile.call_count, 2)
+            self.assertTupleEqual(mock_isfile.call_args_list[0].args, ('index.html',))
+            self.assertTupleEqual(mock_isfile.call_args_list[1].args, ('markdown-up.json',))
             mock_waitress_serve.assert_called_once_with(ANY, port=8080)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
@@ -203,14 +207,16 @@ class TestMain(unittest.TestCase):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isdir', return_value=False) as mock_isdir, \
-             patch('os.path.isfile', return_value=True) as mock_isfile, \
+             patch('os.path.isfile', side_effect=[True, False]) as mock_isfile, \
              patch('waitress.serve') as mock_waitress_serve:
             main(['-n', 'subdir/README.md'])
 
             self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/#url=README.md ...\n')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('subdir/README.md')
-            mock_isfile.assert_called_once_with('subdir/README.md')
+            self.assertEqual(mock_isfile.call_count, 2)
+            self.assertTupleEqual(mock_isfile.call_args_list[0].args, ('subdir/README.md',))
+            self.assertTupleEqual(mock_isfile.call_args_list[1].args, ('markdown-up.json',))
             mock_waitress_serve.assert_called_once_with(ANY, port=8080)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
@@ -220,14 +226,16 @@ class TestMain(unittest.TestCase):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isdir', return_value=False) as mock_isdir, \
-             patch('os.path.isfile', return_value=True) as mock_isfile, \
+             patch('os.path.isfile', side_effect=[True, False]) as mock_isfile, \
              patch('waitress.serve') as mock_waitress_serve:
             main(['-n', 'subdir/index.html'])
 
             self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/index.html ...\n')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('subdir/index.html')
-            mock_isfile.assert_called_once_with('subdir/index.html')
+            self.assertEqual(mock_isfile.call_count, 2)
+            self.assertTupleEqual(mock_isfile.call_args_list[0].args, ('subdir/index.html',))
+            self.assertTupleEqual(mock_isfile.call_args_list[1].args, ('markdown-up.json',))
             mock_waitress_serve.assert_called_once_with(ANY, port=8080)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))

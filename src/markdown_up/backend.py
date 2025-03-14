@@ -16,7 +16,7 @@ import schema_markdown
 
 
 # The backend configuration schema
-BACKEND_TYPES = schema_markdown.parse_schema_markdown('''\
+CONFIG_TYPES = schema_markdown.parse_schema_markdown('''\
 # The MarkdownUp backend API configuration file
 struct BackendConfig
 
@@ -48,14 +48,15 @@ struct BackendAPI
 ''')
 
 
-def load_backend_requests(config_path):
+# Load the MarkdownUp backend config requests
+def load_backend_requests(config_path, debug=False):
     requests = []
 
     # Read the "markdown-up.json" file - do nothing if it doesn't exist
     if not os.path.isfile(config_path):
         return requests
     with open(config_path, 'r', encoding='utf-8') as config_file:
-        config = schema_markdown.validate_type(BACKEND_TYPES, 'BackendConfig', json.load(config_file))
+        config = schema_markdown.validate_type(CONFIG_TYPES, 'BackendConfig', json.load(config_file))
 
     # Load the schema markdown files
     types = {}
@@ -71,23 +72,24 @@ def load_backend_requests(config_path):
         with open(backend_script['script'], 'r', encoding='utf-8') as script_file:
             api_script = bare_script.parse_script(script_file)
 
+        # Execute the script
+        script_globals = {
+            _BACKEND_GLOBAL: {'headers': {}},
+            'backendAddHeader': _backend_add_header
+        }
+        script_options = {
+            'debug': debug,
+            'fetchFn': bare_script.fetch_read_write,
+            'globals': script_globals,
+            'logFn': bare_script.log_stdout,
+            'urlFile': bare_script.url_file_relative
+        }
+        bare_script.execute_script(api_script, script_options)
+
         # Create the backend API requests
         for backend_api in backend_script['apis']:
             api_name = backend_api['name']
             api_fn = backend_api.get('function', api_name)
-
-            # Execute the script
-            script_globals = {
-                _BACKEND_GLOBAL: {'headers': {}},
-                'backendAddHeader': _backend_add_header
-            }
-            script_options = {
-                'fetchFn': bare_script.fetch_read_write,
-                'globals': script_globals,
-                'logFn': bare_script.log_stdout,
-                'urlFile': bare_script.url_file_relative
-            }
-            bare_script.execute_script(api_script, script_options)
 
             # Add the API action
             script_fn = script_globals[api_fn]
