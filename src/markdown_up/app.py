@@ -5,6 +5,7 @@
 The MarkdownUp launcher back-end application
 """
 
+import hashlib
 from http import HTTPStatus
 import importlib.resources
 import os
@@ -88,20 +89,28 @@ class MarkdownUpApplication(chisel.Application):
 
             # Read the static file
             with open(path, 'rb') as path_file:
-                status = HTTPStatus.OK
                 content = path_file.read()
-        except FileNotFoundError:
-            status = HTTPStatus.NOT_FOUND
-            content = status.phrase.encode(encoding='utf-8')
-            content_type = 'text/plain; charset=utf-8'
-        except: # pylint: disable=bare-except
-            status = HTTPStatus.INTERNAL_SERVER_ERROR
-            content = status.phrase.encode(encoding='utf-8')
-            content_type = 'text/plain; charset=utf-8'
 
-        # Static response
-        start_response(f'{status.value} {status.phrase}', [('Content-Type', content_type)])
-        return [content]
+            # Compute the etag
+            md5 = hashlib.md5()
+            md5.update(content)
+            etag = md5.hexdigest()
+
+            # Check the etag - is the resource modified?
+            if etag == environ.get('HTTP_IF_NONE_MATCH'):
+                status = HTTPStatus.NOT_MODIFIED
+                start_response(f'{status.value} {status.phrase}', [])
+                return []
+
+            # Respond with static content
+            status = HTTPStatus.OK
+            start_response(f'{status.value} {status.phrase}', [('Content-Type', content_type), ('ETag', etag)])
+            return [content]
+
+        except: # pylint: disable=bare-except
+            status = HTTPStatus.NOT_FOUND
+            start_response(f'{status.value} {status.phrase}', [('Content-Type', 'text/plain; charset=utf-8')])
+            return [status.phrase.encode(encoding='utf-8')]
 
 
 _CONTENT_TYPES = {
