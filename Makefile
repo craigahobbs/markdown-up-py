@@ -24,10 +24,6 @@ UNITTEST_PARALLEL_COVERAGE_ARGS := --coverage-branch --coverage-fail-under 94
 include Makefile.base
 
 
-# Development dependencies
-TESTS_REQUIRE := bare-script
-
-
 # Disable pylint docstring warnings
 PYLINT_ARGS := $(PYLINT_ARGS) --disable=missing-class-docstring --disable=missing-function-docstring --disable=missing-module-docstring
 
