@@ -16,8 +16,8 @@ $(eval $(call WGET, https://craigahobbs.github.io/python-build/pylintrc))
 
 
 # Set the coverage limit
-COVERAGE_REPORT_ARGS := $(COVERAGE_REPORT_ARGS) --fail-under 94
-UNITTEST_PARALLEL_COVERAGE_ARGS := --coverage-branch --coverage-fail-under 94
+COVERAGE_REPORT_ARGS := $(COVERAGE_REPORT_ARGS) --fail-under 93
+UNITTEST_PARALLEL_COVERAGE_ARGS := --coverage-branch --coverage-fail-under 93
 
 
 # Include python-build

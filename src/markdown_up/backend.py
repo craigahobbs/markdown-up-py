@@ -75,7 +75,8 @@ def load_backend_requests(config_path, debug=False):
         # Execute the script
         script_globals = {
             _BACKEND_GLOBAL: {'headers': {}},
-            'backendAddHeader': _backend_add_header
+            'backendAddHeader': _backend_add_header,
+            'backendSetError': _backend_set_error
         }
         script_options = {
             'debug': debug,
@@ -111,6 +112,10 @@ def _bare_script_action_fn(script_fn, script_options, ctx, req):
     backend_state = script_options['globals'][_BACKEND_GLOBAL]
     ctx.headers.update(backend_state['headers'])
 
+    # Error?
+    if 'error' in backend_state:
+        raise chisel.ActionError(backend_state['error'], status=backend_state.get('errorStatus'))
+
     return response
 
 
@@ -127,4 +132,21 @@ def _backend_add_header(args, options):
 _BACKEND_ADD_HEADER_ARGS = value_args_model([
     {'name': 'key', 'type': 'string'},
     {'name': 'value', 'type': 'string'}
+])
+
+
+# $function: backendSetError
+# $group: Backend
+# $doc: Set the backend API error response
+# $arg error: The error code string (e.g. "UnknownID")
+# $arg value: The status string (default is "400 Bad Request")
+def _backend_set_error(args, options):
+    error, status = value_args_validate(_BACKEND_SET_ERROR_ARGS, args)
+    backend_state = options['globals'][_BACKEND_GLOBAL]
+    backend_state['error'] = error
+    backend_state['errorStatus'] = status if status else '400 Bad Request'
+
+_BACKEND_SET_ERROR_ARGS = value_args_model([
+    {'name': 'error', 'type': 'string'},
+    {'name': 'status', 'type': 'string', 'nullable': True}
 ])
