@@ -76,7 +76,7 @@ def load_backend_requests(config_path, debug=False):
         script_globals = {
             _BACKEND_GLOBAL: {'headers': {}},
             'backendAddHeader': _backend_add_header,
-            'backendSetError': _backend_set_error
+            'backendError': _backend_error
         }
         script_options = {
             'debug': debug,
@@ -135,18 +135,18 @@ _BACKEND_ADD_HEADER_ARGS = value_args_model([
 ])
 
 
-# $function: backendSetError
+# $function: backendError
 # $group: Backend
 # $doc: Set the backend API error response
 # $arg error: The error code string (e.g. "UnknownID")
 # $arg value: The status string (default is "400 Bad Request")
-def _backend_set_error(args, options):
-    error, status = value_args_validate(_BACKEND_SET_ERROR_ARGS, args)
+def _backend_error(args, options):
+    error, status = value_args_validate(_BACKEND_ERROR_ARGS, args)
     backend_state = options['globals'][_BACKEND_GLOBAL]
     backend_state['error'] = error
     backend_state['errorStatus'] = status if status else '400 Bad Request'
 
-_BACKEND_SET_ERROR_ARGS = value_args_model([
+_BACKEND_ERROR_ARGS = value_args_model([
     {'name': 'error', 'type': 'string'},
     {'name': 'status', 'type': 'string', 'nullable': True}
 ])
