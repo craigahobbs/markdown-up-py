@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.0 (2025-03-20)
+
+- [75234b7](https://github.com/craigahobbs/markdown-up-py/commit/75234b7) - update markdown-up tarball
+
 ## 1.9.2 (2025-03-14)
 
 - [4662f69](https://github.com/craigahobbs/markdown-up-py/commit/4662f69) - respond 304 for not modified statics
