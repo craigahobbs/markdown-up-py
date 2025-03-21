@@ -73,7 +73,7 @@ def load_backend_requests(config_path, debug=False):
         # Execute the script
         script_globals = {
             _BACKEND_GLOBAL: {'headers': {}},
-            'backendAddHeader': _backend_add_header,
+            'backendHeader': _backend_header,
             'backendError': _backend_error
         }
         script_options = {
@@ -115,17 +115,17 @@ def _bare_script_action_fn(script_fn, script_options, ctx, req):
     return response
 
 
-# $function: backendAddHeader
+# $function: backendHeader
 # $group: Backend
 # $doc: Add a backend API response header
 # $arg key: The key string
 # $arg value: The value string
-def _backend_add_header(args, options):
-    key, value = value_args_validate(_BACKEND_ADD_HEADER_ARGS, args)
+def _backend_header(args, options):
+    key, value = value_args_validate(_BACKEND_HEADER_ARGS, args)
     backend_state = options['globals'][_BACKEND_GLOBAL]
     backend_state['headers'][key] = value
 
-_BACKEND_ADD_HEADER_ARGS = value_args_model([
+_BACKEND_HEADER_ARGS = value_args_model([
     {'name': 'key', 'type': 'string'},
     {'name': 'value', 'type': 'string'}
 ])
