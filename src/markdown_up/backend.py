@@ -50,11 +50,9 @@ struct BackendAPI
 
 # Load the MarkdownUp backend config requests
 def load_backend_requests(config_path, debug=False):
-    requests = []
-
     # Read the "markdown-up.json" file - do nothing if it doesn't exist
     if not os.path.isfile(config_path):
-        return requests
+        return
     with open(config_path, 'r', encoding='utf-8') as config_file:
         config = schema_markdown.validate_type(CONFIG_TYPES, 'BackendConfig', json.load(config_file))
 
@@ -95,9 +93,7 @@ def load_backend_requests(config_path, debug=False):
             # Add the API action
             script_fn = script_globals[api_fn]
             action_fn = partial(_bare_script_action_fn, script_fn, script_options)
-            requests.append(chisel.Action(action_fn, name=api_name, types=types))
-
-    return requests
+            yield chisel.Action(action_fn, name=api_name, types=types)
 
 
 # Special backend global variables
