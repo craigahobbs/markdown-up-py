@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1 (2025-03-21)
+
+- [8f316ed](https://github.com/craigahobbs/markdown-up-py/commit/8f316ed) - fix chisel dependency specification
+
 ## 2.0.0 (2025-03-20)
 
 - [75234b7](https://github.com/craigahobbs/markdown-up-py/commit/75234b7) - update markdown-up tarball
