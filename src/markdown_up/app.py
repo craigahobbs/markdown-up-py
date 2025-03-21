@@ -10,7 +10,6 @@ from http import HTTPStatus
 import importlib.resources
 import os
 from pathlib import PurePosixPath
-import tarfile
 
 import chisel
 
@@ -28,7 +27,7 @@ class MarkdownUpApplication(chisel.Application):
         self.root = root
 
         # Add the chisel documentation application
-        self.add_requests(chisel.create_doc_requests(markdown_up='../markdown-up/'))
+        self.add_requests(chisel.create_doc_requests())
 
         # Add the markdown-up APIs
         self.add_request(markdown_up_index)
@@ -36,19 +35,6 @@ class MarkdownUpApplication(chisel.Application):
         # Add the markdown-up statics
         self.add_static('index.html', urls=(('GET', '/'),))
         self.add_static('markdownUpIndex.bare')
-
-        # Markdown-Up application statics
-        with importlib.resources.files('markdown_up.static').joinpath('markdown-up.tar.gz').open('rb') as tgz:
-            with tarfile.open(fileobj=tgz, mode='r:gz') as tar:
-                for member in tar.getmembers():
-                    if member.isfile():
-                        self.add_request(chisel.StaticRequest(
-                            member.name,
-                            tar.extractfile(member).read(),
-                            content_type=_CONTENT_TYPES.get(os.path.splitext(member.name)[1], 'text/plain; charset=utf-8'),
-                            urls=(('GET', None),),
-                            doc_group='MarkdownUp Statics'
-                        ))
 
 
     def add_static(self, filename, urls=(('GET', None),), doc_group='MarkdownUp Index Statics'):
