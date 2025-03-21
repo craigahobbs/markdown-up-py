@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.1.0 (2025-03-21)
+
+- [dc5b697](https://github.com/craigahobbs/markdown-up-py/commit/dc5b697) - chisel 1.4
+
+## 2.0.1 (2025-03-21)
+
+- [8f316ed](https://github.com/craigahobbs/markdown-up-py/commit/8f316ed) - fix chisel dependency specification
+
+## 2.0.0 (2025-03-20)
+
+- [75234b7](https://github.com/craigahobbs/markdown-up-py/commit/75234b7) - update markdown-up tarball
+
 ## 1.9.2 (2025-03-14)
 
 - [4662f69](https://github.com/craigahobbs/markdown-up-py/commit/4662f69) - respond 304 for not modified statics
