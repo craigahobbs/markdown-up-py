@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.3 (2025-04-11)
+
+- [bfddcd8](https://github.com/craigahobbs/markdown-up-py/commit/bfddcd8) - add .txt file support
+
 ## 2.1.2 (2025-03-31)
 
 - [4cde28a](https://github.com/craigahobbs/markdown-up-py/commit/4cde28a) - fix chisel version
