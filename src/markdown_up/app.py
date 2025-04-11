@@ -126,6 +126,7 @@ STATIC_EXT_TO_CONTENT_TYPE = {
     '.svg': 'image/svg+xml',
     '.tif': 'image/tiff',
     '.tiff': 'image/tiff',
+    '.txt': 'text/plain; charset=utf-8',
     '.webp': 'image/webp'
 }
 MARKDOWN_EXTS = ('.md', '.markdown')
