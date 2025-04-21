@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.1.3 (2025-04-11)
+
+- [bfddcd8](https://github.com/craigahobbs/markdown-up-py/commit/bfddcd8) - add .txt file support
+
+## 2.1.2 (2025-03-31)
+
+- [4cde28a](https://github.com/craigahobbs/markdown-up-py/commit/4cde28a) - fix chisel version
+
+## 2.1.1 (2025-03-31)
+
+- [eede1ee](https://github.com/craigahobbs/markdown-up-py/commit/eede1ee) - eliminate use of .mds
+
+- [e4e35fb](https://github.com/craigahobbs/markdown-up-py/commit/e4e35fb) - remove setup.cfg license classifier
+
 ## 2.1.0 (2025-03-21)
 
 - [dc5b697](https://github.com/craigahobbs/markdown-up-py/commit/dc5b697) - chisel 1.4
