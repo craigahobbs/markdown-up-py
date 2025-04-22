@@ -10,10 +10,9 @@ import os
 import threading
 import webbrowser
 
-from schema_markdown import encode_query_string
 import waitress
 
-from .app import HTML_EXTS, MarkdownUpApplication
+from .app import MarkdownUpApplication
 
 
 def main(argv=None):
@@ -24,9 +23,11 @@ def main(argv=None):
     # Command line arguments
     parser = argparse.ArgumentParser(prog='markdown-up')
     parser.add_argument('path', nargs='?', default='.',
-                        help='the markdown file or directory to view (default is ".")')
+                        help='the file or directory to view (default is ".")')
     parser.add_argument('-p', metavar='N', dest='port', type=int, default=8080,
                         help='the application port (default is 8080)')
+    parser.add_argument('-t', metavar='N', dest='threads', type=int, default=8,
+                        help='the number of web server threads (default is 8)')
     parser.add_argument('-n', dest='no_browser', action='store_true',
                         help="don't open a web browser")
     parser.add_argument('-q', dest='quiet', action='store_true',
@@ -52,11 +53,7 @@ def main(argv=None):
     # Construct the URL
     host = '127.0.0.1'
     if is_file:
-        if args.path.endswith(HTML_EXTS):
-            url = f'http://{host}:{args.port}/{os.path.basename(args.path)}'
-        else:
-            hash_args = encode_query_string({'url': os.path.basename(args.path)})
-            url = f'http://{host}:{args.port}/#{hash_args}'
+        url = f'http://{host}:{args.port}/{os.path.basename(args.path)}'
     else:
         url = f'http://{host}:{args.port}/'
 
@@ -80,8 +77,4 @@ def main(argv=None):
     # Host the application
     if not args.quiet:
         print(f'markdown-up: Serving at {url} ...')
-    waitress.serve(wsgiapp_wrap, port=args.port, threads=WAITRESS_THREADS)
-
-
-# The number of waitress threads
-WAITRESS_THREADS = 8
+    waitress.serve(wsgiapp_wrap, port=args.port, threads=max(args.threads, 1))

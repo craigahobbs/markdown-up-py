@@ -40,7 +40,7 @@ class MarkdownUpApplication(chisel.Application):
 
 
     def add_static(self, filename, urls=(('GET', None),), doc_group='MarkdownUp Index Statics'):
-        content_type = _CONTENT_TYPES.get(os.path.splitext(filename)[1], 'text/plain; charset=utf-8')
+        content_type = CONTENT_TYPES.get(os.path.splitext(filename)[1], 'text/plain; charset=utf-8')
         with importlib.resources.files('markdown_up.static').joinpath(filename).open('rb') as fh:
             self.add_request(chisel.StaticRequest(filename, fh.read(), content_type, urls, doc_group=doc_group))
 
@@ -117,7 +117,7 @@ class MarkdownUpApplication(chisel.Application):
             return [status.phrase.encode(encoding='utf-8')]
 
 
-_CONTENT_TYPES = {
+CONTENT_TYPES = {
     '.css': 'text/css; charset=utf-8',
     '.js': 'text/javascript; charset=utf-8',
     '.html': 'text/html; charset=utf-8'
