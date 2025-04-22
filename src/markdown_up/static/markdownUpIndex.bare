@@ -34,29 +34,18 @@ async function markdownUpIndex():
     )
 
     # Render file links
-    files = arrayNew()
-    markdownFiles = objectGet(index, 'files')
-    if markdownFiles != null:
-        arrayExtend(files, markdownFiles)
-    endif
-    if objectHas(index, 'htmlFiles'):
-        arrayExtend(files, objectGet(index, 'htmlFiles'))
-    endif
+    files = objectGet(index, 'files')
     if arrayLength(files):
         markdownPrint('', '## Files')
         for file in arraySort(files):
             fileURL = if(path != null, path + '/', '') + file
-            if markdownFiles != null && arrayIndexOf(markdownFiles, file) != -1:
-                markdownPrint('', '[' + markdownEscape(file) + '](#url=' + urlEncodeComponent(fileURL) + '&var=&' + argsTopHeaderId + ')')
-            else:
-                markdownPrint('', '[' + markdownEscape(file) + '](' + urlEncode(fileURL) + ')')
-            endif
+            markdownPrint('', '[' + markdownEscape(file) + '](' + urlEncode(fileURL) + ')')
         endfor
     endif
 
     # Render directory links
     directories = objectGet(index, 'directories')
-    if directories != null:
+    if arrayLength(directories):
         markdownPrint('', '## Directories')
         for directory in arraySort(directories):
             directoryURL = if(path != null, path + '/', '') + directory
@@ -65,7 +54,7 @@ async function markdownUpIndex():
     endif
 
     # Empty path?
-    if !arrayLength(files) && directories == null:
-        markdownPrint('', 'No Markdown files or sub-directories found')
+    if !arrayLength(files) && !arrayLength(directories):
+        markdownPrint('', 'No files or sub-directories found')
     endif
 endfunction

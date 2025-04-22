@@ -10,8 +10,10 @@ from http import HTTPStatus
 import importlib.resources
 import os
 from pathlib import PurePosixPath
+import urllib.parse
 
 import chisel
+import schema_markdown
 
 
 class MarkdownUpApplication(chisel.Application):
@@ -62,6 +64,13 @@ class MarkdownUpApplication(chisel.Application):
                 index_posix_path = posix_path_info.joinpath(index_file)
                 index_path = os.path.join(self.root, *index_posix_path.parts[1:])
                 if os.path.isfile(index_path):
+                    # Redirect?
+                    if not path_info.endswith('/'):
+                        status = HTTPStatus.MOVED_PERMANENTLY
+                        start_response(f'{status.value} {status.phrase}', [('Location', path_info + '/')])
+                        return []
+
+                    # Update the index path
                     posix_path_info = index_posix_path
                     path = index_path
                     break
@@ -70,12 +79,21 @@ class MarkdownUpApplication(chisel.Application):
         try:
             # Unknown method or content type?
             content_type = STATIC_EXT_TO_CONTENT_TYPE.get(posix_path_info.suffix)
-            if request_method != 'GET' or content_type is None:
+            if request_method != 'GET' or content_type is None or not os.path.isfile(path):
                 raise FileNotFoundError(path)
 
-            # Read the static file
-            with open(path, 'rb') as path_file:
-                content = path_file.read()
+            # Parse the query string
+            query_string = environ.get('QUERY_STRING', '')
+            query_args_raw = schema_markdown.decode_query_string(query_string)
+            query_args = schema_markdown.validate_type(_STATIC_QUERY_TYPES, 'MarkdownUpStaticQuery', query_args_raw)
+
+            # Get the static content
+            if path.endswith(MARKDOWN_EXTS) and not query_args.get('raw'):
+                content = create_markdown_up_stub(os.path.basename(path)).encode('utf-8')
+                content_type = 'text/html; charset=utf-8'
+            else:
+                with open(path, 'rb') as path_file:
+                    content = path_file.read()
 
             # Compute the etag
             md5 = hashlib.md5()
@@ -131,7 +149,67 @@ STATIC_EXT_TO_CONTENT_TYPE = {
 }
 MARKDOWN_EXTS = ('.md', '.markdown')
 HTML_EXTS = ('.html', '.htm')
-INDEX_FILES = ('index.html', 'index.htm')
+INDEX_FILES = ('index.html', 'index.htm', 'index.md', 'README.md')
+
+
+_STATIC_QUERY_TYPES = schema_markdown.parse_schema_markdown('''\
+# The MarkdownUp application static query string arguments
+struct MarkdownUpStaticQuery
+
+    # If true, return the raw resource (default is `false`)
+    optional bool raw
+''')
+
+
+# Create a MarkdownUp stub
+def create_markdown_up_stub(path):
+    return f'''\
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>MarkdownUp</title>
+        <meta charset="UTF-8">
+        <meta name="description" content="MarkdownUp is a Markdown viewer">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/markdown-up/app.css">
+
+        <!-- Preloads -->
+        <link rel="modulepreload" href="/markdown-up/bare-script/lib/data.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/bare-script/lib/library.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/bare-script/lib/model.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/bare-script/lib/options.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/bare-script/lib/parser.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/bare-script/lib/runtime.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/bare-script/lib/runtimeAsync.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/bare-script/lib/value.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/element-model/lib/elementModel.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/lib/app.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/lib/dataTable.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/lib/dataUtil.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/lib/lineChart.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/lib/script.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/lib/scriptLibrary.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/markdown-model/lib/elements.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/markdown-model/lib/highlight.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/markdown-model/lib/parser.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/schema-markdown-doc/lib/schemaMarkdownDoc.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/schema-markdown/lib/encode.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/schema-markdown/lib/parser.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/schema-markdown/lib/schema.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/schema-markdown/lib/schemaUtil.js" as="script">
+        <link rel="modulepreload" href="/markdown-up/schema-markdown/lib/typeModel.js" as="script">
+        <link rel="preload" href="/markdown-up/app.css" as="style">
+        <link rel="preload" href="/markdown-up/markdown-model/static/markdown-model.css" as="style">
+    </head>
+    <body>
+    </body>
+    <script type="module">
+        import {{MarkdownUp}} from '/markdown-up/lib/app.js';
+        const app = new MarkdownUp(window, {{'url': '{urllib.parse.quote(path)}?raw=true'}});
+        app.run();
+    </script>
+</html>
+'''
 
 
 @chisel.action(spec='''\
@@ -153,21 +231,17 @@ action markdown_up_index
         # The parent path
         optional string parent
 
-        # The path's Markdown files
-        optional string[len > 0] files
-
-        # The path's HTML files
-        optional string[len > 0] htmlFiles
+        # The path's files
+        string[] files
 
         # The path's sub-directories
-        optional string[len > 0] directories
+        string[] directories
 
     errors
         # The path is invalid
         InvalidPath
 ''')
 def markdown_up_index(ctx, req):
-
     # Validate the path
     posix_path = PurePosixPath(req['path'] if 'path' in req else '')
     if posix_path.is_absolute() or any(part == '..' for part in posix_path.parts):
@@ -181,27 +255,22 @@ def markdown_up_index(ctx, req):
     # Compute parent path
     parent_path = str(posix_path.parent) if 'path' in req else None
 
-    # Get the list of markdown files and sub-directories from the current sub-directory
+    # Get the list of files and sub-directories from the current sub-directory
     files = []
-    html_files = []
     directories = []
     for entry in os.scandir(path):
         if entry.is_dir() and not entry.name.startswith('.'):
             directories.append(entry.name)
         elif entry.is_file(): # pragma: no branch
-            if entry.name.endswith(MARKDOWN_EXTS):
+            if entry.name.endswith(MARKDOWN_EXTS) or entry.name.endswith(HTML_EXTS):
                 files.append(entry.name)
-            if entry.name.endswith(HTML_EXTS):
-                html_files.append(entry.name)
 
     # Return the response
-    response = {'path': path}
+    response = {
+        'path': path,
+        'files': sorted(files),
+        'directories': sorted(directories)
+    }
     if parent_path is not None and parent_path != '.':
         response['parent'] = parent_path
-    if files:
-        response['files'] = sorted(files)
-    if html_files:
-        response['htmlFiles'] = sorted(html_files)
-    if directories:
-        response['directories'] = sorted(directories)
     return response

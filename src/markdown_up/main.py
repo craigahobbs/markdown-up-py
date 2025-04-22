@@ -80,4 +80,8 @@ def main(argv=None):
     # Host the application
     if not args.quiet:
         print(f'markdown-up: Serving at {url} ...')
-    waitress.serve(wsgiapp_wrap, port=args.port)
+    waitress.serve(wsgiapp_wrap, port=args.port, threads=WAITRESS_THREADS)
+
+
+# The number of waitress threads
+WAITRESS_THREADS = 8

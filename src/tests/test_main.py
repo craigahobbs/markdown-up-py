@@ -9,7 +9,7 @@ from unittest.mock import ANY, patch
 import chisel
 
 import markdown_up.__main__
-from markdown_up.main import main
+from markdown_up.main import main, WAITRESS_THREADS
 
 
 class TestMain(unittest.TestCase):
@@ -87,7 +87,7 @@ class TestMain(unittest.TestCase):
             mock_thread.assert_called_once_with(target=ANY, args=('http://127.0.0.1:8080/',))
             thread_fn = mock_thread.call_args.kwargs['target']
             self.assertTrue(callable(thread_fn))
-            mock_waitress_serve.assert_called_once_with(ANY, port=8080)
+            mock_waitress_serve.assert_called_once_with(ANY, port=8080, threads=WAITRESS_THREADS)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
 
@@ -116,7 +116,7 @@ class TestMain(unittest.TestCase):
             mock_isdir.assert_called_once_with('.')
             mock_isfile.assert_not_called()
             mock_thread.assert_not_called()
-            mock_waitress_serve.assert_called_once_with(ANY, port=8080)
+            mock_waitress_serve.assert_called_once_with(ANY, port=8080, threads=WAITRESS_THREADS)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
 
@@ -133,7 +133,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('.')
             mock_isfile.assert_not_called()
-            mock_waitress_serve.assert_called_once_with(ANY, port=8080)
+            mock_waitress_serve.assert_called_once_with(ANY, port=8080, threads=WAITRESS_THREADS)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
 
@@ -160,7 +160,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('.')
             mock_isfile.assert_not_called()
-            mock_waitress_serve.assert_called_once_with(ANY, port=8081)
+            mock_waitress_serve.assert_called_once_with(ANY, port=8081, threads=WAITRESS_THREADS)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
 
@@ -177,7 +177,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('README.md')
             mock_isfile.assert_called_once_with('README.md')
-            mock_waitress_serve.assert_called_once_with(ANY, port=8080)
+            mock_waitress_serve.assert_called_once_with(ANY, port=8080, threads=WAITRESS_THREADS)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
 
@@ -194,7 +194,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('index.html')
             mock_isfile.assert_called_once_with('index.html')
-            mock_waitress_serve.assert_called_once_with(ANY, port=8080)
+            mock_waitress_serve.assert_called_once_with(ANY, port=8080, threads=WAITRESS_THREADS)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
 
@@ -211,7 +211,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('subdir/README.md')
             mock_isfile.assert_called_once_with('subdir/README.md')
-            mock_waitress_serve.assert_called_once_with(ANY, port=8080)
+            mock_waitress_serve.assert_called_once_with(ANY, port=8080, threads=WAITRESS_THREADS)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
 
@@ -228,6 +228,6 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('subdir/index.html')
             mock_isfile.assert_called_once_with('subdir/index.html')
-            mock_waitress_serve.assert_called_once_with(ANY, port=8080)
+            mock_waitress_serve.assert_called_once_with(ANY, port=8080, threads=WAITRESS_THREADS)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
