@@ -9,6 +9,7 @@ from unittest.mock import ANY, patch
 import chisel
 
 import markdown_up.__main__
+from markdown_up.app import MarkdownUpApplication
 from markdown_up.main import main
 
 
@@ -31,7 +32,7 @@ class TestMain(unittest.TestCase):
             mock_isdir.assert_not_called()
             mock_isfile.assert_not_called()
             self.assertEqual(cm_exc.exception.code, 0)
-            self.assertEqual(stdout.getvalue().splitlines()[0], 'usage: markdown-up [-h] [-p N] [-t N] [-n] [-q] [path]')
+            self.assertEqual(stdout.getvalue().splitlines()[0], 'usage: markdown-up [-h] [-p N] [-t N] [-n] [-s] [-q] [path]')
             self.assertEqual(stderr.getvalue(), '')
 
 
@@ -102,6 +103,27 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stderr.getvalue(), '')
 
 
+    def test_main_run_cache_statics(self):
+        with patch('sys.stdout', StringIO()) as stdout, \
+             patch('sys.stderr', StringIO()) as stderr, \
+             patch('os.path.isdir', return_value=True) as mock_isdir, \
+             patch('os.path.isfile', return_value=False) as mock_isfile, \
+             patch('threading.Thread') as mock_thread, \
+             patch('waitress.serve') as mock_waitress_serve:
+            main(['-n', '-s', '-q'])
+
+            self.assertEqual(stdout.getvalue(), '')
+            self.assertEqual(stderr.getvalue(), '')
+            mock_isdir.assert_called_once_with('.')
+            mock_isfile.assert_not_called()
+            mock_thread.assert_not_called()
+            mock_waitress_serve.assert_called_once_with(ANY, port=8080, threads=8)
+            wsgiapp = mock_waitress_serve.call_args[0][0]
+            self.assertTrue(callable(wsgiapp))
+            self.assertTrue(isinstance(wsgiapp, MarkdownUpApplication))
+            self.assertTrue(wsgiapp.cache_statics)
+
+
     def test_main_run_no_browser(self):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
@@ -136,6 +158,8 @@ class TestMain(unittest.TestCase):
             mock_waitress_serve.assert_called_once_with(ANY, port=8080, threads=8)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
+            self.assertTrue(isinstance(wsgiapp, MarkdownUpApplication))
+            self.assertFalse(wsgiapp.cache_statics)
 
             # Test calling the WSGI application
             environ = chisel.Context.create_environ('GET', '/doc')

@@ -9,7 +9,7 @@ import unittest
 import unittest.mock
 
 import chisel.app
-from markdown_up.app import MarkdownUpApplication, create_markdown_up_stub
+from markdown_up.app import MarkdownUpApplication, MarkdownUpStaticRequest
 
 
 # Helper context manager to create a list of files in a temporary directory
@@ -61,7 +61,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
                 start_response.headers,
                 [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'd26ad180babc57df8a633cfe06676fb8')]
             )
-            self.assertEqual(content, [create_markdown_up_stub('README.md').encode('utf-8')])
+            self.assertEqual(content, [MarkdownUpStaticRequest.create_markdown_up_stub('README.md').encode('utf-8')])
 
             # Get a raw markdown file
             environ = chisel.Context.create_environ('GET', '/README.md', query_string='raw=true')
@@ -99,7 +99,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'image/svg+xml'), ('ETag', '7b56e1eab00ec8000da9331a4888cb35')]
+                [('Content-Type', 'image/svg+xml; charset=utf-8'), ('ETag', '7b56e1eab00ec8000da9331a4888cb35')]
             )
             self.assertEqual(content, [b'<svg></svg>'])
 
@@ -135,6 +135,120 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
             self.assertEqual(content, [b'Not Found'])
 
+            # Verify no requests were added
+            self.assertTrue('/README.md' not in app.requests)
+            self.assertTrue('/images/image.svg' not in app.requests)
+            self.assertTrue('/not-found.md' not in app.requests)
+            self.assertTrue('/file.unk' not in app.requests)
+
+
+    def test_static_markdown_cache(self):
+        test_files = [
+            ('README.md', '# Title'),
+            (('sub', 'index.md'), '# Index'),
+            (('sub', 'test.md'), '# Test'),
+            ('test.txt', 'Title')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, True)
+
+            # Get "/README.md"
+            environ = chisel.Context.create_environ('GET', '/README.md')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'd26ad180babc57df8a633cfe06676fb8')]
+            )
+            expected_content = MarkdownUpStaticRequest.create_markdown_up_stub('README.md')
+            self.assertEqual(content, [expected_content.encode('utf-8')])
+
+            # Get "/sub/"
+            environ = chisel.Context.create_environ('GET', '/sub/')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '2979cf7462fcf85e5c1f7257d7efbbc0')]
+            )
+            expected_content = MarkdownUpStaticRequest.create_markdown_up_stub('index.md')
+            self.assertEqual(content, [expected_content.encode('utf-8')])
+
+            # Get "/sub/test.md"
+            environ = chisel.Context.create_environ('GET', '/sub/test.md')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '78c893f60fceca53eb8cde1fcc3a87db')]
+            )
+            expected_content = MarkdownUpStaticRequest.create_markdown_up_stub('test.md')
+            self.assertEqual(content, [expected_content.encode('utf-8')])
+
+            # Get "/test.txt"
+            environ = chisel.Context.create_environ('GET', '/test.txt')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/plain; charset=utf-8'), ('ETag', 'b78a3223503896721cca1303f776159b')]
+            )
+            self.assertEqual(content, [b'Title'])
+
+            # Verify "/README.md" request
+            request = app.requests.get('/README.md')
+            self.assertTrue(request is not None)
+            self.assertEqual(request.doc, 'The static resource "/README.md". Use `?raw=true` to get the raw content.')
+            self.assertEqual(request.urls, (('GET', '/README.md'),))
+            self.assertEqual(request.headers, [
+                ('Content-Type', 'text/markdown; charset=utf-8'),
+                ('ETag', '38cdd67987afb67a4af89ea02044a00e')
+            ])
+            self.assertEqual(request.content, b'# Title')
+            self.assertEqual(request.etag, '38cdd67987afb67a4af89ea02044a00e')
+
+            # Verify "/sub/" request
+            request = app.requests.get('/sub/index.md')
+            redirect_request = app.requests.get('/sub/')
+            self.assertTrue(request is not None)
+            self.assertTrue(redirect_request is not None)
+            self.assertEqual(request.doc, 'The static resource "/sub/index.md". Use `?raw=true` to get the raw content.')
+            self.assertEqual(request.urls, (('GET', '/sub/'), ('GET', '/sub/index.md')))
+            self.assertEqual(request.headers, [
+                ('Content-Type', 'text/markdown; charset=utf-8'),
+                ('ETag', 'df6b2237aef04199008203d333637579')
+            ])
+            self.assertEqual(request.content, b'# Index')
+            self.assertEqual(request.etag, 'df6b2237aef04199008203d333637579')
+            self.assertEqual(redirect_request.doc, 'Redirect to /sub/')
+            self.assertEqual(redirect_request.urls, (('GET', '/sub'),))
+
+            # Verify "/sub/test.md" request
+            request = app.requests.get('/sub/test.md')
+            self.assertTrue(request is not None)
+            self.assertTrue(redirect_request is not None)
+            self.assertEqual(request.doc, 'The static resource "/sub/test.md". Use `?raw=true` to get the raw content.')
+            self.assertEqual(request.urls, (('GET', '/sub/test.md'),))
+            self.assertEqual(request.headers, [
+                ('Content-Type', 'text/markdown; charset=utf-8'),
+                ('ETag', '7ba5401b897f966b4ba7c258c37a8732')
+            ])
+            self.assertEqual(request.content, b'# Test')
+            self.assertEqual(request.etag, '7ba5401b897f966b4ba7c258c37a8732')
+
+            # Verify "/test.txt" request
+            request = app.requests.get('/test.txt')
+            self.assertTrue(request is not None)
+            self.assertEqual(request.doc, 'The static resource "/test.txt"')
+            self.assertEqual(request.urls, (('GET', '/test.txt'),))
+            self.assertEqual(request.headers, [('Content-Type', 'text/plain; charset=utf-8'), ('ETag', 'b78a3223503896721cca1303f776159b')])
+            self.assertEqual(request.content, b'Title')
+            self.assertEqual(request.etag, 'b78a3223503896721cca1303f776159b')
+
 
     def test_static_markdown_escape(self):
         test_files = [
@@ -153,9 +267,41 @@ class TestMarkdownUpApplication(unittest.TestCase):
                 start_response.headers,
                 [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'f82390e20c67d23084eb766122bb7ea6')]
             )
-            expected_content = create_markdown_up_stub('md file.md')
+            expected_content = MarkdownUpStaticRequest.create_markdown_up_stub('md file.md')
             self.assertEqual(content, [expected_content.encode('utf-8')])
             self.assertTrue("'md%20file.md?raw=true'" in expected_content)
+
+
+    def test_static_markdown_invalid_query(self):
+        test_files = [
+            ('test.md', '# Title'),
+            ('test.txt', 'Title')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir)
+
+            # Get a markdown file
+            environ = chisel.Context.create_environ('GET', '/test.md', query_string='raw=1')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '78c893f60fceca53eb8cde1fcc3a87db')]
+            )
+            expected_content = MarkdownUpStaticRequest.create_markdown_up_stub('test.md')
+            self.assertEqual(content, [expected_content.encode('utf-8')])
+
+            # Get a markdown file
+            environ = chisel.Context.create_environ('GET', '/test.txt', query_string='raw=1')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/plain; charset=utf-8'), ('ETag', 'b78a3223503896721cca1303f776159b')]
+            )
+            self.assertEqual(content, [b'Title'])
 
 
     def test_static_index(self):

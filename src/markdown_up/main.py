@@ -6,6 +6,7 @@ The MarkdownUp launcher command-line application
 """
 
 import argparse
+from functools import partial
 import os
 import threading
 import webbrowser
@@ -30,6 +31,8 @@ def main(argv=None):
                         help='the number of web server threads (default is 8)')
     parser.add_argument('-n', dest='no_browser', action='store_true',
                         help="don't open a web browser")
+    parser.add_argument('-s', dest='cache_statics', action='store_true',
+                        help="cache static content")
     parser.add_argument('-q', dest='quiet', action='store_true',
                         help="don't display access logging")
     args = parser.parse_args(args=argv)
@@ -64,17 +67,18 @@ def main(argv=None):
         webbrowser_thread.start()
 
     # Create the WSGI application
-    wsgiapp = MarkdownUpApplication(root)
-
-    # Wrap the WSGI application and the start_response function so we can log status and environ
-    def wsgiapp_wrap(environ, start_response):
-        def log_start_response(status, response_headers):
-            if not args.quiet:
-                print(f'markdown-up: {status[0:3]} {environ["REQUEST_METHOD"]} {environ["PATH_INFO"]} {environ["QUERY_STRING"]}')
-            return start_response(status, response_headers)
-        return wsgiapp(environ, log_start_response)
+    wsgiapp = MarkdownUpApplication(root, args.cache_statics)
+    wsgiapp_wrap = wsgiapp if args.quiet else partial(_wsgiapp_log_access, wsgiapp)
 
     # Host the application
     if not args.quiet:
         print(f'markdown-up: Serving at {url} ...')
     waitress.serve(wsgiapp_wrap, port=args.port, threads=max(args.threads, 1))
+
+
+# WSGI application wrapper and the start_response function so we can log status and environ
+def _wsgiapp_log_access(wsgiapp, environ, start_response):
+    def log_start_response(status, response_headers):
+        print(f'markdown-up: {status[0:3]} {environ["REQUEST_METHOD"]} {environ["PATH_INFO"]} {environ["QUERY_STRING"]}')
+        return start_response(status, response_headers)
+    return wsgiapp(environ, log_start_response)
