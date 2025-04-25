@@ -202,6 +202,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             # Verify "/README.md" request
             request = app.requests.get('/README.md')
             self.assertTrue(request is not None)
+            self.assertEqual(request.name, '/README.md')
             self.assertEqual(request.doc, 'The static resource "/README.md". Use `?raw=true` to get the raw content.')
             self.assertEqual(request.urls, (('GET', '/README.md'),))
             self.assertEqual(request.headers, [
@@ -216,6 +217,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             redirect_request = app.requests.get('/sub/')
             self.assertTrue(request is not None)
             self.assertTrue(redirect_request is not None)
+            self.assertEqual(request.name, '/sub/index.md')
             self.assertEqual(request.doc, 'The static resource "/sub/index.md". Use `?raw=true` to get the raw content.')
             self.assertEqual(request.urls, (('GET', '/sub/'), ('GET', '/sub/index.md')))
             self.assertEqual(request.headers, [
@@ -230,7 +232,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             # Verify "/sub/test.md" request
             request = app.requests.get('/sub/test.md')
             self.assertTrue(request is not None)
-            self.assertTrue(redirect_request is not None)
+            self.assertEqual(request.name, '/sub/test.md')
             self.assertEqual(request.doc, 'The static resource "/sub/test.md". Use `?raw=true` to get the raw content.')
             self.assertEqual(request.urls, (('GET', '/sub/test.md'),))
             self.assertEqual(request.headers, [
@@ -243,6 +245,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             # Verify "/test.txt" request
             request = app.requests.get('/test.txt')
             self.assertTrue(request is not None)
+            self.assertEqual(request.name, '/test.txt')
             self.assertEqual(request.doc, 'The static resource "/test.txt"')
             self.assertEqual(request.urls, (('GET', '/test.txt'),))
             self.assertEqual(request.headers, [('Content-Type', 'text/plain; charset=utf-8'), ('ETag', 'b78a3223503896721cca1303f776159b')])
