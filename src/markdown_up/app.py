@@ -21,24 +21,28 @@ class MarkdownUpApplication(chisel.Application):
     The markdown-up back-end API WSGI application class
     """
 
-    __slots__ = ('root', 'cache_statics', 'add_request_lock')
+    __slots__ = ('root', 'release', 'add_request_lock')
 
 
-    def __init__(self, root, cache_statics=False):
+    def __init__(self, root, release=False):
         super().__init__()
         self.root = root
-        self.cache_statics = cache_statics
+        self.release = release
         self.add_request_lock = threading.Lock()
 
-        # Add the chisel documentation application
-        self.add_requests(chisel.create_doc_requests())
+        if release:
+            # Add the MarkdownUp application
+            self.add_requests(chisel.create_doc_requests(api=False, app=False, markdown_up=True))
+        else:
+            # Add the chisel documentation application (and MarkdownUp)
+            self.add_requests(chisel.create_doc_requests())
 
-        # Add the markdown-up APIs
-        self.add_request(markdown_up_index)
+            # Add the markdown-up APIs
+            self.add_request(markdown_up_index)
 
-        # Add the markdown-up statics
-        self.add_static('index.html', urls=(('GET', '/'),))
-        self.add_static('markdownUpIndex.bare')
+            # Add the markdown-up statics
+            self.add_static('index.html', urls=(('GET', '/'),))
+            self.add_static('markdownUpIndex.bare')
 
 
     def add_static(self, filename, urls=(('GET', None),), doc_group='MarkdownUp Index Statics'):
@@ -87,10 +91,10 @@ class MarkdownUpApplication(chisel.Application):
                 content = path_file.read()
 
             # Create the static content request
-            request = MarkdownUpStaticRequest(posix_path_info, content, content_type)
+            request = MarkdownUpStaticRequest(self, posix_path_info, content, content_type)
 
             # Add the request, if caching of statics is enabled
-            if self.cache_statics:
+            if self.release:
                 with self.add_request_lock:
                     request_lock, _ = self.match_request(request_method, path_info)
                     if request_lock is None: # pragma: no branch
@@ -115,7 +119,7 @@ class MarkdownUpStaticRequest(chisel.Request):
     __slots__ = ('headers', 'content', 'etag', 'stub_headers', 'stub_content', 'stub_etag')
 
 
-    def __init__(self, posix_path, content, content_type):
+    def __init__(self, app, posix_path, content, content_type):
         is_stubbed = posix_path.suffix in MARKDOWN_EXTS
         posix_path_str = str(posix_path)
         parent_path_str = str(posix_path.parent)
@@ -123,8 +127,8 @@ class MarkdownUpStaticRequest(chisel.Request):
             doc = f'The static resource "{posix_path_str}". Use `?raw=true` to get the raw content.'
         else:
             doc = f'The static resource "{posix_path_str}"'
-        if parent_path_str != '/' and posix_path.name in INDEX_FILES:
-            urls = (('GET', parent_path_str + '/'), ('GET', posix_path_str))
+        if (app.release or parent_path_str != '/') and posix_path.name in INDEX_FILES:
+            urls = (('GET', parent_path_str + ('/' if parent_path_str != '/' else '')), ('GET', posix_path_str))
         else:
             urls = (('GET', posix_path_str),)
         super().__init__(name=posix_path_str, urls=urls, doc=doc, doc_group='Statics')

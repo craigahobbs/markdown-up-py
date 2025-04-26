@@ -31,8 +31,8 @@ def main(argv=None):
                         help='the number of web server threads (default is 8)')
     parser.add_argument('-n', dest='no_browser', action='store_true',
                         help="don't open a web browser")
-    parser.add_argument('-s', dest='cache_statics', action='store_true',
-                        help="cache static content")
+    parser.add_argument('-r', dest='release', action='store_true',
+                        help="release mode (cache statics, remove documentation and index)")
     parser.add_argument('-q', dest='quiet', action='store_true',
                         help="don't display access logging")
     args = parser.parse_args(args=argv)
@@ -67,7 +67,7 @@ def main(argv=None):
         webbrowser_thread.start()
 
     # Create the WSGI application
-    wsgiapp = MarkdownUpApplication(root, args.cache_statics)
+    wsgiapp = MarkdownUpApplication(root, args.release)
     wsgiapp_wrap = wsgiapp if args.quiet else partial(_wsgiapp_log_access, wsgiapp)
 
     # Host the application

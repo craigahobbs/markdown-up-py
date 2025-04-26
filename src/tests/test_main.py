@@ -32,7 +32,7 @@ class TestMain(unittest.TestCase):
             mock_isdir.assert_not_called()
             mock_isfile.assert_not_called()
             self.assertEqual(cm_exc.exception.code, 0)
-            self.assertEqual(stdout.getvalue().splitlines()[0], 'usage: markdown-up [-h] [-p N] [-t N] [-n] [-s] [-q] [path]')
+            self.assertEqual(stdout.getvalue().splitlines()[0], 'usage: markdown-up [-h] [-p N] [-t N] [-n] [-r] [-q] [path]')
             self.assertEqual(stderr.getvalue(), '')
 
 
@@ -103,14 +103,14 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stderr.getvalue(), '')
 
 
-    def test_main_run_cache_statics(self):
+    def test_main_run_release(self):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isdir', return_value=True) as mock_isdir, \
              patch('os.path.isfile', return_value=False) as mock_isfile, \
              patch('threading.Thread') as mock_thread, \
              patch('waitress.serve') as mock_waitress_serve:
-            main(['-n', '-s', '-q'])
+            main(['-n', '-r', '-q'])
 
             self.assertEqual(stdout.getvalue(), '')
             self.assertEqual(stderr.getvalue(), '')
@@ -121,7 +121,7 @@ class TestMain(unittest.TestCase):
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
             self.assertTrue(isinstance(wsgiapp, MarkdownUpApplication))
-            self.assertTrue(wsgiapp.cache_statics)
+            self.assertTrue(wsgiapp.release)
 
 
     def test_main_run_no_browser(self):
@@ -159,7 +159,7 @@ class TestMain(unittest.TestCase):
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
             self.assertTrue(isinstance(wsgiapp, MarkdownUpApplication))
-            self.assertFalse(wsgiapp.cache_statics)
+            self.assertFalse(wsgiapp.release)
 
             # Test calling the WSGI application
             environ = chisel.Context.create_environ('GET', '/doc')

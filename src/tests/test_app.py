@@ -142,7 +142,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertTrue('/file.unk' not in app.requests)
 
 
-    def test_static_markdown_cache(self):
+    def test_static_markdown_release(self):
         test_files = [
             ('README.md', '# Title'),
             (('sub', 'index.md'), '# Index'),
@@ -204,7 +204,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertTrue(request is not None)
             self.assertEqual(request.name, '/README.md')
             self.assertEqual(request.doc, 'The static resource "/README.md". Use `?raw=true` to get the raw content.')
-            self.assertEqual(request.urls, (('GET', '/README.md'),))
+            self.assertEqual(request.urls, (('GET', '/'), ('GET', '/README.md'),))
             self.assertEqual(request.headers, [
                 ('Content-Type', 'text/markdown; charset=utf-8'),
                 ('ETag', '38cdd67987afb67a4af89ea02044a00e')
