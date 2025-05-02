@@ -98,7 +98,6 @@ class MarkdownUpApplication(chisel.Application):
                 for index_file in INDEX_FILES: # pragma: no branch
                     # Is this the primary index?
                     if posix_path_info.name == index_file:
-                        is_index = True
                         is_primary = True
                         break
 
