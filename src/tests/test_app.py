@@ -204,7 +204,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertTrue(request is not None)
             self.assertEqual(request.name, '/README.md')
             self.assertEqual(request.doc, 'The static resource "/README.md". Use `?raw=true` to get the raw content.')
-            self.assertEqual(request.urls, (('GET', '/'), ('GET', '/README.md'),))
+            self.assertEqual(request.urls, (('GET', '/'), ('GET', '/README.md')))
             self.assertEqual(request.headers, [
                 ('Content-Type', 'text/markdown; charset=utf-8'),
                 ('ETag', '38cdd67987afb67a4af89ea02044a00e')
@@ -251,6 +251,124 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(request.headers, [('Content-Type', 'text/plain; charset=utf-8'), ('ETag', 'b78a3223503896721cca1303f776159b')])
             self.assertEqual(request.content, b'Title')
             self.assertEqual(request.etag, 'b78a3223503896721cca1303f776159b')
+
+
+    def test_static_markdown_release_multiple_indexes(self):
+        test_files = [
+            (('sub', 'index.md'), '# Title'),
+            (('sub', 'README.md'), '# Title')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, True)
+
+            # Get "/sub/index.md"
+            environ = chisel.Context.create_environ('GET', '/sub/index.md')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '2979cf7462fcf85e5c1f7257d7efbbc0')]
+            )
+            expected_content = MarkdownUpStaticRequest.create_markdown_up_stub('index.md')
+            self.assertEqual(content, [expected_content.encode('utf-8')])
+
+            # Get "/sub/README.md"
+            environ = chisel.Context.create_environ('GET', '/sub/README.md')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'd26ad180babc57df8a633cfe06676fb8')]
+            )
+            expected_content = MarkdownUpStaticRequest.create_markdown_up_stub('README.md')
+            self.assertEqual(content, [expected_content.encode('utf-8')])
+
+            # Verify "/sub/index.md" request
+            request = app.requests.get('/sub/index.md')
+            self.assertTrue(request is not None)
+            self.assertEqual(request.name, '/sub/index.md')
+            self.assertEqual(request.doc, 'The static resource "/sub/index.md". Use `?raw=true` to get the raw content.')
+            self.assertEqual(request.urls, (('GET', '/sub/'), ('GET', '/sub/index.md')))
+            self.assertEqual(request.headers, [
+                ('Content-Type', 'text/markdown; charset=utf-8'),
+                ('ETag', '38cdd67987afb67a4af89ea02044a00e')
+            ])
+            self.assertEqual(request.content, b'# Title')
+            self.assertEqual(request.etag, '38cdd67987afb67a4af89ea02044a00e')
+
+            # Verify "/sub/README.md" request
+            request = app.requests.get('/sub/README.md')
+            self.assertTrue(request is not None)
+            self.assertEqual(request.name, '/sub/README.md')
+            self.assertEqual(request.doc, 'The static resource "/sub/README.md". Use `?raw=true` to get the raw content.')
+            self.assertEqual(request.urls, (('GET', '/sub/README.md'),))
+            self.assertEqual(request.headers, [
+                ('Content-Type', 'text/markdown; charset=utf-8'),
+                ('ETag', '38cdd67987afb67a4af89ea02044a00e')
+            ])
+            self.assertEqual(request.content, b'# Title')
+            self.assertEqual(request.etag, '38cdd67987afb67a4af89ea02044a00e')
+
+
+    def test_static_markdown_release_multiple_indexes_reversed(self):
+        test_files = [
+            (('sub', 'index.md'), '# Title'),
+            (('sub', 'README.md'), '# Title')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, True)
+
+            # Get "/sub/README.md"
+            environ = chisel.Context.create_environ('GET', '/sub/README.md')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'd26ad180babc57df8a633cfe06676fb8')]
+            )
+            expected_content = MarkdownUpStaticRequest.create_markdown_up_stub('README.md')
+            self.assertEqual(content, [expected_content.encode('utf-8')])
+
+            # Get "/sub/index.md"
+            environ = chisel.Context.create_environ('GET', '/sub/index.md')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '2979cf7462fcf85e5c1f7257d7efbbc0')]
+            )
+            expected_content = MarkdownUpStaticRequest.create_markdown_up_stub('index.md')
+            self.assertEqual(content, [expected_content.encode('utf-8')])
+
+            # Verify "/sub/index.md" request
+            request = app.requests.get('/sub/index.md')
+            self.assertTrue(request is not None)
+            self.assertEqual(request.name, '/sub/index.md')
+            self.assertEqual(request.doc, 'The static resource "/sub/index.md". Use `?raw=true` to get the raw content.')
+            self.assertEqual(request.urls, (('GET', '/sub/'), ('GET', '/sub/index.md')))
+            self.assertEqual(request.headers, [
+                ('Content-Type', 'text/markdown; charset=utf-8'),
+                ('ETag', '38cdd67987afb67a4af89ea02044a00e')
+            ])
+            self.assertEqual(request.content, b'# Title')
+            self.assertEqual(request.etag, '38cdd67987afb67a4af89ea02044a00e')
+
+            # Verify "/sub/README.md" request
+            request = app.requests.get('/sub/README.md')
+            self.assertTrue(request is not None)
+            self.assertEqual(request.name, '/sub/README.md')
+            self.assertEqual(request.doc, 'The static resource "/sub/README.md". Use `?raw=true` to get the raw content.')
+            self.assertEqual(request.urls, (('GET', '/sub/README.md'),))
+            self.assertEqual(request.headers, [
+                ('Content-Type', 'text/markdown; charset=utf-8'),
+                ('ETag', '38cdd67987afb67a4af89ea02044a00e')
+            ])
+            self.assertEqual(request.content, b'# Title')
+            self.assertEqual(request.etag, '38cdd67987afb67a4af89ea02044a00e')
 
 
     def test_static_markdown_escape(self):
