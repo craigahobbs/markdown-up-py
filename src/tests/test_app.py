@@ -141,6 +141,17 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertTrue('/not-found.md' not in app.requests)
             self.assertTrue('/file.unk' not in app.requests)
 
+            # Verify redirect requests
+            self.assertListEqual(
+                [
+                    (redirect.urls, redirect.doc) for _, redirect in sorted(app.requests.items())
+                    if isinstance(redirect, chisel.RedirectRequest)
+                ],
+                [
+                    ((('GET', '/doc'),), 'Redirect to /doc/')
+                ]
+            )
+
 
     def test_static_markdown_release(self):
         test_files = [
@@ -252,6 +263,17 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(request.content, b'Title')
             self.assertEqual(request.etag, 'b78a3223503896721cca1303f776159b')
 
+            # Verify redirect requests
+            self.assertListEqual(
+                [
+                    (redirect.urls, redirect.doc) for _, redirect in sorted(app.requests.items())
+                    if isinstance(redirect, chisel.RedirectRequest)
+                ],
+                [
+                    ((('GET', '/sub'),), 'Redirect to /sub/')
+                ]
+            )
+
 
     def test_static_markdown_release_multiple_indexes(self):
         test_files = [
@@ -311,6 +333,17 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(request.content, b'# Title')
             self.assertEqual(request.etag, '38cdd67987afb67a4af89ea02044a00e')
 
+            # Verify redirect requests
+            self.assertListEqual(
+                [
+                    (redirect.urls, redirect.doc) for _, redirect in sorted(app.requests.items())
+                    if isinstance(redirect, chisel.RedirectRequest)
+                ],
+                [
+                    ((('GET', '/sub'),), 'Redirect to /sub/')
+                ]
+            )
+
 
     def test_static_markdown_release_multiple_indexes_reversed(self):
         test_files = [
@@ -369,6 +402,17 @@ class TestMarkdownUpApplication(unittest.TestCase):
             ])
             self.assertEqual(request.content, b'# Title')
             self.assertEqual(request.etag, '38cdd67987afb67a4af89ea02044a00e')
+
+            # Verify redirect requests
+            self.assertListEqual(
+                [
+                    (redirect.urls, redirect.doc) for _, redirect in sorted(app.requests.items())
+                    if isinstance(redirect, chisel.RedirectRequest)
+                ],
+                [
+                    ((('GET', '/sub'),), 'Redirect to /sub/')
+                ]
+            )
 
 
     def test_static_markdown_escape(self):
