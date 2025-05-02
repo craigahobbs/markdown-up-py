@@ -108,9 +108,9 @@ class MarkdownUpApplication(chisel.Application):
                         break
 
         try:
-            # Unknown method or content type?
+            # File not found?
             content_type = STATIC_EXT_TO_CONTENT_TYPE.get(posix_path_info.suffix)
-            if request_method != 'GET' or content_type is None or not path_exists:
+            if not path_exists or content_type is None or request_method != 'GET':
                 raise FileNotFoundError(path)
 
             # Get the static content
