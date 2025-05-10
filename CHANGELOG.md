@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.4 (2025-05-09)
+
+- [4dda3e9](https://github.com/craigahobbs/markdown-up-py/commit/4dda3e9) - add Python 3.14
+
 ## 2.1.3 (2025-04-11)
 
 - [bfddcd8](https://github.com/craigahobbs/markdown-up-py/commit/bfddcd8) - add .txt file support
