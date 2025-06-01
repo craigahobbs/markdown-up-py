@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.5 (2025-06-01)
+
+- [070c944](https://github.com/craigahobbs/markdown-up-py/commit/070c944) - remove .mds extension
+
 ## 2.1.4 (2025-05-09)
 
 - [4dda3e9](https://github.com/craigahobbs/markdown-up-py/commit/4dda3e9) - add Python 3.14

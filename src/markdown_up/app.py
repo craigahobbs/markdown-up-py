@@ -298,7 +298,6 @@ STATIC_EXT_TO_CONTENT_TYPE = {
     '.json': 'application/json; charset=utf-8',
     '.markdown': 'text/markdown; charset=utf-8',
     '.md': 'text/markdown; charset=utf-8',
-    '.mds': 'text/plain; charset=utf-8',
     '.pdf': 'application/pdf',
     '.png': 'image/png',
     '.smd': 'text/plain; charset=utf-8',
