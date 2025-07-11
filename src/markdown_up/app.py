@@ -5,7 +5,7 @@
 The MarkdownUp launcher back-end application
 """
 
-import hashlib
+from http import HTTPStatus
 import importlib.resources
 import os
 from pathlib import PurePosixPath
@@ -13,7 +13,6 @@ import threading
 import urllib.parse
 
 import chisel
-import schema_markdown
 
 
 class MarkdownUpApplication(chisel.Application):
@@ -41,14 +40,13 @@ class MarkdownUpApplication(chisel.Application):
             self.add_request(markdown_up_index)
 
             # Add the markdown-up statics
-            self.add_static('index.html', urls=(('GET', '/'),))
+            self.add_static('index.html', content_type='text/html; charset=utf-8', urls=(('GET', '/'),))
             self.add_static('markdownUpIndex.bare')
 
 
-    def add_static(self, filename, urls=(('GET', None),), doc_group='MarkdownUp Index Statics'):
-        content_type = STATIC_EXT_TO_CONTENT_TYPE.get(os.path.splitext(filename)[1], STATIC_EXT_TO_CONTENT_TYPE['.txt'])
+    def add_static(self, filename, content_type=None, urls=(('GET', None),), doc_group='MarkdownUp Index Statics'):
         with importlib.resources.files('markdown_up.static').joinpath(filename).open('rb') as fh:
-            self.add_request(chisel.StaticRequest(filename, fh.read(), content_type, urls, doc_group=doc_group))
+            self.add_request(chisel.StaticRequest(filename, fh.read(), content_type=content_type, urls=urls, doc_group=doc_group))
 
 
     def __call__(self, environ, start_response):
@@ -64,169 +62,103 @@ class MarkdownUpApplication(chisel.Application):
         posix_path_info = PurePosixPath(path_info)
         path = os.path.join(self.root, *posix_path_info.parts[1:])
 
-        # Directory index file?
-        path_exists = False
-        is_index = False
-        is_primary = False
+        # Create the request object
+        request = None
         if os.path.isdir(path):
-            # Search for the index file
-            for index_file in INDEX_FILES:
-                index_posix_path = posix_path_info.joinpath(index_file)
-                index_path = os.path.join(self.root, *index_posix_path.parts[1:])
-                if os.path.isfile(index_path):
-                    # Redirect?
-                    if not path_info.endswith('/'):
-                        start_response('301 Moved Permanently', [('Location', path_info + '/')])
-                        return []
+            # Directory redirect?
+            if not path_info.endswith('/'):
+                request = chisel.RedirectRequest((('GET', path_info),), path_info + '/', name=path_info)
 
-                    # Update the index path
-                    posix_path_info = index_posix_path
-                    path = index_path
-                    path_exists = True
-                    is_index = True
-                    is_primary = True
-                    break
-        else:
-            # File exist?
-            path_exists = os.path.isfile(path)
-
-            # Index file?
-            if path_exists and posix_path_info.name in INDEX_FILES:
-                is_index = True
-
-                # Search the index files
-                for index_file in INDEX_FILES: # pragma: no branch
-                    # Is this the primary index?
-                    if posix_path_info.name == index_file:
-                        is_primary = True
-                        break
-
-                    # Another index is the primary
-                    index_posix_path = posix_path_info.parent.joinpath(index_file)
+            # HTML index file exist?
+            if request is None:
+                for index_file in INDEX_FILES:
+                    index_posix_path = posix_path_info.joinpath(index_file)
                     index_path = os.path.join(self.root, *index_posix_path.parts[1:])
                     if os.path.isfile(index_path):
+                        with open(index_path, 'rb') as index_file:
+                            request = chisel.StaticRequest(
+                                path_info,
+                                index_file.read(),
+                                content_type='text/html; charset=utf-8',
+                                urls=(('GET', path_info),)
+                            )
                         break
 
-        try:
-            # File not found?
-            content_type = STATIC_EXT_TO_CONTENT_TYPE.get(posix_path_info.suffix)
-            if not path_exists or content_type is None or request_method != 'GET':
-                raise FileNotFoundError(path)
+            # No HTML index file - does a Markdown index file exist?
+            if request is None:
+                for index_markdown in INDEX_MARKDOWN:
+                    markdown_posix_path = posix_path_info.joinpath(index_markdown)
+                    markdown_posix_str = str(markdown_posix_path)
+                    markdown_path = os.path.join(self.root, *markdown_posix_path.parts[1:])
+                    if os.path.isfile(markdown_path):
+                        index_file = INDEX_FILES[0]
+                        index_posix_path = posix_path_info.joinpath(index_file)
+                        request = chisel.StaticRequest(
+                            path_info,
+                            create_markdown_up_stub(markdown_posix_str),
+                            content_type='text/html; charset=utf-8',
+                            urls=(('GET', path_info),)
+                        )
+                        break
 
-            # Get the static content
+            # Not found
+            if request is None:
+                request = StatusRequest(path_info, HTTPStatus.NOT_FOUND, (('GET', path_info),))
+
+        # File exist?
+        elif os.path.isfile(path):
             with open(path, 'rb') as path_file:
-                content = path_file.read()
+                request = chisel.StaticRequest(path_info, path_file.read(), urls=(('GET', path_info),))
 
-            # Create the static content request
-            request = MarkdownUpStaticRequest(self, posix_path_info, content, content_type, is_primary)
-
-            # Add the request, if caching of statics is enabled
-            if self.release:
-                with self.add_request_lock:
-                    request_lock, _ = self.match_request(request_method, path_info)
-                    if request_lock is None: # pragma: no branch
-                        self.add_request(request)
-
-                        # Add the index redirect, if not at the root
-                        parent_path_str = str(posix_path_info.parent)
-                        if is_index and parent_path_str != '/':
-                            redirect_request = chisel.RedirectRequest(
-                                (('GET', parent_path_str),),
-                                parent_path_str + '/',
-                                name=parent_path_str + '/'
-                            )
-                            if redirect_request.name not in self.requests:
-                                self.add_request(redirect_request)
-
-            return request(environ, start_response)
-        except: # pylint: disable=bare-except
-            start_response('404 Not Found', [('Content-Type', STATIC_EXT_TO_CONTENT_TYPE['.txt'])])
-            return [b'Not Found']
-
-
-class MarkdownUpStaticRequest(chisel.Request):
-    __slots__ = ('headers', 'content', 'etag', 'stub_headers', 'stub_content', 'stub_etag')
-
-
-    def __init__(self, app, posix_path, content, content_type, is_primary):
-        is_stubbed = posix_path.suffix in MARKDOWN_EXTS
-        posix_path_str = str(posix_path)
-        parent_path_str = str(posix_path.parent)
-
-        # Compute the request documentation
-        if is_stubbed:
-            doc = f'The static resource "{posix_path_str}". Use `?raw=true` to get the raw content.'
+        # File not found?
         else:
-            doc = f'The static resource "{posix_path_str}"'
+            # MarkdownUp HTML stub file?
+            if posix_path_info.suffix == HTML_EXTS[0]:
+                for markdown_ext in MARKDOWN_EXTS:
+                    markdown_posix_path = posix_path_info.with_suffix(markdown_ext)
+                    markdown_posix_str = str(markdown_posix_path)
+                    markdown_path = os.path.join(self.root, *markdown_posix_path.parts[1:])
+                    if os.path.isfile(markdown_path):
+                        request = chisel.StaticRequest(
+                            path_info,
+                            create_markdown_up_stub(markdown_posix_str),
+                            content_type='text/html; charset=utf-8',
+                            urls=(('GET', path_info),)
+                        )
+                        break
 
-        # Compute the request URLs
-        if is_primary and (app.release or parent_path_str != '/'):
-            urls = (('GET', parent_path_str + ('/' if parent_path_str != '/' else '')), ('GET', posix_path_str))
-        else:
-            urls = (('GET', posix_path_str),)
+            # Not found
+            if request is None:
+                request = StatusRequest(path_info, HTTPStatus.NOT_FOUND, (('GET', path_info),))
 
-        # Call super class init
-        super().__init__(name=posix_path_str, urls=urls, doc=doc, doc_group='Statics')
+        # Add the request, if caching of statics is enabled
+        if self.release:
+            with self.add_request_lock:
+                request_lock, _ = self.match_request(request_method, path_info)
+                if request_lock is None:
+                    self.add_request(request)
 
-        # Compute the etag
-        self.content = content
-        md5 = hashlib.md5()
-        md5.update(content)
-        self.etag = md5.hexdigest()
-        self.headers = [('Content-Type', content_type), ('ETag', self.etag)]
+        # Bad method?
+        if request_method != 'GET':
+            method_request = StatusRequest(path_info, HTTPStatus.METHOD_NOT_ALLOWED, (('GET', path_info),))
+            return method_request(environ, start_response)
 
-        # Compute the raw etag
-        if is_stubbed:
-            self.stub_content = self.create_markdown_up_stub(posix_path.name).encode('utf-8')
-            md5 = hashlib.md5()
-            md5.update(self.stub_content)
-            self.stub_etag = md5.hexdigest()
-            self.stub_headers = [('Content-Type', STATIC_EXT_TO_CONTENT_TYPE['.html']), ('ETag', self.stub_etag)]
-        else:
-            self.stub_content = None
-            self.stub_etag = None
-            self.stub_headers = None
-
-
-    def __call__(self, environ, start_response):
-        # Raw content request?
-        if self.stub_content is None:
-            is_raw = True
-        else:
-            try:
-                query_args_raw = schema_markdown.decode_query_string(environ.get('QUERY_STRING', ''))
-                query_args = schema_markdown.validate_type(self.QUERY_TYPES, 'MarkdownUpStaticQuery', query_args_raw)
-                is_raw = query_args.get('raw', False)
-            except: # pylint: disable=bare-except
-                is_raw = False
-
-        # Get the response content
-        if is_raw:
-            headers, content, etag = self.headers, self.content, self.etag
-        else:
-            headers, content, etag = self.stub_headers, self.stub_content, self.stub_etag
-
-        # Check the etag - is the resource modified?
-        if etag == environ.get('HTTP_IF_NONE_MATCH'):
-            start_response('304 Not Modified', [])
-            return []
-
-        start_response('200 OK', headers)
-        return [content]
+        # Handle the request
+        return request(environ, start_response)
 
 
-    QUERY_TYPES = schema_markdown.parse_schema_markdown('''\
-# The MarkdownUp application static query string arguments
-struct MarkdownUpStaticQuery
-
-    # If true, return the raw resource (default is `false`)
-    optional bool raw
-''')
+# Render-able file extensions
+MARKDOWN_EXTS = ('.md', '.markdown')
+HTML_EXTS = ('.html', '.htm')
 
 
-    @staticmethod
-    def create_markdown_up_stub(filename):
-        return f'''\
+# Index file names
+INDEX_FILES = ('index.html', 'index.htm')
+INDEX_MARKDOWN = ('index.md', 'README.md')
+
+
+def create_markdown_up_stub(filename):
+    return f'''\
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -268,49 +200,29 @@ struct MarkdownUpStaticQuery
     </body>
     <script type="module">
         import {{MarkdownUp}} from '/markdown-up/lib/app.js';
-        const app = new MarkdownUp(window, {{'url': '{urllib.parse.quote(filename)}?raw=true'}});
+        const app = new MarkdownUp(window, {{'url': '{urllib.parse.quote(filename)}'}});
         app.run();
     </script>
 </html>
-'''
+'''.encode('utf-8')
 
 
-# Render-able file extensions
-MARKDOWN_EXTS = ('.md', '.markdown')
-HTML_EXTS = ('.html', '.htm')
+class StatusRequest(chisel.Request):
+    __slots__ = ('status', 'content')
 
+    def __init__(self, name, status, urls):
+        self.status = f'{status.value} {status.phrase}'
+        self.content = status.phrase.encode('utf-8')
+        super().__init__(name=name, urls=urls, doc=f'HTTP {status.value} response for "{name}"', doc_group='Status Requests')
 
-# Index file names
-INDEX_FILES = ('index.html', 'index.htm', 'index.md', 'README.md')
-
-
-# The map of static file extension to content-type
-STATIC_EXT_TO_CONTENT_TYPE = {
-    '.bare': 'text/plain; charset=utf-8',
-    '.css': 'text/css; charset=utf-8',
-    '.csv': 'text/csv; charset=utf-8',
-    '.gif': 'image/gif',
-    '.htm': 'text/html; charset=utf-8',
-    '.html': 'text/html; charset=utf-8',
-    '.jpeg': 'image/jpeg',
-    '.jpg': 'image/jpeg',
-    '.js': 'application/javascript; charset=utf-8',
-    '.json': 'application/json; charset=utf-8',
-    '.markdown': 'text/markdown; charset=utf-8',
-    '.md': 'text/markdown; charset=utf-8',
-    '.pdf': 'application/pdf',
-    '.png': 'image/png',
-    '.smd': 'text/plain; charset=utf-8',
-    '.svg': 'image/svg+xml; charset=utf-8',
-    '.tif': 'image/tiff',
-    '.tiff': 'image/tiff',
-    '.txt': 'text/plain; charset=utf-8',
-    '.webp': 'image/webp'
-}
+    def __call__(self, environ, start_response):
+        start_response(self.status, [('Content-Type', 'text/plain; charset=utf-8')])
+        return [self.content]
 
 
 @chisel.action(spec='''\
 group "MarkdownUp Index API"
+
 
 # The MarkdownUp launcher index API
 action markdown_up_index
@@ -329,7 +241,7 @@ action markdown_up_index
         optional string parent
 
         # The path's files
-        string[] files
+        IndexFile[] files
 
         # The path's sub-directories
         string[] directories
@@ -337,6 +249,16 @@ action markdown_up_index
     errors
         # The path is invalid
         InvalidPath
+
+
+# An index file
+struct IndexFile
+
+    # The file name
+    string name
+
+    # The file's display name
+    optional string display
 ''')
 def markdown_up_index(ctx, req):
     # Validate the path
@@ -359,13 +281,17 @@ def markdown_up_index(ctx, req):
         if entry.is_dir() and not entry.name.startswith('.'):
             directories.append(entry.name)
         elif entry.is_file(): # pragma: no branch
-            if entry.name.endswith(MARKDOWN_EXTS) or entry.name.endswith(HTML_EXTS):
-                files.append(entry.name)
+            if entry.name.endswith(HTML_EXTS):
+                files.append({'name': entry.name})
+            elif entry.name.endswith(MARKDOWN_EXTS):
+                # Markdown files are viewed using their generated MarkdownUp HTML stubs
+                stub_name = os.path.splitext(entry.name)[0] + HTML_EXTS[0]
+                files.append({'name': stub_name, 'display': entry.name})
 
     # Return the response
     response = {
         'path': path,
-        'files': sorted(files),
+        'files': sorted(files, key=lambda file_: file_.get('display', file_['name'])),
         'directories': sorted(directories)
     }
     if parent_path is not None and parent_path != '.':

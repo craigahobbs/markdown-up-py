@@ -13,7 +13,7 @@ import webbrowser
 
 import waitress
 
-from .app import MarkdownUpApplication
+from .app import HTML_EXTS, MARKDOWN_EXTS, MarkdownUpApplication
 
 
 def main(argv=None):
@@ -56,7 +56,12 @@ def main(argv=None):
     # Construct the URL
     host = '127.0.0.1'
     if is_file:
-        url = f'http://{host}:{args.port}/{os.path.basename(args.path)}'
+        path_base = os.path.basename(args.path)
+        path_root, path_ext = os.path.splitext(path_base)
+        if path_ext in MARKDOWN_EXTS:
+            url = f'http://{host}:{args.port}/{path_root}{HTML_EXTS[0]}'
+        else:
+            url = f'http://{host}:{args.port}/{path_base}'
     else:
         url = f'http://{host}:{args.port}/'
 

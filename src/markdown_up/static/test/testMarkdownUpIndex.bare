@@ -10,7 +10,11 @@ async function testMarkdownUpIndex():
         'systemFetch', objectNew( \
             'markdown_up_index', jsonStringify(objectNew( \
                 'path', '.', \
-                'files', arrayNew('a.md', 'b.html', 'c.md'), \
+                'files', arrayNew( \
+                    objectNew('name', 'a.html', 'display', 'a.md'), \
+                    objectNew('name', 'b.html'), \
+                    objectNew('name', 'c.html', 'display', 'c.md') \
+                ), \
                 'directories', arrayNew('sub1', 'sub2') \
             )) \
         ) \
@@ -31,9 +35,9 @@ async function testMarkdownUpIndex():
             '# MarkdownUp \\- .' \
         )), \
         arrayNew('markdownPrint', arrayNew('', '## Files')), \
-        arrayNew('markdownPrint', arrayNew('', '[a.md](a.md)')), \
+        arrayNew('markdownPrint', arrayNew('', '[a.md](a.html)')), \
         arrayNew('markdownPrint', arrayNew('', '[b.html](b.html)')), \
-        arrayNew('markdownPrint', arrayNew('', '[c.md](c.md)')), \
+        arrayNew('markdownPrint', arrayNew('', '[c.md](c.html)')), \
         arrayNew('markdownPrint', arrayNew('', '## Directories')), \
         arrayNew('markdownPrint', arrayNew('', "[sub1](#var.vPath='sub1')")), \
         arrayNew('markdownPrint', arrayNew('', "[sub2](#var.vPath='sub2')")) \
@@ -48,7 +52,10 @@ async function testMarkdownUpIndex_escapes():
         'systemFetch', objectNew( \
             'markdown_up_index', jsonStringify(objectNew( \
                 'path', '.', \
-                'files', arrayNew('a+)b.md', 'b+)a.html'), \
+                'files', arrayNew( \
+                    objectNew('name', 'a+)b.html', 'display', 'a+)b.md'), \
+                    objectNew('name', 'b+)a.html') \
+                ), \
                 'directories', arrayNew('sub+)dir') \
             )) \
         ) \
@@ -70,7 +77,7 @@ async function testMarkdownUpIndex_escapes():
             ) \
         ), \
         arrayNew('markdownPrint', arrayNew('', '## Files')), \
-        arrayNew('markdownPrint', arrayNew('', '[a\\+\\)b.md](a+%29b.md)')), \
+        arrayNew('markdownPrint', arrayNew('', '[a\\+\\)b.md](a+%29b.html)')), \
         arrayNew('markdownPrint', arrayNew('', '[b\\+\\)a.html](b+%29a.html)')), \
         arrayNew('markdownPrint', arrayNew('', '## Directories')), \
         arrayNew('markdownPrint', arrayNew('', "[sub\\+\\)dir](#var.vPath='sub%2B%29dir')")) \
@@ -86,7 +93,11 @@ async function testMarkdownUpIndex_path():
             'markdown_up_index?path=subdir', jsonStringify(objectNew( \
                 'path', 'subdir', \
                 'parent', '.', \
-                'files', arrayNew('a.md', 'b.html', 'c.md'), \
+                'files', arrayNew( \
+                    objectNew('name', 'a.html', 'display', 'a.md'), \
+                    objectNew('name', 'b.html'), \
+                    objectNew('name', 'c.html', 'display', 'c.md') \
+                ), \
                 'directories', arrayNew('sub1', 'sub2') \
             )) \
         ) \
@@ -109,9 +120,9 @@ async function testMarkdownUpIndex_path():
             '# MarkdownUp \\- subdir' \
         )), \
         arrayNew('markdownPrint', arrayNew('', '## Files')), \
-        arrayNew('markdownPrint', arrayNew('', '[a.md](subdir/a.md)')), \
+        arrayNew('markdownPrint', arrayNew('', '[a.md](subdir/a.html)')), \
         arrayNew('markdownPrint', arrayNew('', '[b.html](subdir/b.html)')), \
-        arrayNew('markdownPrint', arrayNew('', '[c.md](subdir/c.md)')), \
+        arrayNew('markdownPrint', arrayNew('', '[c.md](subdir/c.html)')), \
         arrayNew('markdownPrint', arrayNew('', '## Directories')), \
         arrayNew('markdownPrint', arrayNew('', "[sub1](#var.vPath='subdir%2Fsub1')")), \
         arrayNew('markdownPrint', arrayNew('', "[sub2](#var.vPath='subdir%2Fsub2')")) \
@@ -158,7 +169,10 @@ async function testMarkdownUpIndex_onlyFiles():
         'systemFetch', objectNew( \
             'markdown_up_index', jsonStringify(objectNew( \
                 'path', '.', \
-                'files', arrayNew('a.md', 'c.md'), \
+                'files', arrayNew( \
+                    objectNew('name', 'a.html', 'display', 'a.md'), \
+                    objectNew('name', 'c.html', 'display', 'c.md') \
+                ), \
                 'directories', arrayNew() \
             )) \
         ) \
@@ -179,8 +193,8 @@ async function testMarkdownUpIndex_onlyFiles():
             '# MarkdownUp \\- .' \
         )), \
         arrayNew('markdownPrint', arrayNew('', '## Files')), \
-        arrayNew('markdownPrint', arrayNew('', '[a.md](a.md)')), \
-        arrayNew('markdownPrint', arrayNew('', '[c.md](c.md)')) \
+        arrayNew('markdownPrint', arrayNew('', '[a.md](a.html)')), \
+        arrayNew('markdownPrint', arrayNew('', '[c.md](c.html)')) \
     ))
 endfunction
 unittestRunTestAsync('testMarkdownUpIndex_onlyFiles')

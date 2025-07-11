@@ -37,9 +37,11 @@ async function markdownUpIndex():
     files = objectGet(index, 'files')
     if arrayLength(files):
         markdownPrint('', '## Files')
-        for file in arraySort(files):
-            fileURL = if(path != null, path + '/', '') + file
-            markdownPrint('', '[' + markdownEscape(file) + '](' + urlEncode(fileURL) + ')')
+        for file in arraySort(files, markdownUpIndexFileCompare):
+            fileName = objectGet(file, 'name')
+            fileDisplay = objectGet(file, 'display', fileName)
+            fileURL = if(path != null, path + '/', '') + fileName
+            markdownPrint('', '[' + markdownEscape(fileDisplay) + '](' + urlEncode(fileURL) + ')')
         endfor
     endif
 
@@ -57,4 +59,11 @@ async function markdownUpIndex():
     if !arrayLength(files) && !arrayLength(directories):
         markdownPrint('', 'No files or sub-directories found')
     endif
+endfunction
+
+
+function markdownUpIndexFileCompare(file1, file2):
+    name1 = objectGet(file1, 'display', objectGet(file1, 'name'))
+    name2 = objectGet(file2, 'display', objectGet(file2, 'name'))
+    return systemCompare(name1, name2)
 endfunction

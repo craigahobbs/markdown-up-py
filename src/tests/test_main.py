@@ -97,7 +97,7 @@ class TestMain(unittest.TestCase):
             start_response = chisel.app.StartResponse()
             content = wsgiapp(environ, start_response)
             self.assertEqual(start_response.status, '301 Moved Permanently')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain'), ('Location', '/doc/')])
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8'), ('Location', '/doc/')])
             self.assertEqual(content, [b'/doc/'])
             self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/ ...\nmarkdown-up: 301 GET /doc \n')
             self.assertEqual(stderr.getvalue(), '')
@@ -166,7 +166,7 @@ class TestMain(unittest.TestCase):
             start_response = chisel.app.StartResponse()
             content = wsgiapp(environ, start_response)
             self.assertEqual(start_response.status, '301 Moved Permanently')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain'), ('Location', '/doc/')])
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8'), ('Location', '/doc/')])
             self.assertEqual(content, [b'/doc/'])
             self.assertEqual(stdout.getvalue(), '')
             self.assertEqual(stderr.getvalue(), '')
@@ -231,7 +231,7 @@ class TestMain(unittest.TestCase):
              patch('waitress.serve') as mock_waitress_serve:
             main(['-n', 'README.md'])
 
-            self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/README.md ...\n')
+            self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/README.html ...\n')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('README.md')
             mock_isfile.assert_called_once_with('README.md')
@@ -265,7 +265,7 @@ class TestMain(unittest.TestCase):
              patch('waitress.serve') as mock_waitress_serve:
             main(['-n', 'subdir/README.md'])
 
-            self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/README.md ...\n')
+            self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/README.html ...\n')
             self.assertEqual(stderr.getvalue(), '')
             mock_isdir.assert_called_once_with('subdir/README.md')
             mock_isfile.assert_called_once_with('subdir/README.md')
