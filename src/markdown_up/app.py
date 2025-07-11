@@ -88,14 +88,13 @@ class MarkdownUpApplication(chisel.Application):
             if request is None:
                 for index_markdown in INDEX_MARKDOWN:
                     markdown_posix_path = posix_path_info.joinpath(index_markdown)
-                    markdown_posix_str = str(markdown_posix_path)
                     markdown_path = os.path.join(self.root, *markdown_posix_path.parts[1:])
                     if os.path.isfile(markdown_path):
                         index_file = INDEX_FILES[0]
                         index_posix_path = posix_path_info.joinpath(index_file)
                         request = chisel.StaticRequest(
                             path_info,
-                            create_markdown_up_stub(markdown_posix_str),
+                            create_markdown_up_stub(markdown_posix_path.name),
                             content_type='text/html; charset=utf-8',
                             urls=(('GET', path_info),)
                         )
@@ -116,12 +115,11 @@ class MarkdownUpApplication(chisel.Application):
             if posix_path_info.suffix == HTML_EXTS[0]:
                 for markdown_ext in MARKDOWN_EXTS:
                     markdown_posix_path = posix_path_info.with_suffix(markdown_ext)
-                    markdown_posix_str = str(markdown_posix_path)
                     markdown_path = os.path.join(self.root, *markdown_posix_path.parts[1:])
                     if os.path.isfile(markdown_path):
                         request = chisel.StaticRequest(
                             path_info,
-                            create_markdown_up_stub(markdown_posix_str),
+                            create_markdown_up_stub(markdown_posix_path.name),
                             content_type='text/html; charset=utf-8',
                             urls=(('GET', path_info),)
                         )

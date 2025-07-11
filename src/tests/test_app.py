@@ -70,9 +70,9 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'cd31c47ee9f2fe6f440148135e9200d9')]
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '97c5e29c4afd6dc4889e9ad00e064e44')]
             )
-            self.assertEqual(content, [create_markdown_up_stub('/README.md')])
+            self.assertEqual(content, [create_markdown_up_stub('README.md')])
 
             # Get an unmodified markdown file
             environ = chisel.Context.create_environ('GET', '/README.md')
@@ -85,7 +85,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
 
             # Get an unmodified auto-stub markdown HTML file
             environ = chisel.Context.create_environ('GET', '/README.html')
-            environ['HTTP_IF_NONE_MATCH'] = 'cd31c47ee9f2fe6f440148135e9200d9'
+            environ['HTTP_IF_NONE_MATCH'] = '97c5e29c4afd6dc4889e9ad00e064e44'
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '304 Not Modified')
@@ -172,7 +172,6 @@ class TestMarkdownUpApplication(unittest.TestCase):
                 start_response.headers,
                 [('Content-Type', 'text/markdown; charset=utf-8'), ('ETag', '38cdd67987afb67a4af89ea02044a00e')]
             )
-            expected_content = create_markdown_up_stub('README.md')
             self.assertEqual(content, [b'# Title'])
 
             # Get "/sub"
@@ -193,10 +192,9 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '1c869ac3454e6e82c98f4c95573c9137')]
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '739bf4eb63300d75159ebd27890cde70')]
             )
-            expected_content = create_markdown_up_stub('/sub/index.md')
-            self.assertEqual(content, [expected_content])
+            self.assertEqual(content, [create_markdown_up_stub('index.md')])
 
             # Get "/sub/test.html"
             environ = chisel.Context.create_environ('GET', '/sub/test.html')
@@ -205,10 +203,9 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '078f7c50d934888ae5ec3d88438747a3')]
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'fd5da0f3f9bb6238d6268bbc5c69eca5')]
             )
-            expected_content = create_markdown_up_stub('/sub/test.md')
-            self.assertEqual(content, [expected_content])
+            self.assertEqual(content, [create_markdown_up_stub('test.md')])
 
             # Get "/test.txt"
             environ = chisel.Context.create_environ('GET', '/test.txt')
@@ -245,8 +242,8 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(request.name, '/sub/')
             self.assertEqual(request.doc, ('The static resource "/sub/"',))
             self.assertEqual(request.urls, (('GET', '/sub/'),))
-            self.assertEqual(request.content, create_markdown_up_stub('/sub/index.md'))
-            self.assertEqual(request.etag, '1c869ac3454e6e82c98f4c95573c9137')
+            self.assertEqual(request.content, create_markdown_up_stub('index.md'))
+            self.assertEqual(request.etag, '739bf4eb63300d75159ebd27890cde70')
 
             # Verify "/sub/test.html" request
             request = app.requests.get('/sub/test.html')
@@ -254,9 +251,9 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(request.name, '/sub/test.html')
             self.assertEqual(request.doc, ('The static resource "/sub/test.html"',))
             self.assertEqual(request.urls, (('GET', '/sub/test.html'),))
-            self.assertEqual(request.content, create_markdown_up_stub('/sub/test.md'))
+            self.assertEqual(request.content, create_markdown_up_stub('test.md'))
             self.assertEqual(request.content_type, 'text/html; charset=utf-8')
-            self.assertEqual(request.etag, '078f7c50d934888ae5ec3d88438747a3')
+            self.assertEqual(request.etag, 'fd5da0f3f9bb6238d6268bbc5c69eca5')
 
             # Verify "/test.txt" request
             request = app.requests.get('/test.txt')
@@ -284,10 +281,9 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '1c869ac3454e6e82c98f4c95573c9137')]
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '739bf4eb63300d75159ebd27890cde70')]
             )
-            expected_content = create_markdown_up_stub('/sub/index.md')
-            self.assertEqual(content, [expected_content])
+            self.assertEqual(content, [create_markdown_up_stub('index.md')])
 
             # Get "/sub/README.html"
             environ = chisel.Context.create_environ('GET', '/sub/README.html')
@@ -296,10 +292,9 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'b479093cfffade16def371c48fff809e')]
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '97c5e29c4afd6dc4889e9ad00e064e44')]
             )
-            expected_content = create_markdown_up_stub('/sub/README.md')
-            self.assertEqual(content, [expected_content])
+            self.assertEqual(content, [create_markdown_up_stub('README.md')])
 
             # Verify "/sub/index.html" request
             request = app.requests.get('/sub/index.html')
@@ -307,10 +302,9 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(request.name, '/sub/index.html')
             self.assertEqual(request.doc, ('The static resource "/sub/index.html"',))
             self.assertEqual(request.urls, (('GET', '/sub/index.html'),))
-            expected_content = create_markdown_up_stub('/sub/index.md')
-            self.assertEqual(request.content, expected_content)
+            self.assertEqual(request.content, create_markdown_up_stub('index.md'))
             self.assertEqual(request.content_type, 'text/html; charset=utf-8')
-            self.assertEqual(request.etag, '1c869ac3454e6e82c98f4c95573c9137')
+            self.assertEqual(request.etag, '739bf4eb63300d75159ebd27890cde70')
 
             # Verify "/sub/README.html" request
             request = app.requests.get('/sub/README.html')
@@ -318,9 +312,9 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(request.name, '/sub/README.html')
             self.assertEqual(request.doc, ('The static resource "/sub/README.html"',))
             self.assertEqual(request.urls, (('GET', '/sub/README.html'),))
-            self.assertEqual(request.content, create_markdown_up_stub('/sub/README.md'))
+            self.assertEqual(request.content, create_markdown_up_stub('README.md'))
             self.assertEqual(request.content_type, 'text/html; charset=utf-8')
-            self.assertEqual(request.etag, 'b479093cfffade16def371c48fff809e')
+            self.assertEqual(request.etag, '97c5e29c4afd6dc4889e9ad00e064e44')
 
 
     def test_static_markdown_release_multiple_indexes_reversed(self):
@@ -338,9 +332,9 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'b479093cfffade16def371c48fff809e')]
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '97c5e29c4afd6dc4889e9ad00e064e44')]
             )
-            self.assertEqual(content, [create_markdown_up_stub('/sub/README.md')])
+            self.assertEqual(content, [create_markdown_up_stub('README.md')])
 
             # Get "/sub/index.html"
             environ = chisel.Context.create_environ('GET', '/sub/index.html')
@@ -349,9 +343,9 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '1c869ac3454e6e82c98f4c95573c9137')]
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '739bf4eb63300d75159ebd27890cde70')]
             )
-            self.assertEqual(content, [create_markdown_up_stub('/sub/index.md')])
+            self.assertEqual(content, [create_markdown_up_stub('index.md')])
 
             # Verify "/sub/README.html" request
             request = app.requests.get('/sub/README.html')
@@ -359,9 +353,9 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(request.name, '/sub/README.html')
             self.assertEqual(request.doc, ('The static resource "/sub/README.html"',))
             self.assertEqual(request.urls, (('GET', '/sub/README.html'),))
-            self.assertEqual(request.content, create_markdown_up_stub('/sub/README.md'))
+            self.assertEqual(request.content, create_markdown_up_stub('README.md'))
             self.assertEqual(request.content_type, 'text/html; charset=utf-8')
-            self.assertEqual(request.etag, 'b479093cfffade16def371c48fff809e')
+            self.assertEqual(request.etag, '97c5e29c4afd6dc4889e9ad00e064e44')
 
             # Verify "/sub/index.md" request
             request = app.requests.get('/sub/index.html')
@@ -369,9 +363,9 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(request.name, '/sub/index.html')
             self.assertEqual(request.doc, ('The static resource "/sub/index.html"',))
             self.assertEqual(request.urls, (('GET', '/sub/index.html'),))
-            self.assertEqual(request.content, create_markdown_up_stub('/sub/index.md'))
+            self.assertEqual(request.content, create_markdown_up_stub('index.md'))
             self.assertEqual(request.content_type, 'text/html; charset=utf-8')
-            self.assertEqual(request.etag, '1c869ac3454e6e82c98f4c95573c9137')
+            self.assertEqual(request.etag, '739bf4eb63300d75159ebd27890cde70')
 
 
     def test_static_markdown_stub_escape(self):
@@ -389,11 +383,11 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '1871731d36c954438f3fdf1d71c521f2')]
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '8003682c2896be6fa49fd3b75895a6c1')]
             )
-            expected_content = create_markdown_up_stub('/md file.md')
+            expected_content = create_markdown_up_stub('md file.md')
             self.assertEqual(content, [expected_content])
-            self.assertTrue(b"'/md%20file.md'" in expected_content)
+            self.assertTrue(b"'md%20file.md'" in expected_content)
 
 
     def test_static_index(self):
