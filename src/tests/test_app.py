@@ -148,7 +148,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
                     if isinstance(redirect, chisel.RedirectRequest)
                 ],
                 [
-                    ((('GET', '/doc'),), 'Redirect to /doc/')
+                    ((('GET', '/doc'),), ('Redirect to /doc/',))
                 ]
             )
 
@@ -232,7 +232,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             request = app.requests.get('/sub')
             self.assertTrue(request is not None)
             self.assertEqual(request.name, '/sub')
-            self.assertEqual(request.doc, 'Redirect to /sub/')
+            self.assertEqual(request.doc, ('Redirect to /sub/',))
             self.assertEqual(request.urls, (('GET', '/sub'),))
             self.assertEqual(request.content, b'/sub/')
 
