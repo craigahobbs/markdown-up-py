@@ -34,29 +34,20 @@ async function markdownUpIndex():
     )
 
     # Render file links
-    files = arrayNew()
-    markdownFiles = objectGet(index, 'files')
-    if markdownFiles != null:
-        arrayExtend(files, markdownFiles)
-    endif
-    if objectHas(index, 'htmlFiles'):
-        arrayExtend(files, objectGet(index, 'htmlFiles'))
-    endif
-    if arrayLength(files):
+    files = objectGet(index, 'files')
+    if files:
         markdownPrint('', '## Files')
-        for file in arraySort(files):
-            fileURL = if(path != null, path + '/', '') + file
-            if markdownFiles != null && arrayIndexOf(markdownFiles, file) != -1:
-                markdownPrint('', '[' + markdownEscape(file) + '](#url=' + urlEncodeComponent(fileURL) + '&var=&' + argsTopHeaderId + ')')
-            else:
-                markdownPrint('', '[' + markdownEscape(file) + '](' + urlEncode(fileURL) + ')')
-            endif
+        for file in arraySort(files, markdownUpIndexFileCompare):
+            fileName = objectGet(file, 'name')
+            fileDisplay = objectGet(file, 'display', fileName)
+            fileURL = if(path != null, path + '/', '') + fileName
+            markdownPrint('', '[' + markdownEscape(fileDisplay) + '](' + urlEncode(fileURL) + ')')
         endfor
     endif
 
     # Render directory links
     directories = objectGet(index, 'directories')
-    if directories != null:
+    if directories:
         markdownPrint('', '## Directories')
         for directory in arraySort(directories):
             directoryURL = if(path != null, path + '/', '') + directory
@@ -65,7 +56,14 @@ async function markdownUpIndex():
     endif
 
     # Empty path?
-    if !arrayLength(files) && directories == null:
-        markdownPrint('', 'No Markdown files or sub-directories found')
+    if !files && !directories:
+        markdownPrint('', 'No files or sub-directories found')
     endif
+endfunction
+
+
+function markdownUpIndexFileCompare(file1, file2):
+    name1 = objectGet(file1, 'display', objectGet(file1, 'name'))
+    name2 = objectGet(file2, 'display', objectGet(file2, 'name'))
+    return systemCompare(name1, name2)
 endfunction
