@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.0 (2025-07-17)
+
+- [9c2f9b4](https://github.com/craigahobbs/markdown-up-py/commit/9c2f9b4) - auto-stub html files, release mode
+
 ## 2.1.5 (2025-06-01)
 
 - [070c944](https://github.com/craigahobbs/markdown-up-py/commit/070c944) - remove .mds extension

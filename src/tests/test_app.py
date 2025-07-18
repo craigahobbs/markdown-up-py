@@ -2,14 +2,16 @@
 # https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
 from contextlib import contextmanager
+from io import StringIO
 import json
 import os
+import re
 from tempfile import TemporaryDirectory
 import unittest
 import unittest.mock
 
 import chisel.app
-from markdown_up.app import MarkdownUpApplication
+from markdown_up.app import MarkdownUpApplication, create_markdown_up_stub
 
 
 # Helper context manager to create a list of files in a temporary directory
@@ -29,30 +31,94 @@ def create_test_files(file_defs):
         tempdir.cleanup()
 
 
-class TestMarkdownUpApplication(unittest.TestCase):
+class TestMarkdownUp(unittest.TestCase):
 
     def test_init(self):
         app = MarkdownUpApplication('.')
         self.assertEqual(app.root, '.')
-        self.assertListEqual(
-            sorted(request.name for request in app.requests.values() if request.doc_group.startswith('MarkdownUp Index ')),
-            [
-                'index.html',
-                'markdownUpIndex.bare',
-                'markdown_up_index'
-            ]
-        )
+        self.assertTrue('index.html' in (request.name for request in app.requests.values()))
+        self.assertTrue('markdownUpIndex.bare' in (request.name for request in app.requests.values()))
+        self.assertTrue('markdown_up_index' in (request.name for request in app.requests.values()))
+        self.assertTrue('chisel_doc' in (request.name for request in app.requests.values()))
+        self.assertTrue('markdown-up/VERSION.txt' in (request.name for request in app.requests.values()))
+
+
+    def test_init_release(self):
+        app = MarkdownUpApplication('.', True)
+        self.assertEqual(app.root, '.')
+        self.assertFalse('index.html' in (request.name for request in app.requests.values()))
+        self.assertFalse('markdownUpIndex.bare' in (request.name for request in app.requests.values()))
+        self.assertFalse('markdown_up_index' in (request.name for request in app.requests.values()))
+        self.assertFalse('chisel_doc' in (request.name for request in app.requests.values()))
+        self.assertTrue('markdown-up/VERSION.txt' in (request.name for request in app.requests.values()))
 
 
     def test_static(self):
         test_files = [
             ('README.md', '# Title'),
-            (('images', 'image.svg'), '<svg></svg>')
+            (('sub', 'index.md'), '# index.md'),
+            (('sub2', 'index.html'), '<html></html>'),
+            (('sub3', 'test.txt'), 'test')
         ]
         with create_test_files(test_files) as temp_dir:
             app = MarkdownUpApplication(temp_dir)
 
-            # Get a markdown file
+            # Root
+            environ = chisel.Context.create_environ('GET', '/')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '85ffc95b1d8b8f87ac29f80e07cac2d0')]
+            )
+            self.assertTrue(b'<title>MarkdownUp</title>' in b''.join(content))
+
+            # Root subdir reloc
+            environ = chisel.Context.create_environ('GET', '/sub')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '301 Moved Permanently')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/plain; charset=utf-8'), ('Location', '/sub/')]
+            )
+            self.assertEqual(content, [b'/sub/'])
+
+            # Root subdir autostub
+            environ = chisel.Context.create_environ('GET', '/sub/')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '0658c1a8597e87ba9829f9b7e13fe5be')]
+            )
+            self.assertTrue(content, [create_markdown_up_stub('index.md')])
+
+            # Root subdir HTML
+            environ = chisel.Context.create_environ('GET', '/sub2/')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'c83301425b2ad1d496473a5ff3d9ecca')]
+            )
+            self.assertEqual(content, [b'<html></html>'])
+
+            # Root subdir not found
+            environ = chisel.Context.create_environ('GET', '/sub3/')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '404 Not Found')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/plain; charset=utf-8')]
+            )
+            self.assertEqual(content, [b'Not Found'])
+
+            # File
             environ = chisel.Context.create_environ('GET', '/README.md')
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
@@ -63,7 +129,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             )
             self.assertEqual(content, [b'# Title'])
 
-            # Get an unmodified markdown file
+            # File unmodified
             environ = chisel.Context.create_environ('GET', '/README.md')
             environ['HTTP_IF_NONE_MATCH'] = '38cdd67987afb67a4af89ea02044a00e'
             start_response = chisel.app.StartResponse()
@@ -72,18 +138,27 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.headers, [])
             self.assertEqual(content, [])
 
-            # Get an image file
-            environ = chisel.Context.create_environ('GET', '/images/image.svg')
+            # Auto HTML stub
+            environ = chisel.Context.create_environ('GET', '/README.html')
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'image/svg+xml'), ('ETag', '7b56e1eab00ec8000da9331a4888cb35')]
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'e4fad7593460a7af69f2708f6563898b')]
             )
-            self.assertEqual(content, [b'<svg></svg>'])
+            self.assertEqual(content, [create_markdown_up_stub('README.md')])
 
-            # Get a not-found file
+            # Auto HTML stub unmodified
+            environ = chisel.Context.create_environ('GET', '/README.html')
+            environ['HTTP_IF_NONE_MATCH'] = 'e4fad7593460a7af69f2708f6563898b'
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '304 Not Modified')
+            self.assertEqual(start_response.headers, [])
+            self.assertEqual(content, [])
+
+            # Not found
             environ = chisel.Context.create_environ('GET', '/not-found.md')
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
@@ -91,8 +166,198 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
             self.assertEqual(content, [b'Not Found'])
 
-            # Get a file of unknown content type
-            environ = chisel.Context.create_environ('GET', '/file.unk')
+            # Not found HTML
+            environ = chisel.Context.create_environ('GET', '/not-found.html')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '404 Not Found')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(content, [b'Not Found'])
+
+            # Bad method
+            environ = chisel.Context.create_environ('POST', '/README.md')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '405 Method Not Allowed')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(content, [b'Method Not Allowed'])
+
+            # Verify no requests were added
+            self.assertFalse('/' in app.requests)
+            self.assertFalse('/sub' in app.requests)
+            self.assertFalse('/sub/' in app.requests)
+            self.assertFalse('/sub2/' in app.requests)
+            self.assertFalse('/sub3/' in app.requests)
+            self.assertFalse('/README.html' in app.requests)
+            self.assertFalse('/README.md' in app.requests)
+            self.assertFalse('/not-found.html' in app.requests)
+            self.assertFalse('/not-found.md' in app.requests)
+
+
+    def test_static_release(self):
+        test_files = [
+            ('README.md', '# Title'),
+            (('sub', 'index.md'), '# index.md'),
+            (('sub2', 'index.html'), '<html></html>'),
+            (('sub3', 'test.txt'), 'test')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, True)
+
+            # Root
+            environ = chisel.Context.create_environ('GET', '/')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'e4fad7593460a7af69f2708f6563898b')]
+            )
+            self.assertTrue(content, [create_markdown_up_stub('README.md')])
+
+            # Root subdir reloc
+            environ = chisel.Context.create_environ('GET', '/sub')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '301 Moved Permanently')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/plain; charset=utf-8'), ('Location', '/sub/')]
+            )
+            self.assertEqual(content, [b'/sub/'])
+
+            # Root subdir autostub
+            environ = chisel.Context.create_environ('GET', '/sub/')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '0658c1a8597e87ba9829f9b7e13fe5be')]
+            )
+            self.assertTrue(content, [create_markdown_up_stub('index.md')])
+
+            # Root subdir HTML
+            environ = chisel.Context.create_environ('GET', '/sub2/')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'c83301425b2ad1d496473a5ff3d9ecca')]
+            )
+            self.assertEqual(content, [b'<html></html>'])
+
+            # Root subdir not found
+            environ = chisel.Context.create_environ('GET', '/sub3/')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '404 Not Found')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/plain; charset=utf-8')]
+            )
+            self.assertEqual(content, [b'Not Found'])
+
+            # File
+            environ = chisel.Context.create_environ('GET', '/README.md')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/markdown; charset=utf-8'), ('ETag', '38cdd67987afb67a4af89ea02044a00e')]
+            )
+            self.assertEqual(content, [b'# Title'])
+
+            # File unmodified
+            environ = chisel.Context.create_environ('GET', '/README.md')
+            environ['HTTP_IF_NONE_MATCH'] = '38cdd67987afb67a4af89ea02044a00e'
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '304 Not Modified')
+            self.assertEqual(start_response.headers, [])
+            self.assertEqual(content, [])
+
+            # Auto HTML stub
+            environ = chisel.Context.create_environ('GET', '/README.html')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '200 OK')
+            self.assertEqual(
+                start_response.headers,
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'e4fad7593460a7af69f2708f6563898b')]
+            )
+            self.assertEqual(content, [create_markdown_up_stub('README.md')])
+
+            # Auto HTML stub unmodified
+            environ = chisel.Context.create_environ('GET', '/README.html')
+            environ['HTTP_IF_NONE_MATCH'] = 'e4fad7593460a7af69f2708f6563898b'
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '304 Not Modified')
+            self.assertEqual(start_response.headers, [])
+            self.assertEqual(content, [])
+
+            # Not found
+            environ = chisel.Context.create_environ('GET', '/not-found.md')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '404 Not Found')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(content, [b'Not Found'])
+
+            # Not found HTML
+            environ = chisel.Context.create_environ('GET', '/not-found.html')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '404 Not Found')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(content, [b'Not Found'])
+
+            # Bad method
+            environ = chisel.Context.create_environ('POST', '/README.md')
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '405 Method Not Allowed')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(content, [b'Method Not Allowed'])
+
+            # Verify no requests were added
+            self.assertTrue('/' in app.requests)
+            self.assertTrue('/sub' in app.requests)
+            self.assertTrue('/sub/' in app.requests)
+            self.assertTrue('/sub2/' in app.requests)
+            self.assertFalse('/sub3/' in app.requests)
+            self.assertTrue('/README.html' in app.requests)
+            self.assertTrue('/README.md' in app.requests)
+            self.assertFalse('/not-found.md' in app.requests)
+
+
+    def test_static_unknown_extension(self):
+        test_files = [
+            ('test.unk', '')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, True)
+            wsgi_errors = StringIO()
+            environ = chisel.Context.create_environ('GET', '/test.unk', environ={'wsgi.errors': wsgi_errors})
+            start_response = chisel.app.StartResponse()
+            content = app(environ, start_response)
+            self.assertEqual(start_response.status, '404 Not Found')
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(content, [b'Not Found'])
+            self.assertTrue(re.match(
+                r'^WARNING \[\d+ / \d+\] Unknown content type for static resource "/test.unk"',
+                wsgi_errors.getvalue()
+            ), wsgi_errors.getvalue())
+
+
+    def test_static_unknown_extension_not_found(self):
+        test_files = []
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, True)
+            environ = chisel.Context.create_environ('GET', '/test.unk')
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '404 Not Found')
@@ -100,120 +365,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(content, [b'Not Found'])
 
 
-    def test_static_index(self):
-        test_files = [
-            (('html', 'index.html'), '<html></html>'),
-        ]
-        with create_test_files(test_files) as temp_dir:
-            app = MarkdownUpApplication(temp_dir)
-
-            # Get the index file directly
-            environ = chisel.Context.create_environ('GET', '/html/index.html')
-            start_response = chisel.app.StartResponse()
-            content = app(environ, start_response)
-            self.assertEqual(start_response.status, '200 OK')
-            self.assertEqual(
-                start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'c83301425b2ad1d496473a5ff3d9ecca')]
-            )
-            self.assertEqual(content, [b'<html></html>'])
-
-            # Get the index file
-            environ = chisel.Context.create_environ('GET', '/html/')
-            start_response = chisel.app.StartResponse()
-            content = app(environ, start_response)
-            self.assertEqual(start_response.status, '200 OK')
-            self.assertEqual(
-                start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'c83301425b2ad1d496473a5ff3d9ecca')]
-            )
-            self.assertEqual(content, [b'<html></html>'])
-
-            # Get the index file (alternate)
-            environ = chisel.Context.create_environ('GET', '/html')
-            start_response = chisel.app.StartResponse()
-            content = app(environ, start_response)
-            self.assertEqual(start_response.status, '200 OK')
-            self.assertEqual(
-                start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'c83301425b2ad1d496473a5ff3d9ecca')]
-            )
-            self.assertEqual(content, [b'<html></html>'])
-
-
-    def test_static_index_other(self):
-        test_files = [
-            (('html', 'index.htm'), '<html></html>'),
-        ]
-        with create_test_files(test_files) as temp_dir:
-            app = MarkdownUpApplication(temp_dir)
-
-            # Get the index file directly
-            environ = chisel.Context.create_environ('GET', '/html/index.htm')
-            start_response = chisel.app.StartResponse()
-            content = app(environ, start_response)
-            self.assertEqual(start_response.status, '200 OK')
-            self.assertEqual(
-                start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'c83301425b2ad1d496473a5ff3d9ecca')]
-            )
-            self.assertEqual(content, [b'<html></html>'])
-
-            # Get the index file
-            environ = chisel.Context.create_environ('GET', '/html/')
-            start_response = chisel.app.StartResponse()
-            content = app(environ, start_response)
-            self.assertEqual(start_response.status, '200 OK')
-            self.assertEqual(
-                start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'c83301425b2ad1d496473a5ff3d9ecca')]
-            )
-            self.assertEqual(content, [b'<html></html>'])
-
-            # Get the index file (alternate)
-            environ = chisel.Context.create_environ('GET', '/html')
-            start_response = chisel.app.StartResponse()
-            content = app(environ, start_response)
-            self.assertEqual(start_response.status, '200 OK')
-            self.assertEqual(
-                start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'c83301425b2ad1d496473a5ff3d9ecca')]
-            )
-            self.assertEqual(content, [b'<html></html>'])
-
-
-    def test_static_index_none(self):
-        test_files = [
-            (('html', 'README.md'), '# Title'),
-        ]
-        with create_test_files(test_files) as temp_dir:
-            app = MarkdownUpApplication(temp_dir)
-
-            # Get the index file
-            environ = chisel.Context.create_environ('GET', '/html/')
-            start_response = chisel.app.StartResponse()
-            content = app(environ, start_response)
-            self.assertEqual(start_response.status, '404 Not Found')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
-            self.assertEqual(content, [b'Not Found'])
-
-            # Get the index file (alternate)
-            environ = chisel.Context.create_environ('GET', '/html')
-            start_response = chisel.app.StartResponse()
-            content = app(environ, start_response)
-            self.assertEqual(start_response.status, '404 Not Found')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
-            self.assertEqual(content, [b'Not Found'])
-
-
-    def test_markdown_up_html(self):
-        with create_test_files([]) as temp_dir:
-            app = MarkdownUpApplication(temp_dir)
-            status, headers, content_bytes = app.request('GET', '/')
-            self.assertEqual(status, '200 OK')
-            self.assertEqual(headers, [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'abb5157ca009ed55bc9bb14813cdb6c7')])
-            self.assertTrue(content_bytes.decode('utf-8').startswith('<!DOCTYPE html>'))
-
+class TestMarkdownUpAPI(unittest.TestCase):
 
     def test_markdown_up_index(self):
         test_files = [
@@ -231,8 +383,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertDictEqual(json.loads(content_bytes.decode('utf-8')), {
                 'path': temp_dir,
-                'files': ['README.md'],
-                'htmlFiles': ['index.html'],
+                'files': [{'name': 'README.html', 'display': 'README.md'}, {'name': 'index.html'}],
                 'directories': ['dir', 'dir2']
             })
 
@@ -244,7 +395,9 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(status, '200 OK')
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertDictEqual(json.loads(content_bytes.decode('utf-8')), {
-                'path': temp_dir
+                'path': temp_dir,
+                'files': [],
+                'directories': []
             })
 
 
@@ -259,7 +412,8 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertDictEqual(json.loads(content_bytes.decode('utf-8')), {
                 'path': os.path.join(temp_dir, 'dir'),
-                'files': ['README.md']
+                'files': [{'name': 'README.html', 'display': 'README.md'}],
+                'directories': []
             })
 
 
@@ -275,7 +429,8 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertDictEqual(json.loads(content_bytes.decode('utf-8')), {
                 'path': os.path.join(temp_dir, 'dir', 'dir2'),
                 'parent': 'dir',
-                'files': ['README.md']
+                'files': [{'name': 'README.html', 'display': 'README.md'}],
+                'directories': []
             })
 
 
@@ -292,7 +447,7 @@ class TestMarkdownUpApplication(unittest.TestCase):
             self.assertDictEqual(json.loads(content_bytes.decode('utf-8')), {
                 'path': os.path.join(temp_dir, 'dir()[]', 'dir2()[]'),
                 'parent': 'dir()[]',
-                'files': ['file()[].md'],
+                'files': [{'name': 'file()[].html', 'display': 'file()[].md'}],
                 'directories': ['dir3()[]']
             })
 
