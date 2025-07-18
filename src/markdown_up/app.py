@@ -48,7 +48,7 @@ class MarkdownUpApplication(chisel.Application):
         self.add_requests(load_backend_requests('markdown-up.json', debug))
 
 
-    def add_static(self, filename, content_type=None, urls=(('GET', None),), doc_group='MarkdownUp Index Statics'):
+    def add_static(self, filename, content_type=None, urls=(('GET', None),), doc_group='MarkdownUp File Browser'):
         with importlib.resources.files('markdown_up.static').joinpath(filename).open('rb') as fh:
             self.add_request(chisel.StaticRequest(filename, fh.read(), content_type=content_type, urls=urls, doc_group=doc_group))
 
@@ -210,7 +210,7 @@ def create_markdown_up_stub(filename):
 
 
 @chisel.action(spec='''\
-group "MarkdownUp Index API"
+group "MarkdownUp File Browser"
 
 
 # The MarkdownUp launcher index API
