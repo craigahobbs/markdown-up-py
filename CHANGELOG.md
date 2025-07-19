@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.1 (2025-07-19)
+
+- [e9d27a1](https://github.com/craigahobbs/markdown-up-py/commit/e9d27a1) - update readme
+
 ## 2.2.0 (2025-07-17)
 
 - [9c2f9b4](https://github.com/craigahobbs/markdown-up-py/commit/9c2f9b4) - auto-stub html files, release mode
