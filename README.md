@@ -46,7 +46,7 @@ backend API application using
 [waitress](https://pypi.org/project/waitress/).
 
 
-### Automatically Creates HTML for Markdown Files
+### Automatic HTML for Markdown Files
 
 When you run MarkdownUp and click on a Markdown file link, the link navigates to an HTML file that
 renders the Markdown file. Every Markdown file hosted by MarkdownUp has a corresponding `.html` file
@@ -89,7 +89,7 @@ using the
 programming language. Markdown files viewed within MarkdownUp may contain `markdown-script` fenced
 code blocks containing
 [BareScript](https://github.com/craigahobbs/bare-script#readme)
-that executes when the Markdown renders.
+that execute when the Markdown renders.
 
 MarkdownUp has libraries for dynamically generating and rendering Markdown text, drawing SVG images,
 performing data analytics, parsing application arguments, and much more. See the
@@ -113,6 +113,13 @@ while i <= 10:
 endwhile
 ```
 ~~~
+
+
+### MarkdownUp Application Examples
+
+To see what's possible with MarkdownUp Applications, see the
+[MarkdownUp Application Examples](https://craigahobbs.github.io/#var.vPage='MarkdownUp')
+page.
 
 
 ## Development
