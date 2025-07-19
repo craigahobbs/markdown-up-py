@@ -6,94 +6,52 @@ The MarkdownUp launcher back-end API support
 """
 
 from functools import partial
-import json
-import os
-
 import bare_script
 from bare_script.value import value_args_model, value_args_validate
 import chisel
 import schema_markdown
 
 
-# The backend configuration schema
-CONFIG_TYPES = schema_markdown.parse_schema_markdown('''\
-# The MarkdownUp backend API configuration file
-struct BackendConfig
-
-    # The schema markdown files
-    string[len > 0] schemas
-
-    # The BareScript API files
-    BackendScript[len > 0] scripts
-
-
-# A backend API script
-struct BackendScript
-
-    # The BareScript file
-    string script
-
-    # The APIs
-    BackendAPI[len > 0] apis
-
-
-# A backend API
-struct BackendAPI
-
-    # The schema type name
-    string name
-
-    # The script function name. If unspecified, use the schema type name.
-    optional string function
-''')
-
-
 # Load the MarkdownUp backend config requests
-def load_backend_requests(config_path, debug=False):
-    # Read the "markdown-up.json" file - do nothing if it doesn't exist
-    if not os.path.isfile(config_path):
-        return
-    with open(config_path, 'r', encoding='utf-8') as config_file:
-        config = schema_markdown.validate_type(CONFIG_TYPES, 'BackendConfig', json.load(config_file))
+def load_backend_requests(config):
+    debug = config.get('debug', False)
+    schemas = config.get('schemas') or []
+    scripts = config.get('scripts') or []
+    apis = config.get('apis') or []
 
-    # Load the schema markdown files
+    # Parse the backend schema markdown files
     types = {}
-    for smd_path in config['schemas']:
-        with open(smd_path, 'r', encoding='utf-8') as smd_file:
-            schema_markdown.parse_schema_markdown(smd_file, types, filename=smd_path, validate=False)
-    schema_markdown.validate_type_model(types)
+    for schema in schemas:
+        with open(schema, 'r', encoding='utf-8') as schema_file:
+            schema_markdown.parse_schema_markdown(schema_file, types, filename=schema, validate=False)
+    if types:
+        schema_markdown.validate_type_model(types)
 
-    # Load the BareScript API files
-    for backend_script in config['scripts']:
+    # Parse and execute the backend BareScript files
+    backend_globals = {
+        'backendHeader': _backend_header,
+        'backendError': _backend_error
+    }
+    script_options = {
+        'debug': debug,
+        'fetchFn': bare_script.fetch_read_write,
+        'globals': backend_globals,
+        'logFn': bare_script.log_stdout,
+        'urlFile': bare_script.url_file_relative
+    }
+    for script in scripts:
+        with open(script, 'r', encoding='utf-8') as script_file:
+            bare_script.execute_script(bare_script.parse_script(script_file), script_options)
 
-        # Parse the script
-        with open(backend_script['script'], 'r', encoding='utf-8') as script_file:
-            api_script = bare_script.parse_script(script_file)
+    # Yield the backend APIs
+    for api in apis:
+        api_name = api['name']
+        api_fn = api.get('function', api_name)
 
-        # Execute the script
-        script_globals = {
-            _BACKEND_GLOBAL: {'headers': {}},
-            'backendHeader': _backend_header,
-            'backendError': _backend_error
-        }
-        script_options = {
-            'debug': debug,
-            'fetchFn': bare_script.fetch_read_write,
-            'globals': script_globals,
-            'logFn': bare_script.log_stdout,
-            'urlFile': bare_script.url_file_relative
-        }
-        bare_script.execute_script(api_script, script_options)
-
-        # Create the backend API requests
-        for backend_api in backend_script['apis']:
-            api_name = backend_api['name']
-            api_fn = backend_api.get('function', api_name)
-
-            # Add the API action
-            script_fn = script_globals[api_fn]
-            action_fn = partial(_bare_script_action_fn, script_fn, script_options)
-            yield chisel.Action(action_fn, name=api_name, types=types)
+        # Add the API action
+        script_fn = backend_globals[api_fn]
+        action_fn = partial(_bare_script_action_fn, script_fn, backend_globals, debug)
+        yield chisel.Action(action_fn, name=api_name, types=types)
 
 
 # Special backend global variables
@@ -101,11 +59,24 @@ _BACKEND_GLOBAL = '__markdown_up__'
 
 
 # Action function wrapper for a MarkdownUp backend API function
-def _bare_script_action_fn(script_fn, script_options, ctx, req):
+def _bare_script_action_fn(script_fn, backend_globals, debug, ctx, req):
+    # Copy the backend globals
+    script_globals = dict(backend_globals)
+    script_globals[_BACKEND_GLOBAL] = {'headers': {}}
+
+    # Execute the API function
+    script_options = {
+        'debug': debug,
+        'fetchFn': bare_script.fetch_read_write,
+        'globals': script_globals,
+        'logFn': bare_script.log_stdout,
+        'statementCount': 0,
+        'urlFile': bare_script.url_file_relative
+    }
     response = script_fn([req], script_options)
 
     # Add response headers, if any
-    backend_state = script_options['globals'][_BACKEND_GLOBAL]
+    backend_state = script_globals[_BACKEND_GLOBAL]
     ctx.headers.update(backend_state['headers'])
 
     # Error?

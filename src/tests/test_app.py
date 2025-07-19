@@ -44,7 +44,7 @@ class TestMarkdownUp(unittest.TestCase):
 
 
     def test_init_release(self):
-        app = MarkdownUpApplication('.', True)
+        app = MarkdownUpApplication('.', {'release': True})
         self.assertEqual(app.root, '.')
         self.assertFalse('index.html' in (request.name for request in app.requests.values()))
         self.assertFalse('markdownUpIndex.bare' in (request.name for request in app.requests.values()))
@@ -202,7 +202,7 @@ class TestMarkdownUp(unittest.TestCase):
             (('sub3', 'test.txt'), 'test')
         ]
         with create_test_files(test_files) as temp_dir:
-            app = MarkdownUpApplication(temp_dir, True)
+            app = MarkdownUpApplication(temp_dir, {'release': True})
 
             # Root
             environ = chisel.Context.create_environ('GET', '/')
@@ -339,7 +339,7 @@ class TestMarkdownUp(unittest.TestCase):
             ('test.unk', '')
         ]
         with create_test_files(test_files) as temp_dir:
-            app = MarkdownUpApplication(temp_dir, True)
+            app = MarkdownUpApplication(temp_dir)
             wsgi_errors = StringIO()
             environ = chisel.Context.create_environ('GET', '/test.unk', environ={'wsgi.errors': wsgi_errors})
             start_response = chisel.app.StartResponse()
@@ -356,7 +356,7 @@ class TestMarkdownUp(unittest.TestCase):
     def test_static_unknown_extension_not_found(self):
         test_files = []
         with create_test_files(test_files) as temp_dir:
-            app = MarkdownUpApplication(temp_dir, True)
+            app = MarkdownUpApplication(temp_dir)
             environ = chisel.Context.create_environ('GET', '/test.unk')
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)

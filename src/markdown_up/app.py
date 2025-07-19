@@ -24,13 +24,14 @@ class MarkdownUpApplication(chisel.Application):
     __slots__ = ('root', 'release', 'add_request_lock')
 
 
-    def __init__(self, root, release=False, debug=False):
+    def __init__(self, root, config = None):
         super().__init__()
         self.root = root
-        self.release = release
+        self.release = config.get('release', False) if config else False
         self.add_request_lock = threading.Lock()
 
-        if release:
+        # Release mode?
+        if self.release:
             # Add the MarkdownUp application
             self.add_requests(chisel.create_doc_requests(api=False, app=False, markdown_up=True))
         else:
@@ -45,7 +46,8 @@ class MarkdownUpApplication(chisel.Application):
             self.add_static('markdownUpIndex.bare')
 
         # Add the backend APIs
-        self.add_requests(load_backend_requests('markdown-up.json', debug))
+        if config:
+            self.add_requests(load_backend_requests(config))
 
 
     def add_static(self, filename, content_type=None, urls=(('GET', None),), doc_group='MarkdownUp File Browser'):
