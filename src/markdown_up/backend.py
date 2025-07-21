@@ -47,11 +47,12 @@ def load_backend_requests(config):
     for api in apis:
         api_name = api['name']
         api_fn = api.get('function', api_name)
+        api_wsgi = api.get('wsgi', False)
 
         # Add the API action
         script_fn = backend_globals[api_fn]
-        action_fn = partial(_bare_script_action_fn, script_fn, backend_globals, debug)
-        yield chisel.Action(action_fn, name=api_name, types=types)
+        action_fn = partial(_bare_script_action_fn, script_fn, api_wsgi, backend_globals, debug)
+        yield chisel.Action(action_fn, name=api_name, types=types, wsgi_response=api_wsgi)
 
 
 # Special backend global variables
@@ -59,7 +60,7 @@ _BACKEND_GLOBAL = '__markdown_up__'
 
 
 # Action function wrapper for a MarkdownUp backend API function
-def _bare_script_action_fn(script_fn, backend_globals, debug, ctx, req):
+def _bare_script_action_fn(script_fn, api_wsgi, backend_globals, debug, ctx, req):
     # Copy the backend globals
     script_globals = dict(backend_globals)
     script_globals[_BACKEND_GLOBAL] = {'headers': {}}
@@ -75,13 +76,24 @@ def _bare_script_action_fn(script_fn, backend_globals, debug, ctx, req):
     }
     response = script_fn([req], script_options)
 
-    # Add response headers, if any
-    backend_state = script_globals[_BACKEND_GLOBAL]
-    ctx.headers.update(backend_state['headers'])
-
     # Error?
+    backend_state = script_globals[_BACKEND_GLOBAL]
     if 'error' in backend_state:
         raise chisel.ActionError(backend_state['error'], status=backend_state.get('errorStatus'))
+
+    # WSGI response?
+    if api_wsgi:
+
+        # Add WSGI response headers
+        headers = response[1]
+        headers.extend(backend_state['headers'].items())
+
+        # WSGI response
+        ctx.start_response(response[0], headers)
+        return [response[2].encode('utf-8')]
+
+    # Add response headers
+    ctx.headers.update(backend_state['headers'])
 
     return response
 

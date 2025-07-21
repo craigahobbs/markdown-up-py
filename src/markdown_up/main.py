@@ -48,6 +48,8 @@ def main(argv=None):
             config = schema_markdown.validate_type(CONFIG_TYPES, 'MarkdownUpConfig', json.load(config_file))
     else:
         config = {}
+
+    # Add arguments to the config
     config['debug'] = args.debug if args.debug is not None else config.get('debug', False)
     config['release'] = args.release if args.release is not None else config.get('release', False)
     config['threads'] = max(1, args.threads if args.threads is not None else config.get('threads', 8))
@@ -136,4 +138,8 @@ struct BackendAPI
 
     # The script function name. If unspecified, use the schema action name.
     optional string function
+
+    # If true, the API function has a WSGI respone (e.g. `["200 Status", [["Content-Type": "text/plain"]], "Hello!"]`)
+    # Default is false.
+    optional bool wsgi
 ''')
