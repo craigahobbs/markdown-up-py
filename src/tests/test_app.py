@@ -35,6 +35,8 @@ class TestMarkdownUp(unittest.TestCase):
 
     def test_init(self):
         app = MarkdownUpApplication('.')
+        self.assertEqual(app.pretty_output, True)
+        self.assertEqual(app.validate_output, True)
         self.assertEqual(app.root, '.')
         self.assertTrue('index.html' in (request.name for request in app.requests.values()))
         self.assertTrue('markdownUpIndex.bare' in (request.name for request in app.requests.values()))
@@ -45,6 +47,8 @@ class TestMarkdownUp(unittest.TestCase):
 
     def test_init_release(self):
         app = MarkdownUpApplication('.', {'release': True})
+        self.assertEqual(app.pretty_output, False)
+        self.assertEqual(app.validate_output, False)
         self.assertEqual(app.root, '.')
         self.assertFalse('index.html' in (request.name for request in app.requests.values()))
         self.assertFalse('markdownUpIndex.bare' in (request.name for request in app.requests.values()))
