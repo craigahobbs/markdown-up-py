@@ -41,21 +41,23 @@ def main(argv=None):
                         help='backend debug mode')
     parser.add_argument('-v', '--var', nargs=2, action='append', metavar=('VAR', 'EXPR'), default = [],
                         help='set a global variable to an expression value')
+    parser.add_argument('-c', '--config', metavar='FILE', default='markdown-up.json',
+                        help='the configuration file path (default is "markdown-up.json")')
+    parser.add_argument('-a', '--api', metavar='FILE', default='markdown-up-api.json',
+                        help='the API configuration file path (default is "markdown-up-api.json")')
     args = parser.parse_args(args=argv)
 
     # Load and validate the configuration file
-    config_path = 'markdown-up.json'
-    if os.path.isfile(config_path):
-        with open(config_path, 'r', encoding='utf-8') as config_file:
+    if os.path.isfile(args.config):
+        with open(args.config, 'r', encoding='utf-8') as config_file:
             config = schema_markdown.validate_type(CONFIG_TYPES, 'MarkdownUpConfig', json.load(config_file))
     else:
         config = {}
 
     # Load and validate the API configuration file
-    api_config_path = 'markdown-up-api.json'
-    if os.path.isfile(api_config_path):
-        with open(api_config_path, 'r', encoding='utf-8') as api_config_file:
-            api_config = schema_markdown.validate_type(CONFIG_TYPES, 'MarkdownUpAPI', json.load(api_config_file))
+    if os.path.isfile(args.api):
+        with open(args.api, 'r', encoding='utf-8') as api_file:
+            api_config = schema_markdown.validate_type(CONFIG_TYPES, 'MarkdownUpAPI', json.load(api_file))
     else:
         api_config = None
 

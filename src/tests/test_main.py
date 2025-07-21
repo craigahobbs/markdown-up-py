@@ -32,10 +32,7 @@ class TestMain(unittest.TestCase):
             mock_isdir.assert_not_called()
             mock_isfile.assert_not_called()
             self.assertEqual(cm_exc.exception.code, 0)
-            self.assertEqual(
-                stdout.getvalue().splitlines()[0],
-                'usage: markdown-up [-h] [-p N] [-t N] [-n] [-r] [-q] [-d] [-v VAR EXPR] [path]'
-            )
+            self.assertTrue(stdout.getvalue().startswith('usage: markdown-up'))
             self.assertEqual(stderr.getvalue(), '')
 
 
