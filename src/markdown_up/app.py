@@ -2,7 +2,7 @@
 # https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
 """
-The MarkdownUp launcher back-end application
+The MarkdownUp back-end application
 """
 
 import importlib.resources
@@ -13,7 +13,7 @@ import urllib.parse
 
 import chisel
 
-from .backend import load_backend_requests
+from .api import load_backend_requests
 
 
 class MarkdownUpApplication(chisel.Application):
@@ -215,7 +215,7 @@ def create_markdown_up_stub(filename):
 group "MarkdownUp File Browser"
 
 
-# The MarkdownUp launcher index API
+# The MarkdownUp file browser API
 action markdown_up_index
     urls
         GET

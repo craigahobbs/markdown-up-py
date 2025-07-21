@@ -5,7 +5,7 @@ include <args.bare>
 
 
 #
-# The MarkdownUp launcher index application main entry point
+# The MarkdownUp file browser application main entry point
 #
 async function markdownUpIndex():
     # Parse arguments

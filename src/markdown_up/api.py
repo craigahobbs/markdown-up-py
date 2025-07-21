@@ -2,7 +2,7 @@
 # https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
 """
-The MarkdownUp launcher back-end API support
+MarkdownUp back-end API support
 """
 
 from functools import partial

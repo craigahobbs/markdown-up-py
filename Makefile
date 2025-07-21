@@ -15,11 +15,6 @@ $(eval $(call WGET, https://craigahobbs.github.io/python-build/Makefile.base))
 $(eval $(call WGET, https://craigahobbs.github.io/python-build/pylintrc))
 
 
-# Set the coverage limit
-COVERAGE_REPORT_ARGS := $(COVERAGE_REPORT_ARGS) --fail-under 91
-UNITTEST_PARALLEL_COVERAGE_ARGS := --coverage-branch --coverage-fail-under 91
-
-
 # Include python-build
 include Makefile.base
 
