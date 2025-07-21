@@ -32,9 +32,17 @@ class MarkdownUpApplication(chisel.Application):
 
         # Release mode?
         if self.release:
+            # Not-pretty, unvalidated output
+            self.pretty_output = False
+            self.validate_output = False
+
             # Add the MarkdownUp application
             self.add_requests(chisel.create_doc_requests(api=False, app=False, markdown_up=True))
         else:
+            # Pretty, validated output
+            self.pretty_output = True
+            self.validate_output = True
+
             # Add the chisel documentation application (and the MarkdownUp application)
             self.add_requests(chisel.create_doc_requests())
 

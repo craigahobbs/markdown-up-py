@@ -458,7 +458,7 @@ class TestMarkdownUpAPI(unittest.TestCase):
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=../dir')
             self.assertEqual(status, '400 Bad Request')
             self.assertEqual(headers, [('Content-Type', 'application/json')])
-            self.assertEqual(content_bytes, b'{"error":"InvalidPath"}')
+            self.assertEqual(json.loads(content_bytes.decode('utf-8')), {'error': 'InvalidPath'})
 
 
     def test_markdown_up_index_file_path(self):
@@ -470,7 +470,7 @@ class TestMarkdownUpAPI(unittest.TestCase):
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=README.md')
             self.assertEqual(status, '400 Bad Request')
             self.assertEqual(headers, [('Content-Type', 'application/json')])
-            self.assertEqual(content_bytes, b'{"error":"InvalidPath"}')
+            self.assertEqual(json.loads(content_bytes.decode('utf-8')), {'error': 'InvalidPath'})
 
 
     def test_markdown_up_index_file_not_found(self):
@@ -479,4 +479,4 @@ class TestMarkdownUpAPI(unittest.TestCase):
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=dir')
             self.assertEqual(status, '400 Bad Request')
             self.assertEqual(headers, [('Content-Type', 'application/json')])
-            self.assertEqual(content_bytes, b'{"error":"InvalidPath"}')
+            self.assertEqual(json.loads(content_bytes.decode('utf-8')), {'error': 'InvalidPath'})
