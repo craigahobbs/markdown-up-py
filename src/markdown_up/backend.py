@@ -6,6 +6,8 @@ The MarkdownUp launcher back-end API support
 """
 
 from functools import partial
+from pathlib import Path
+
 import bare_script
 from bare_script.value import value_args_model, value_args_validate
 import chisel
@@ -18,9 +20,10 @@ def load_backend_requests(config, api_config):
 
     # Parse the backend schema markdown files
     types = {}
-    for schema in api_config.get('schemas'):
-        with open(schema, 'r', encoding='utf-8') as schema_file:
-            schema_markdown.parse_schema_markdown(schema_file, types, filename=schema, validate=False)
+    for schema_posix in api_config.get('schemas'):
+        schema_path = str(Path(schema_posix))
+        with open(schema_path, 'r', encoding='utf-8') as schema_file:
+            schema_markdown.parse_schema_markdown(schema_file, types, filename=schema_path, validate=False)
     if types:
         schema_markdown.validate_type_model(types)
 
@@ -39,8 +42,9 @@ def load_backend_requests(config, api_config):
         'logFn': bare_script.log_stdout,
         'urlFile': bare_script.url_file_relative
     }
-    for script in api_config.get('scripts'):
-        with open(script, 'r', encoding='utf-8') as script_file:
+    for script_posix in api_config.get('scripts'):
+        script_path = str(Path(script_posix))
+        with open(script_path, 'r', encoding='utf-8') as script_file:
             bare_script.execute_script(bare_script.parse_script(script_file), script_options)
 
     # Yield the backend APIs

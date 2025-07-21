@@ -142,10 +142,10 @@ struct MarkdownUpConfig
 # The MarkdownUp API configuration (e.g. `markdown-up-api.json`)
 struct MarkdownUpAPI
 
-    # The backend schema markdown files
+    # The backend schema markdown POSIX file paths
     string[len > 0] schemas
 
-    # The backend BareScript files
+    # The backend BareScript POSIX file paths
     string[len > 0] scripts
 
     # The backend APIs
