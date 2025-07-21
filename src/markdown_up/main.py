@@ -64,7 +64,7 @@ def main(argv=None):
         root = '.'
 
     # Load and validate the configuration file
-    config_path = args.config if root == '.' else os.path.join(root, args.config)
+    config_path = os.path.normpath(os.path.join(root, args.config))
     if os.path.isfile(config_path):
         with open(config_path, 'r', encoding='utf-8') as config_file:
             config = schema_markdown.validate_type(CONFIG_TYPES, 'MarkdownUpConfig', json.load(config_file))
@@ -72,7 +72,7 @@ def main(argv=None):
         config = {}
 
     # Load and validate the API configuration file
-    api_path = args.api if root == '.' else os.path.join(root, args.api)
+    api_path = os.path.normpath(os.path.join(root, args.api))
     if os.path.isfile(api_path):
         with open(api_path, 'r', encoding='utf-8') as api_file:
             api_config = schema_markdown.validate_type(CONFIG_TYPES, 'MarkdownUpAPI', json.load(api_file))
