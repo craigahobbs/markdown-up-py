@@ -33,11 +33,11 @@ def main(argv=None):
                         help='the number of web server threads (default is 8)')
     parser.add_argument('-n', '--no-browser', action='store_true',
                         help="don't open a web browser")
-    parser.add_argument('-r', '--release', action='store_true',
+    parser.add_argument('-r', '--release', action='store_true', default=None,
                         help="release mode (cache statics, remove documentation and index)")
     parser.add_argument('-q', '--quiet', action='store_true',
                         help="don't display access logging")
-    parser.add_argument('-d', '--debug', action='store_true', default=False,
+    parser.add_argument('-d', '--debug', action='store_true', default=None,
                         help='backend debug mode')
     parser.add_argument('-v', '--var', nargs=2, action='append', metavar=('VAR', 'EXPR'), default = [],
                         help='set a global variable to an expression value')
