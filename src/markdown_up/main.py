@@ -42,34 +42,10 @@ def main(argv=None):
     parser.add_argument('-v', '--var', nargs=2, action='append', metavar=('VAR', 'EXPR'), default = [],
                         help='set a global variable to an expression value')
     parser.add_argument('-c', '--config', metavar='FILE', default='markdown-up.json',
-                        help='the configuration file path (default is "markdown-up.json")')
+                        help='the configuration file name (default is "markdown-up.json")')
     parser.add_argument('-a', '--api', metavar='FILE', default='markdown-up-api.json',
-                        help='the API configuration file path (default is "markdown-up-api.json")')
+                        help='the API configuration file name (default is "markdown-up-api.json")')
     args = parser.parse_args(args=argv)
-
-    # Load and validate the configuration file
-    if os.path.isfile(args.config):
-        with open(args.config, 'r', encoding='utf-8') as config_file:
-            config = schema_markdown.validate_type(CONFIG_TYPES, 'MarkdownUpConfig', json.load(config_file))
-    else:
-        config = {}
-
-    # Load and validate the API configuration file
-    if os.path.isfile(args.api):
-        with open(args.api, 'r', encoding='utf-8') as api_file:
-            api_config = schema_markdown.validate_type(CONFIG_TYPES, 'MarkdownUpAPI', json.load(api_file))
-    else:
-        api_config = None
-
-    # Add argumentsg to the config
-    config['debug'] = args.debug if args.debug is not None else config.get('debug', False)
-    config['release'] = args.release if args.release is not None else config.get('release', False)
-    config['threads'] = max(1, args.threads if args.threads is not None else config.get('threads', 8))
-    if args.var:
-        if 'globals' not in config:
-            config['globals'] = {}
-        for key, value in args.var:
-            config['globals'][key] = value
 
     # Verify the path exists
     is_dir = os.path.isdir(args.path)
@@ -86,6 +62,32 @@ def main(argv=None):
     # Root must be a directory
     if root == '':
         root = '.'
+
+    # Load and validate the configuration file
+    config_path = args.config if root == '.' else os.path.join(root, args.config)
+    if os.path.isfile(config_path):
+        with open(config_path, 'r', encoding='utf-8') as config_file:
+            config = schema_markdown.validate_type(CONFIG_TYPES, 'MarkdownUpConfig', json.load(config_file))
+    else:
+        config = {}
+
+    # Load and validate the API configuration file
+    api_path = args.api if root == '.' else os.path.join(root, args.api)
+    if os.path.isfile(api_path):
+        with open(api_path, 'r', encoding='utf-8') as api_file:
+            api_config = schema_markdown.validate_type(CONFIG_TYPES, 'MarkdownUpAPI', json.load(api_file))
+    else:
+        api_config = None
+
+    # Add argumentsg to the config
+    config['debug'] = args.debug if args.debug is not None else config.get('debug', False)
+    config['release'] = args.release if args.release is not None else config.get('release', False)
+    config['threads'] = max(1, args.threads if args.threads is not None else config.get('threads', 8))
+    if args.var:
+        if 'globals' not in config:
+            config['globals'] = {}
+        for key, value in args.var:
+            config['globals'][key] = value
 
     # Construct the URL
     host = '127.0.0.1'

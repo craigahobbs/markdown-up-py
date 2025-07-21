@@ -55,7 +55,7 @@ class MarkdownUpApplication(chisel.Application):
 
         # Add the backend APIs
         if api_config:
-            self.add_requests(load_backend_requests(config, api_config))
+            self.add_requests(load_backend_requests(root, config, api_config))
 
 
     def add_static(self, filename, content_type=None, urls=(('GET', None),), doc_group='MarkdownUp File Browser'):

@@ -6,6 +6,7 @@ MarkdownUp back-end API support
 """
 
 from functools import partial
+import os
 from pathlib import Path
 
 import bare_script
@@ -15,17 +16,17 @@ import schema_markdown
 
 
 # Load the MarkdownUp backend config requests
-def load_backend_requests(config, api_config):
+def load_backend_requests(root, config, api_config):
     debug = config.get('debug', False)
 
     # Parse the backend schema markdown files
     types = {}
     for schema_posix in api_config.get('schemas'):
-        schema_path = str(Path(schema_posix))
+        schema_parts = Path(schema_posix).parts
+        schema_path = os.path.join(root, *(schema_parts[1:] if schema_parts[0] == '/' else schema_parts))
         with open(schema_path, 'r', encoding='utf-8') as schema_file:
             schema_markdown.parse_schema_markdown(schema_file, types, filename=schema_path, validate=False)
-    if types:
-        schema_markdown.validate_type_model(types)
+    schema_markdown.validate_type_model(types)
 
     # Parse and execute the backend BareScript files
     backend_globals = {
@@ -43,7 +44,8 @@ def load_backend_requests(config, api_config):
         'urlFile': bare_script.url_file_relative
     }
     for script_posix in api_config.get('scripts'):
-        script_path = str(Path(script_posix))
+        script_parts = Path(script_posix).parts
+        script_path = os.path.join(root, *(script_parts[1:] if script_parts[0] == '/' else script_parts))
         with open(script_path, 'r', encoding='utf-8') as script_file:
             bare_script.execute_script(bare_script.parse_script(script_file), script_options)
 

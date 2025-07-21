@@ -369,6 +369,43 @@ class TestMarkdownUp(unittest.TestCase):
             self.assertEqual(content, [b'Not Found'])
 
 
+    def test_api(self):
+        test_files = [
+            ('test.smd', '''\
+action sumNumbers
+    urls
+        GET
+
+    query
+        float[] values
+
+    output
+        float result
+'''),
+            ('test.bare', '''\
+function sumNumbers(request):
+    result = 0
+    for value in objectGet(request, 'values'):
+        result = result + value
+    endfor
+    return objectNew('result', result)
+endfunction
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, {}, {
+                'schemas': ['test.smd'],
+                'scripts': ['test.bare'],
+                'apis': [
+                    {'name': 'sumNumbers'}
+                ]
+            })
+            status, headers, content_bytes = app.request('GET', '/sumNumbers', query_string='values.0=1&values.1=2.5')
+            self.assertEqual(status, '200 OK')
+            self.assertEqual(headers, [('Content-Type', 'application/json')])
+            self.assertDictEqual(json.loads(content_bytes.decode('utf-8')), {'result': 3.5})
+
+
 class TestMarkdownUpAPI(unittest.TestCase):
 
     def test_markdown_up_index(self):

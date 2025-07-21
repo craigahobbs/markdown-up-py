@@ -47,12 +47,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stdout.getvalue(), '')
             self.assertEqual(stderr.getvalue(), f"\"{os.path.join('missing', 'README.md')}\" does not exist!\n")
             mock_isdir.assert_called_once_with(os.path.join('missing', 'README.md'))
-            self.assertEqual(mock_isfile.call_count, 3)
-            mock_isfile.assert_has_calls([
-                unittest.mock.call('markdown-up.json'),
-                unittest.mock.call('markdown-up-api.json'),
-                unittest.mock.call(os.path.join('missing', 'README.md'))
-            ])
+            mock_isfile.assert_called_once_with(os.path.join('missing', 'README.md'))
             self.assertEqual(cm_exc.exception.code, 2)
             self.assertEqual(stdout.getvalue(), '')
             self.assertEqual(stderr.getvalue(), f"\"{os.path.join('missing', 'README.md')}\" does not exist!\n")
@@ -69,12 +64,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(stdout.getvalue(), '')
             self.assertEqual(stderr.getvalue(), '"missing" does not exist!\n')
             mock_isdir.assert_called_once_with('missing')
-            self.assertEqual(mock_isfile.call_count, 3)
-            mock_isfile.assert_has_calls([
-                unittest.mock.call('markdown-up.json'),
-                unittest.mock.call('markdown-up-api.json'),
-                unittest.mock.call('missing')
-            ])
+            mock_isfile.assert_called_once_with('missing')
             self.assertEqual(cm_exc.exception.code, 2)
             self.assertEqual(stdout.getvalue(), '')
             self.assertEqual(stderr.getvalue(), '"missing" does not exist!\n')
@@ -263,7 +253,7 @@ class TestMain(unittest.TestCase):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isdir', return_value=False) as mock_isdir, \
-             patch('os.path.isfile', side_effect=[False, False, True]) as mock_isfile, \
+             patch('os.path.isfile', side_effect=[True, False, False]) as mock_isfile, \
              patch('waitress.serve') as mock_waitress_serve:
             main(['-n', 'README.md'])
 
@@ -272,9 +262,9 @@ class TestMain(unittest.TestCase):
             mock_isdir.assert_called_once_with('README.md')
             self.assertEqual(mock_isfile.call_count, 3)
             mock_isfile.assert_has_calls([
+                unittest.mock.call('README.md'),
                 unittest.mock.call('markdown-up.json'),
-                unittest.mock.call('markdown-up-api.json'),
-                unittest.mock.call('README.md')
+                unittest.mock.call('markdown-up-api.json')
             ])
             mock_waitress_serve.assert_called_once_with(ANY, port=8080, threads=8)
             wsgiapp = mock_waitress_serve.call_args[0][0]
@@ -285,7 +275,7 @@ class TestMain(unittest.TestCase):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isdir', return_value=False) as mock_isdir, \
-             patch('os.path.isfile', side_effect=[False, False, True]) as mock_isfile, \
+             patch('os.path.isfile', side_effect=[True, False, False]) as mock_isfile, \
              patch('waitress.serve') as mock_waitress_serve:
             main(['-n', 'index.html'])
 
@@ -294,9 +284,9 @@ class TestMain(unittest.TestCase):
             mock_isdir.assert_called_once_with('index.html')
             self.assertEqual(mock_isfile.call_count, 3)
             mock_isfile.assert_has_calls([
+                unittest.mock.call('index.html'),
                 unittest.mock.call('markdown-up.json'),
-                unittest.mock.call('markdown-up-api.json'),
-                unittest.mock.call('index.html')
+                unittest.mock.call('markdown-up-api.json')
             ])
             mock_waitress_serve.assert_called_once_with(ANY, port=8080, threads=8)
             wsgiapp = mock_waitress_serve.call_args[0][0]
@@ -307,7 +297,7 @@ class TestMain(unittest.TestCase):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isdir', return_value=False) as mock_isdir, \
-             patch('os.path.isfile', side_effect=[False, False, True]) as mock_isfile, \
+             patch('os.path.isfile', side_effect=[True, False, False]) as mock_isfile, \
              patch('waitress.serve') as mock_waitress_serve:
             main(['-n', os.path.join('subdir', 'README.md')])
 
@@ -316,9 +306,9 @@ class TestMain(unittest.TestCase):
             mock_isdir.assert_called_once_with(os.path.join('subdir', 'README.md'))
             self.assertEqual(mock_isfile.call_count, 3)
             mock_isfile.assert_has_calls([
-                unittest.mock.call('markdown-up.json'),
-                unittest.mock.call('markdown-up-api.json'),
-                unittest.mock.call(os.path.join('subdir', 'README.md'))
+                unittest.mock.call(os.path.join('subdir', 'README.md')),
+                unittest.mock.call(os.path.join('subdir', 'markdown-up.json')),
+                unittest.mock.call(os.path.join('subdir', 'markdown-up-api.json'))
             ])
             mock_waitress_serve.assert_called_once_with(ANY, port=8080, threads=8)
             wsgiapp = mock_waitress_serve.call_args[0][0]
@@ -329,7 +319,7 @@ class TestMain(unittest.TestCase):
         with patch('sys.stdout', StringIO()) as stdout, \
              patch('sys.stderr', StringIO()) as stderr, \
              patch('os.path.isdir', return_value=False) as mock_isdir, \
-             patch('os.path.isfile', side_effect=[False, False, True]) as mock_isfile, \
+             patch('os.path.isfile', side_effect=[True, False, False]) as mock_isfile, \
              patch('waitress.serve') as mock_waitress_serve:
             main(['-n', os.path.join('subdir', 'index.html')])
 
@@ -338,9 +328,9 @@ class TestMain(unittest.TestCase):
             mock_isdir.assert_called_once_with(os.path.join('subdir', 'index.html'))
             self.assertEqual(mock_isfile.call_count, 3)
             mock_isfile.assert_has_calls([
-                unittest.mock.call('markdown-up.json'),
-                unittest.mock.call('markdown-up-api.json'),
-                unittest.mock.call(os.path.join('subdir', 'index.html'))
+                unittest.mock.call(os.path.join('subdir', 'index.html')),
+                unittest.mock.call(os.path.join('subdir', 'markdown-up.json')),
+                unittest.mock.call(os.path.join('subdir', 'markdown-up-api.json'))
             ])
             mock_waitress_serve.assert_called_once_with(ANY, port=8080, threads=8)
             wsgiapp = mock_waitress_serve.call_args[0][0]
