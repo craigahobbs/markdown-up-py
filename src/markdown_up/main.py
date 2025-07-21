@@ -102,7 +102,7 @@ def main(argv=None):
         url = f'http://{host}:{args.port}/'
 
     # Launch the web browser on a thread so the WSGI application can startup first
-    if not args.no_browser:
+    if not config['release'] and not args.no_browser:
         webbrowser_thread = threading.Thread(target=webbrowser.open, args=(url,))
         webbrowser_thread.daemon = True
         webbrowser_thread.start()
