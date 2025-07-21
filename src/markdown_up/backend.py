@@ -13,15 +13,12 @@ import schema_markdown
 
 
 # Load the MarkdownUp backend config requests
-def load_backend_requests(config):
+def load_backend_requests(config, api_config):
     debug = config.get('debug', False)
-    schemas = config.get('schemas') or []
-    scripts = config.get('scripts') or []
-    apis = config.get('apis') or []
 
     # Parse the backend schema markdown files
     types = {}
-    for schema in schemas:
+    for schema in api_config.get('schemas'):
         with open(schema, 'r', encoding='utf-8') as schema_file:
             schema_markdown.parse_schema_markdown(schema_file, types, filename=schema, validate=False)
     if types:
@@ -32,6 +29,9 @@ def load_backend_requests(config):
         'backendHeader': _backend_header,
         'backendError': _backend_error
     }
+    if 'globals' in config:
+        for key, value in config['globals'].items():
+            backend_globals[key] = value
     script_options = {
         'debug': debug,
         'fetchFn': bare_script.fetch_read_write,
@@ -39,12 +39,12 @@ def load_backend_requests(config):
         'logFn': bare_script.log_stdout,
         'urlFile': bare_script.url_file_relative
     }
-    for script in scripts:
+    for script in api_config.get('scripts'):
         with open(script, 'r', encoding='utf-8') as script_file:
             bare_script.execute_script(bare_script.parse_script(script_file), script_options)
 
     # Yield the backend APIs
-    for api in apis:
+    for api in api_config.get('apis'):
         api_name = api['name']
         api_fn = api.get('function', api_name)
         api_wsgi = api.get('wsgi', False)
@@ -83,7 +83,6 @@ def _bare_script_action_fn(script_fn, api_wsgi, backend_globals, debug, ctx, req
 
     # WSGI response?
     if api_wsgi:
-
         # Add WSGI response headers
         headers = response[1]
         headers.extend(backend_state['headers'].items())

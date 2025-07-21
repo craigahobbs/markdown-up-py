@@ -27,18 +27,20 @@ def main(argv=None):
     parser = argparse.ArgumentParser(prog='markdown-up')
     parser.add_argument('path', nargs='?', default='.',
                         help='the file or directory to view (default is ".")')
-    parser.add_argument('-p', metavar='N', dest='port', type=int, default=8080,
+    parser.add_argument('-p', '--port', metavar='N', type=int, default=8080,
                         help='the application port (default is 8080)')
-    parser.add_argument('-t', metavar='N', dest='threads', type=int,
+    parser.add_argument('-t', '--threads', metavar='N', type=int,
                         help='the number of web server threads (default is 8)')
-    parser.add_argument('-n', dest='no_browser', action='store_true',
+    parser.add_argument('-n', '--no-browser', action='store_true',
                         help="don't open a web browser")
-    parser.add_argument('-r', dest='release', action='store_true',
+    parser.add_argument('-r', '--release', action='store_true',
                         help="release mode (cache statics, remove documentation and index)")
-    parser.add_argument('-q', dest='quiet', action='store_true',
+    parser.add_argument('-q', '--quiet', action='store_true',
                         help="don't display access logging")
-    parser.add_argument('-d', dest='debug', action='store_true', default=False,
+    parser.add_argument('-d', '--debug', action='store_true', default=False,
                         help='backend debug mode')
+    parser.add_argument('-v', '--var', nargs=2, action='append', metavar=('VAR', 'EXPR'), default = [],
+                        help='set a global variable to an expression value')
     args = parser.parse_args(args=argv)
 
     # Load and validate the configuration file
@@ -49,10 +51,23 @@ def main(argv=None):
     else:
         config = {}
 
-    # Add arguments to the config
+    # Load and validate the API configuration file
+    api_config_path = 'markdown-up-api.json'
+    if os.path.isfile(api_config_path):
+        with open(api_config_path, 'r', encoding='utf-8') as api_config_file:
+            api_config = schema_markdown.validate_type(CONFIG_TYPES, 'MarkdownUpAPI', json.load(api_config_file))
+    else:
+        api_config = None
+
+    # Add argumentsg to the config
     config['debug'] = args.debug if args.debug is not None else config.get('debug', False)
     config['release'] = args.release if args.release is not None else config.get('release', False)
     config['threads'] = max(1, args.threads if args.threads is not None else config.get('threads', 8))
+    if args.var:
+        if 'globals' not in config:
+            config['globals'] = {}
+        for key, value in args.var:
+            config['globals'][key] = value
 
     # Verify the path exists
     is_dir = os.path.isdir(args.path)
@@ -89,7 +104,7 @@ def main(argv=None):
         webbrowser_thread.start()
 
     # Create the WSGI application
-    wsgiapp = MarkdownUpApplication(root, config)
+    wsgiapp = MarkdownUpApplication(root, config, api_config)
     wsgiapp_wrap = wsgiapp if args.quiet else partial(_wsgiapp_log_access, wsgiapp)
 
     # Host the application
@@ -108,7 +123,7 @@ def _wsgiapp_log_access(wsgiapp, environ, start_response):
 
 # The backend configuration schema
 CONFIG_TYPES = schema_markdown.parse_schema_markdown('''\
-# The MarkdownUp configuration file
+# The MarkdownUp configuration (e.g. `markdown-up.json`)
 struct MarkdownUpConfig
 
     # If true, run in release mode. Default is false.
@@ -120,14 +135,21 @@ struct MarkdownUpConfig
     # The number of backend server threads. Default is 8.
     optional int threads
 
+    # Global variables
+    optional string{len > 0} globals
+
+
+# The MarkdownUp API configuration (e.g. `markdown-up-api.json`)
+struct MarkdownUpAPI
+
     # The backend schema markdown files
-    optional string[len > 0] schemas
+    string[len > 0] schemas
 
     # The backend BareScript files
-    optional string[len > 0] scripts
+    string[len > 0] scripts
 
     # The backend APIs
-    optional BackendAPI[len > 0] apis
+    BackendAPI[len > 0] apis
 
 
 # A backend API
