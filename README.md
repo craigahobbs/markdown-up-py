@@ -50,7 +50,7 @@ backend API application using
 
 When you run MarkdownUp and click on a Markdown file link, the link navigates to an HTML file that
 renders the Markdown file. Every Markdown file hosted by MarkdownUp has a corresponding `.html` file
-of the same name. For example, if you run Markdown up in a directory that has the following Markdown
+of the same name. For example, if you run MarkdownUp in a directory that has the following Markdown
 files: "README.md" and "CHANGELOG.md". The MarkdownUp service automatically generates "README.html"
 and "CHANGELOG.html" files.
 
