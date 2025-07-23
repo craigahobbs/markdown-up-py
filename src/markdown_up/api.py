@@ -68,7 +68,7 @@ _BACKEND_GLOBAL = '__markdown_up__'
 
 
 # Action function wrapper for a MarkdownUp backend API function
-def _bare_script_action_fn(script_fn, api_wsgi, backend_globals, debug, ctx, req):
+def _bare_script_action_fn(api_fn, api_wsgi, backend_globals, debug, ctx, req):
     # Copy the backend globals
     script_globals = dict(backend_globals)
     script_globals[_BACKEND_GLOBAL] = {'headers': {}}
@@ -83,7 +83,7 @@ def _bare_script_action_fn(script_fn, api_wsgi, backend_globals, debug, ctx, req
         'statementCount': 0,
         'urlFile': bare_script.url_file_relative
     }
-    response = script_fn([req], script_options)
+    response = api_fn([req], script_options)
 
     # Error?
     backend_state = script_globals[_BACKEND_GLOBAL]
@@ -92,13 +92,24 @@ def _bare_script_action_fn(script_fn, api_wsgi, backend_globals, debug, ctx, req
 
     # WSGI response?
     if api_wsgi:
+        # Validate response
+        status, headers, content = None, None, None
+        invalid_response = not isinstance(response, list) or len(response) != 3
+        if not invalid_response:
+            status, headers, content = response
+            invalid_response = not isinstance(status, str) or not isinstance(headers, list) or not isinstance(content, str) or \
+                any(not isinstance(header, list) or len(header) != 2 for header in headers) or \
+                any(not isinstance(key, str) or not isinstance(value, str) for key, value in headers)
+        if invalid_response:
+            ctx.start_response('500 Internal Server Error', [('Content-Type', 'text/plain; charset=utf-8')])
+            return [f'Invalid WSGI API function return value {response!r}'.encode('utf-8')]
+
         # Add WSGI response headers
-        headers = response[1]
         headers.extend(backend_state['headers'].items())
 
         # WSGI response
-        ctx.start_response(response[0], headers)
-        return [response[2].encode('utf-8')]
+        ctx.start_response(status, headers)
+        return [content.encode('utf-8')]
 
     # Add response headers
     ctx.headers.update(backend_state['headers'])

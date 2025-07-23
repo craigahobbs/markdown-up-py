@@ -1,7 +1,9 @@
 # Licensed under the MIT License
 # https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
+from io import StringIO
 import json
+import re
 import unittest
 import unittest.mock
 
@@ -353,3 +355,297 @@ endfunction
             self.assertEqual(status, '200 OK')
             self.assertEqual(headers, [('Content-Type', 'application/json'), ('X-Foobar', 'TestFoobar')])
             self.assertEqual(json.loads(content_bytes.decode('utf-8')), {})
+
+
+    def test_api_null_response(self):
+        test_files = [
+            ('test.smd', '''\
+action test
+    urls
+        GET
+'''),
+            ('test.bare', '''\
+function test(request):
+endfunction
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, {}, {
+                'schemas': ['test.smd'],
+                'scripts': ['test.bare'],
+                'apis': [
+                    {'name': 'test'}
+                ]
+            })
+            status, headers, content_bytes = app.request('GET', '/test')
+            self.assertEqual(status, '200 OK')
+            self.assertEqual(headers, [('Content-Type', 'application/json')])
+            self.assertEqual(json.loads(content_bytes.decode('utf-8')), {})
+
+
+    def test_api_invalid_response(self):
+        test_files = [
+            ('test.smd', '''\
+action test
+    urls
+        GET
+'''),
+            ('test.bare', '''\
+function test(request):
+    return 'asdf'
+endfunction
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, {}, {
+                'schemas': ['test.smd'],
+                'scripts': ['test.bare'],
+                'apis': [
+                    {'name': 'test'}
+                ]
+            })
+            wsgi_errors = StringIO()
+            status, headers, content_bytes = app.request('GET', '/test', environ={'wsgi.errors': wsgi_errors})
+            self.assertEqual(status, '500 Internal Server Error')
+            self.assertEqual(headers, [('Content-Type', 'application/json')])
+            self.assertEqual(json.loads(content_bytes.decode('utf-8')), {
+                'error': 'InvalidOutput',
+                'message': "Invalid value 'asdf' (type 'str'), expected type 'test_output'"
+            })
+            self.assertTrue(re.match(
+                r"ERROR \[\d+ / \d+\] Invalid output returned from action 'test': "
+                    r"Invalid value 'asdf' \(type 'str'\), expected type 'test_output'",
+                wsgi_errors.getvalue()
+            ), wsgi_errors.getvalue())
+
+
+    def test_api_wsgi_invalid_response_empty(self):
+        test_files = [
+            ('test.smd', '''\
+action test
+    urls
+        GET
+'''),
+            ('test.bare', '''\
+function test(request):
+    return arrayNew()
+endfunction
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, {}, {
+                'schemas': ['test.smd'],
+                'scripts': ['test.bare'],
+                'apis': [
+                    {'name': 'test', 'wsgi': True}
+                ]
+            })
+            wsgi_errors = StringIO()
+            status, headers, content_bytes = app.request('GET', '/test', environ={'wsgi.errors': wsgi_errors})
+            self.assertEqual(status, '500 Internal Server Error')
+            self.assertEqual(headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(content_bytes, b'Invalid WSGI API function return value []')
+            self.assertEqual(wsgi_errors.getvalue(), '')
+
+
+    def test_api_wsgi_invalid_response_status(self):
+        test_files = [
+            ('test.smd', '''\
+action test
+    urls
+        GET
+'''),
+            ('test.bare', '''\
+function test(request):
+    return arrayNew(200, arrayNew(), 'Hello')
+endfunction
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, {}, {
+                'schemas': ['test.smd'],
+                'scripts': ['test.bare'],
+                'apis': [
+                    {'name': 'test', 'wsgi': True}
+                ]
+            })
+            wsgi_errors = StringIO()
+            status, headers, content_bytes = app.request('GET', '/test', environ={'wsgi.errors': wsgi_errors})
+            self.assertEqual(status, '500 Internal Server Error')
+            self.assertEqual(headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(content_bytes, b"Invalid WSGI API function return value [200.0, [], 'Hello']")
+            self.assertEqual(wsgi_errors.getvalue(), '')
+
+
+    def test_api_wsgi_invalid_response_headers(self):
+        test_files = [
+            ('test.smd', '''\
+action test
+    urls
+        GET
+'''),
+            ('test.bare', '''\
+function test(request):
+    return arrayNew('200 OK', 'text/plain', 'Hello')
+endfunction
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, {}, {
+                'schemas': ['test.smd'],
+                'scripts': ['test.bare'],
+                'apis': [
+                    {'name': 'test', 'wsgi': True}
+                ]
+            })
+            wsgi_errors = StringIO()
+            status, headers, content_bytes = app.request('GET', '/test', environ={'wsgi.errors': wsgi_errors})
+            self.assertEqual(status, '500 Internal Server Error')
+            self.assertEqual(headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(content_bytes, b"Invalid WSGI API function return value ['200 OK', 'text/plain', 'Hello']")
+            self.assertEqual(wsgi_errors.getvalue(), '')
+
+
+    def test_api_wsgi_invalid_response_header_item(self):
+        test_files = [
+            ('test.smd', '''\
+action test
+    urls
+        GET
+'''),
+            ('test.bare', '''\
+function test(request):
+    return arrayNew('200 OK', arrayNew('text/plain'), 'Hello')
+endfunction
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, {}, {
+                'schemas': ['test.smd'],
+                'scripts': ['test.bare'],
+                'apis': [
+                    {'name': 'test', 'wsgi': True}
+                ]
+            })
+            wsgi_errors = StringIO()
+            status, headers, content_bytes = app.request('GET', '/test', environ={'wsgi.errors': wsgi_errors})
+            self.assertEqual(status, '500 Internal Server Error')
+            self.assertEqual(headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(content_bytes, b"Invalid WSGI API function return value ['200 OK', ['text/plain'], 'Hello']")
+            self.assertEqual(wsgi_errors.getvalue(), '')
+
+
+    def test_api_wsgi_invalid_response_header_empty(self):
+        test_files = [
+            ('test.smd', '''\
+action test
+    urls
+        GET
+'''),
+            ('test.bare', '''\
+function test(request):
+    return arrayNew('200 OK', arrayNew(arrayNew()), 'Hello')
+endfunction
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, {}, {
+                'schemas': ['test.smd'],
+                'scripts': ['test.bare'],
+                'apis': [
+                    {'name': 'test', 'wsgi': True}
+                ]
+            })
+            wsgi_errors = StringIO()
+            status, headers, content_bytes = app.request('GET', '/test', environ={'wsgi.errors': wsgi_errors})
+            self.assertEqual(status, '500 Internal Server Error')
+            self.assertEqual(headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(content_bytes, b"Invalid WSGI API function return value ['200 OK', [[]], 'Hello']")
+            self.assertEqual(wsgi_errors.getvalue(), '')
+
+
+    def test_api_wsgi_invalid_response_header_key(self):
+        test_files = [
+            ('test.smd', '''\
+action test
+    urls
+        GET
+'''),
+            ('test.bare', '''\
+function test(request):
+    return arrayNew('200 OK', arrayNew(arrayNew(null, 'Value')), 'Hello')
+endfunction
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, {}, {
+                'schemas': ['test.smd'],
+                'scripts': ['test.bare'],
+                'apis': [
+                    {'name': 'test', 'wsgi': True}
+                ]
+            })
+            wsgi_errors = StringIO()
+            status, headers, content_bytes = app.request('GET', '/test', environ={'wsgi.errors': wsgi_errors})
+            self.assertEqual(status, '500 Internal Server Error')
+            self.assertEqual(headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(content_bytes, b"Invalid WSGI API function return value ['200 OK', [[None, 'Value']], 'Hello']")
+            self.assertEqual(wsgi_errors.getvalue(), '')
+
+
+    def test_api_wsgi_invalid_response_header_value(self):
+        test_files = [
+            ('test.smd', '''\
+action test
+    urls
+        GET
+'''),
+            ('test.bare', '''\
+function test(request):
+    return arrayNew('200 OK', arrayNew(arrayNew('Key', null)), 'Hello')
+endfunction
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, {}, {
+                'schemas': ['test.smd'],
+                'scripts': ['test.bare'],
+                'apis': [
+                    {'name': 'test', 'wsgi': True}
+                ]
+            })
+            wsgi_errors = StringIO()
+            status, headers, content_bytes = app.request('GET', '/test', environ={'wsgi.errors': wsgi_errors})
+            self.assertEqual(status, '500 Internal Server Error')
+            self.assertEqual(headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(content_bytes, b"Invalid WSGI API function return value ['200 OK', [['Key', None]], 'Hello']")
+            self.assertEqual(wsgi_errors.getvalue(), '')
+
+
+    def test_api_wsgi_invalid_response_content(self):
+        test_files = [
+            ('test.smd', '''\
+action test
+    urls
+        GET
+'''),
+            ('test.bare', '''\
+function test(request):
+    return arrayNew('200 OK', arrayNew(arrayNew('Content-Type', 'text/plain')), null)
+endfunction
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, {}, {
+                'schemas': ['test.smd'],
+                'scripts': ['test.bare'],
+                'apis': [
+                    {'name': 'test', 'wsgi': True}
+                ]
+            })
+            wsgi_errors = StringIO()
+            status, headers, content_bytes = app.request('GET', '/test', environ={'wsgi.errors': wsgi_errors})
+            self.assertEqual(status, '500 Internal Server Error')
+            self.assertEqual(headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(content_bytes, b"Invalid WSGI API function return value ['200 OK', [['Content-Type', 'text/plain']], None]")
+            self.assertEqual(wsgi_errors.getvalue(), '')
