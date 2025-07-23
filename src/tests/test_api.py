@@ -5,6 +5,9 @@ import json
 import unittest
 import unittest.mock
 
+from bare_script import BareScriptParserError
+from schema_markdown import SchemaMarkdownParserError
+
 from markdown_up.app import MarkdownUpApplication
 
 from .test_app import create_test_files
@@ -85,6 +88,64 @@ endfunction
             self.assertEqual(status, '200 OK')
             self.assertEqual(headers, [('Content-Type', 'text/plain')])
             self.assertEqual(content_bytes, b'The result is 3.5')
+
+
+    def test_api_schema_error(self):
+        test_files = [
+            ('test.smd', '''\
+asdf
+'''),
+            ('test.bare', '''\
+function test(request):
+    return objectNew()
+endfunction
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            with self.assertRaises(SchemaMarkdownParserError) as cm_exc:
+                MarkdownUpApplication(
+                    temp_dir,
+                    {},
+                    {
+                        'schemas': ['test.smd'],
+                        'scripts': ['test.bare'],
+                        'apis': [
+                            {'name': 'test'}
+                        ]
+                    }
+                )
+            self.assertEqual(str(cm_exc.exception), 'test.smd:1: error: Syntax error')
+
+
+    def test_api_script_error(self):
+        test_files = [
+            ('test.smd', '''\
+action test
+    urls
+        GET
+'''),
+            ('test.bare', '''\
+asdf-
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            with self.assertRaises(BareScriptParserError) as cm_exc:
+                MarkdownUpApplication(
+                    temp_dir,
+                    {},
+                    {
+                        'schemas': ['test.smd'],
+                        'scripts': ['test.bare'],
+                        'apis': [
+                            {'name': 'test'}
+                        ]
+                    }
+                )
+            self.assertEqual(str(cm_exc.exception), '''\
+Syntax error, line number 1:
+asdf-
+     ^
+''')
 
 
     def test_api_globals(self):
