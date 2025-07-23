@@ -120,8 +120,8 @@ def main(argv=None):
 # WSGI application wrapper and the start_response function so we can log status and environ
 def _wsgiapp_log_access(wsgiapp, environ, start_response):
     def log_start_response(status, response_headers):
-        suffix = f' {environ["QUERY_STRING"]}' if environ['QUERY_STRING'] else ''
-        print(f'markdown-up: {status[0:3]} {environ["REQUEST_METHOD"]} {environ["PATH_INFO"]}{suffix}')
+        query_string = f' {environ["QUERY_STRING"]}' if environ['QUERY_STRING'] else ''
+        print(f'markdown-up: {status[0:3]} {environ["REQUEST_METHOD"]} {environ["PATH_INFO"]}{query_string}')
         return start_response(status, response_headers)
     return wsgiapp(environ, log_start_response)
 
