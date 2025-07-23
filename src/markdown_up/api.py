@@ -92,7 +92,7 @@ def _bare_script_action_fn(api_fn, api_wsgi, backend_globals, debug, ctx, req):
 
     # WSGI response?
     if api_wsgi:
-        # Validate response
+        # Validate the WSGI response
         status, headers, content = None, None, None
         invalid_response = not isinstance(response, list) or len(response) != 3
         if not invalid_response:
