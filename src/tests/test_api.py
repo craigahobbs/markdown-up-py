@@ -148,6 +148,35 @@ asdf-
 ''')
 
 
+    def test_api_unknown_function(self):
+        test_files = [
+            ('test.smd', '''\
+action test
+    urls
+        GET
+'''),
+            ('test.bare', '''\
+function test():
+    return objectNew()
+endfunction
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            with self.assertRaises(NameError) as cm_exc:
+                MarkdownUpApplication(
+                    temp_dir,
+                    {},
+                    {
+                        'schemas': ['test.smd'],
+                        'scripts': ['test.bare'],
+                        'apis': [
+                            {'name': 'unknown'}
+                        ]
+                    }
+                )
+            self.assertEqual(str(cm_exc.exception), 'Unknown API function "unknown"')
+
+
     def test_api_globals(self):
         test_files = [
             ('test.smd', '''\

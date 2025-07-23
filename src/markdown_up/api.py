@@ -56,8 +56,9 @@ def load_backend_requests(root, config, api_config):
         api_wsgi = api.get('wsgi', False)
 
         # Add the API action
-        script_fn = backend_globals[api_fn]
-        action_fn = partial(_bare_script_action_fn, script_fn, api_wsgi, backend_globals, debug)
+        if api_fn not in backend_globals:
+            raise NameError(f'Unknown API function "{api_fn}"')
+        action_fn = partial(_bare_script_action_fn, backend_globals[api_fn], api_wsgi, backend_globals, debug)
         yield chisel.Action(action_fn, name=api_name, types=types, wsgi_response=api_wsgi)
 
 
