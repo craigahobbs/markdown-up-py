@@ -204,6 +204,33 @@ endfunction
             self.assertEqual(str(cm_exc.exception), 'Unknown API function "unknown"')
 
 
+    def test_api_invalid_function(self):
+        test_files = [
+            ('test.smd', '''\
+action test
+    urls
+        GET
+'''),
+            ('test.bare', '''\
+test = null
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            with self.assertRaises(NameError) as cm_exc:
+                MarkdownUpApplication(
+                    temp_dir,
+                    {},
+                    {
+                        'schemas': ['test.smd'],
+                        'scripts': ['test.bare'],
+                        'apis': [
+                            {'name': 'test'}
+                        ]
+                    }
+                )
+            self.assertEqual(str(cm_exc.exception), 'Unknown API function "test"')
+
+
     def test_api_globals(self):
         test_files = [
             ('test.smd', '''\

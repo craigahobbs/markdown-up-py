@@ -52,13 +52,14 @@ def load_backend_requests(root, config, api_config):
     # Yield the backend APIs
     for api in api_config.get('apis'):
         api_name = api['name']
-        api_fn = api.get('function', api_name)
+        api_fn_name = api.get('function', api_name)
         api_wsgi = api.get('wsgi', False)
 
         # Add the API action
-        if api_fn not in backend_globals:
-            raise NameError(f'Unknown API function "{api_fn}"')
-        action_fn = partial(_bare_script_action_fn, backend_globals[api_fn], api_wsgi, backend_globals, debug)
+        api_fn = backend_globals.get(api_fn_name)
+        if not api_fn or not callable(api_fn):
+            raise NameError(f'Unknown API function "{api_fn_name}"')
+        action_fn = partial(_bare_script_action_fn, api_fn, api_wsgi, backend_globals, debug)
         yield chisel.Action(action_fn, name=api_name, types=types, wsgi_response=api_wsgi)
 
 
