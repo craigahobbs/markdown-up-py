@@ -52,6 +52,33 @@ endfunction
             self.assertDictEqual(json.loads(content_bytes.decode('utf-8')), {'result': 3.5})
 
 
+    def test_api_named_fn(self):
+        test_files = [
+            ('test.smd', '''\
+action test
+    urls
+        GET
+'''),
+            ('test.bare', '''\
+function testx(request):
+    return objectNew()
+endfunction
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, {}, {
+                'schemas': ['test.smd'],
+                'scripts': ['test.bare'],
+                'apis': [
+                    {'name': 'test', 'function': 'testx'}
+                ]
+            })
+            status, headers, content_bytes = app.request('GET', '/test')
+            self.assertEqual(status, '200 OK')
+            self.assertEqual(headers, [('Content-Type', 'application/json')])
+            self.assertEqual(content_bytes, b'{}')
+
+
     def test_api_wsgi(self):
         test_files = [
             ('test.smd', '''\
