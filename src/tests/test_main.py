@@ -12,6 +12,8 @@ import markdown_up.__main__
 from markdown_up.app import MarkdownUpApplication
 from markdown_up.main import main
 
+from .test_app import create_test_files
+
 
 class TestMain(unittest.TestCase):
 
@@ -101,7 +103,7 @@ class TestMain(unittest.TestCase):
             self.assertEqual(start_response.status, '301 Moved Permanently')
             self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8'), ('Location', '/doc/')])
             self.assertEqual(content, [b'/doc/'])
-            self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/ ...\nmarkdown-up: 301 GET /doc \n')
+            self.assertEqual(stdout.getvalue(), 'markdown-up: Serving at http://127.0.0.1:8080/ ...\nmarkdown-up: 301 GET /doc\n')
             self.assertEqual(stderr.getvalue(), '')
 
 
@@ -247,6 +249,55 @@ class TestMain(unittest.TestCase):
             mock_waitress_serve.assert_called_once_with(ANY, port=8080, threads=1)
             wsgiapp = mock_waitress_serve.call_args[0][0]
             self.assertTrue(callable(wsgiapp))
+
+    def test_main_run_globals(self):
+        test_files = [
+            ('test.smd', '''\
+action testGlobals
+    urls
+        GET
+'''),
+            ('test.bare', '''\
+function testGlobals(request):
+    systemLog('The sum of ' + N1 + ' and ' + N2 + ' is ' + (numberParseInt(N1) + numberParseInt(N2)) + '.')
+endfunction
+'''),
+            ('markdown-up-api.json', '''\
+{
+    "schemas": ["test.smd"],
+    "scripts": ["test.bare"],
+    "apis": [
+        {"name": "testGlobals"}
+    ]
+}
+''')
+        ]
+        with create_test_files(test_files) as temp_dir, \
+             patch('sys.stdout', StringIO()) as stdout, \
+             patch('sys.stderr', StringIO()) as stderr, \
+             patch('waitress.serve') as mock_waitress_serve:
+            main(['-n', '-v', 'N1', '1', '-v', 'N2', '2', temp_dir])
+
+            mock_waitress_serve.assert_called_once_with(ANY, port=8080, threads=8)
+            wsgiapp = mock_waitress_serve.call_args[0][0]
+            self.assertTrue(callable(wsgiapp))
+
+            wsgi_errors = StringIO()
+            environ = chisel.Context.create_environ('GET', '/testGlobals', environ={'wsgi.errors': wsgi_errors})
+            start_response_calls = []
+            def start_response(status, headers):
+                start_response_calls.append([status, headers])
+            response = wsgiapp(environ, start_response)
+            self.assertEqual(start_response_calls, [['200 OK', [('Content-Type', 'application/json')]]])
+            self.assertEqual(response, [b'{}'])
+            self.assertEqual(wsgi_errors.getvalue(), '')
+
+            self.assertEqual(stdout.getvalue(), '''\
+markdown-up: Serving at http://127.0.0.1:8080/ ...
+The sum of 1 and 2 is 3.
+markdown-up: 200 GET /testGlobals
+''')
+            self.assertEqual(stderr.getvalue(), '')
 
 
     def test_main_run_file(self):
