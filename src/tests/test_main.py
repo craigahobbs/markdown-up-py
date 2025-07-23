@@ -291,11 +291,10 @@ endfunction
             response = wsgiapp(environ, start_response)
             self.assertEqual(start_response_calls, [['200 OK', [('Content-Type', 'application/json')]]])
             self.assertEqual(response, [b'{}'])
-            self.assertEqual(wsgi_errors.getvalue(), '')
+            self.assertEqual(wsgi_errors.getvalue(), 'The sum of 1 and 2 is 3.\n')
 
             self.assertEqual(stdout.getvalue(), '''\
 markdown-up: Serving at http://127.0.0.1:8080/ ...
-The sum of 1 and 2 is 3.
 markdown-up: 200 GET /testGlobals
 ''')
             self.assertEqual(stderr.getvalue(), '')

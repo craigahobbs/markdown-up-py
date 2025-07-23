@@ -154,6 +154,36 @@ endfunction
             self.assertEqual(json.loads(content_bytes.decode('utf-8')), {'error': 'TestError'})
 
 
+    def test_api_error_status(self):
+        test_files = [
+            ('test.smd', '''\
+action testError
+    urls
+        GET
+
+    errors
+        TestError
+'''),
+            ('test.bare', '''\
+function testError(request):
+    backendError('TestError', '500 Internal Server Error')
+endfunction
+''')
+        ]
+        with create_test_files(test_files) as temp_dir:
+            app = MarkdownUpApplication(temp_dir, {}, {
+                'schemas': ['test.smd'],
+                'scripts': ['test.bare'],
+                'apis': [
+                    {'name': 'testError'}
+                ]
+            })
+            status, headers, content_bytes = app.request('GET', '/testError')
+            self.assertEqual(status, '500 Internal Server Error')
+            self.assertEqual(headers, [('Content-Type', 'application/json')])
+            self.assertEqual(json.loads(content_bytes.decode('utf-8')), {'error': 'TestError'})
+
+
     def test_api_headers(self):
         test_files = [
             ('test.smd', '''\

@@ -25,7 +25,7 @@ def load_backend_requests(root, config, api_config):
         schema_parts = Path(schema_posix).parts
         schema_path = os.path.normpath(os.path.join(root, *(schema_parts[1:] if schema_parts[0] == '/' else schema_parts)))
         with open(schema_path, 'r', encoding='utf-8') as schema_file:
-            schema_markdown.parse_schema_markdown(schema_file, types, filename=schema_path, validate=False)
+            schema_markdown.parse_schema_markdown(schema_file, types, filename=schema_posix, validate=False)
     schema_markdown.validate_type_model(types)
 
     # Parse and execute the backend BareScript files
@@ -72,11 +72,12 @@ def _bare_script_action_fn(script_fn, api_wsgi, backend_globals, debug, ctx, req
     script_globals[_BACKEND_GLOBAL] = {'headers': {}}
 
     # Execute the API function
+    wsgi_errors = ctx.environ.get('wsgi.errors')
     script_options = {
         'debug': debug,
         'fetchFn': bare_script.fetch_read_write,
         'globals': script_globals,
-        'logFn': bare_script.log_stdout,
+        'logFn': partial(_log_filehandle, wsgi_errors) if wsgi_errors is not None else None ,
         'statementCount': 0,
         'urlFile': bare_script.url_file_relative
     }
@@ -101,6 +102,11 @@ def _bare_script_action_fn(script_fn, api_wsgi, backend_globals, debug, ctx, req
     ctx.headers.update(backend_state['headers'])
 
     return response
+
+
+# File handle logging function
+def _log_filehandle(fh, text):
+    print(text, file=fh)
 
 
 # $function: backendHeader
