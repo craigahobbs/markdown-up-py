@@ -40,7 +40,7 @@ def main(argv=None):
     parser.add_argument('-d', '--debug', action='store_true', default=None,
                         help='backend debug mode')
     parser.add_argument('-v', '--var', nargs=2, action='append', metavar=('VAR', 'EXPR'), default = [],
-                        help='set a global variable to an expression value')
+                        help='set a backend global variable')
     parser.add_argument('-c', '--config', metavar='FILE', default='markdown-up.json',
                         help='the application config filename (default is "markdown-up.json")')
     parser.add_argument('-a', '--api', metavar='FILE', default='markdown-up-api.json',

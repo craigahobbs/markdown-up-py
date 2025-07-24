@@ -77,7 +77,7 @@ options:
   -r, --release       release mode (cache statics, remove documentation and index)
   -q, --quiet         don't display access logging
   -d, --debug         backend debug mode
-  -v, --var VAR EXPR  set a global variable to an expression value
+  -v, --var VAR EXPR  set a backend global variable
   -c, --config FILE   the application config filename (default is "markdown-up.json")
   -a, --api FILE      the API config filename (default is "markdown-up-api.json")
   ```
