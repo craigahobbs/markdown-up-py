@@ -79,14 +79,13 @@ class MarkdownUpApplication(chisel.Application):
         # Directory path?
         request = None
         if os.path.isdir(path):
-
             # Directory redirect?
             if not path_info.endswith('/'):
                 request = chisel.RedirectRequest(((None, path_info),), path_info + '/', name=path_info)
 
             # HTML index file exist?
             if request is None:
-                for index_file in INDEX_FILES:
+                for index_file in HTML_INDEXES:
                     index_posix_path = posix_path_info.joinpath(index_file)
                     index_path = os.path.join(self.root, *index_posix_path.parts[1:])
                     if os.path.isfile(index_path):
@@ -101,7 +100,7 @@ class MarkdownUpApplication(chisel.Application):
 
             # No HTML index file - does a Markdown index file exist?
             if request is None:
-                for index_markdown in INDEX_MARKDOWN:
+                for index_markdown in MARKDOWN_INDEXES:
                     markdown_posix_path = posix_path_info.joinpath(index_markdown)
                     markdown_path = os.path.join(self.root, *markdown_posix_path.parts[1:])
                     if os.path.isfile(markdown_path):
@@ -157,16 +156,17 @@ class MarkdownUpApplication(chisel.Application):
         return request(environ, start_response)
 
 
-# Render-able file extensions
-MARKDOWN_EXTS = ('.md', '.markdown')
+# Recognized HTML and Markdown extensions
 HTML_EXTS = ('.html', '.htm')
+MARKDOWN_EXTS = ('.md', '.markdown')
 
 
-# Index file names
-INDEX_FILES = ('index.html', 'index.htm')
-INDEX_MARKDOWN = ('index.md', 'README.md')
+# Recognized HTML and Markdown index file names
+HTML_INDEXES = ('index.html', 'index.htm')
+MARKDOWN_INDEXES = ('index.md', 'README.md')
 
 
+# Create a MarkdownUp HTML file (bytes)
 def create_markdown_up_stub(filename):
     return f'''\
 <!DOCTYPE html>
