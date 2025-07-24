@@ -1,0 +1,147 @@
+{
+    "MarkdownUpConfig": {
+        "struct": {
+            "name": "MarkdownUpConfig",
+            "doc": [
+                "The MarkdownUp application configuration (e.g. `markdown-up.json`)"
+            ],
+            "docGroup": "Application Configuration",
+            "members": [
+                {
+                    "name": "release",
+                    "type": {
+                        "builtin": "bool"
+                    },
+                    "doc": [
+                        "If true, run in release mode. Default is false."
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "debug",
+                    "type": {
+                        "builtin": "bool"
+                    },
+                    "doc": [
+                        "If true, run in debug mode. Default is false."
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "threads",
+                    "type": {
+                        "builtin": "int"
+                    },
+                    "doc": [
+                        "The number of backend server threads. Default is 8."
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "globals",
+                    "type": {
+                        "dict": {
+                            "type": {
+                                "builtin": "string"
+                            }
+                        }
+                    },
+                    "doc": [
+                        "Global variables"
+                    ],
+                    "optional": true
+                }
+            ]
+        }
+    },
+    "MarkdownUpAPIConfig": {
+        "struct": {
+            "name": "MarkdownUpAPIConfig",
+            "doc": [
+                "The MarkdownUp API configuration (e.g. `markdown-up-api.json`)"
+            ],
+            "docGroup": "API Configuration",
+            "members": [
+                {
+                    "name": "schemas",
+                    "type": {
+                        "array": {
+                            "type": {
+                                "builtin": "string"
+                            }
+                        }
+                    },
+                    "doc": [
+                        "The API schema markdown POSIX file paths"
+                    ]
+                },
+                {
+                    "name": "scripts",
+                    "type": {
+                        "array": {
+                            "type": {
+                                "builtin": "string"
+                            }
+                        }
+                    },
+                    "doc": [
+                        "The API BareScript POSIX file paths"
+                    ]
+                },
+                {
+                    "name": "apis",
+                    "type": {
+                        "array": {
+                            "type": {
+                                "user": "MarkdownUpAPI"
+                            }
+                        }
+                    },
+                    "doc": [
+                        "The APIs"
+                    ]
+                }
+            ]
+        }
+    },
+    "MarkdownUpAPI": {
+        "struct": {
+            "name": "MarkdownUpAPI",
+            "doc": [
+                "An API"
+            ],
+            "members": [
+                {
+                    "name": "name",
+                    "type": {
+                        "builtin": "string"
+                    },
+                    "doc": [
+                        "The schema action name"
+                    ]
+                },
+                {
+                    "name": "function",
+                    "type": {
+                        "builtin": "string"
+                    },
+                    "doc": [
+                        "The script function name. If unspecified, use the schema action name."
+                    ],
+                    "optional": true
+                },
+                {
+                    "name": "wsgi",
+                    "type": {
+                        "builtin": "bool"
+                    },
+                    "doc": [
+                        "If true, the API function has a WSGI respone (e.g. `[\"200 Status\", [[\"Content-Type\": \"text/plain\"]], \"Hello!\"]`)",
+                        "Default is false."
+                    ],
+                    "optional": true
+                }
+            ]
+        }
+    }
+}
