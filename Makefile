@@ -31,6 +31,12 @@ clean:
 	rm -rf Makefile.base pylintrc
 
 
+doc:
+	mkdir -p build/doc/
+	$(DEFAULT_VENV_PYTHON) -c 'import json; from markdown_up.main import CONFIG_TYPES; print(json.dumps(CONFIG_TYPES, indent=4))' > build/doc/config.json
+	$(DEFAULT_VENV_BIN)/baredoc src/markdown_up/api.py -o build/doc/api.json
+
+
 .PHONY: test-app
 commit: test-app
 test-app: $(DEFAULT_VENV_BUILD)
