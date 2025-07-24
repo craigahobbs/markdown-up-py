@@ -102,6 +102,16 @@ code blocks containing
 [BareScript](https://github.com/craigahobbs/bare-script#readme)
 that execute when the Markdown renders.
 
+
+### Application Example
+
+TODO
+
+
+#### Frontend Application
+
+TODO
+
 MarkdownUp has libraries for dynamically generating and rendering Markdown text, drawing SVG images,
 performing data analytics, parsing application arguments, and much more. See the
 [MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/)
@@ -109,24 +119,13 @@ and
 [MarkdownUp Include Library](https://craigahobbs.github.io/markdown-up/library/include.html)
 for more information.
 
-Here's an example of a simple MarkdownUp application:
 
-~~~markdown
-# The First Ten Numbers
+#### Backend APIs
 
-Here are the first ten numbers:
-
-```markdown-script
-i = 1
-while i <= 10:
-    markdownPrint('', stringNew(i))
-    i = i + 1
-endwhile
-```
-~~~
+TODO
 
 
-### MarkdownUp Application Examples
+### Other Examples
 
 To see what's possible with MarkdownUp Applications, see the
 [MarkdownUp Application Examples](https://craigahobbs.github.io/#var.vPage='MarkdownUp')
