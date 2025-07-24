@@ -56,7 +56,14 @@ and "CHANGELOG.html" files.
 
 The generated `.html` files are HTML stubs for the
 [MarkdownUp Front-End Application](https://github.com/craigahobbs/markdown-up#readme).
-All Markdown parsing and rendering are done on the client to minimize server costs.
+All Markdown parsing and rendering are done on the client.
+
+
+### Configuration File
+
+The
+[MarkdownUp Application Configuration File](https://craigahobbs.github.io/markdown-up-py/config.html#var.vName='MarkdownUpConfig'),
+`markdown-up.json`, allows you to enable release mode, set the number of backend server threads, and more.
 
 
 ### Command-Line Arguments
