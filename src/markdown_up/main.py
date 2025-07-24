@@ -36,7 +36,7 @@ def main(argv=None):
     parser.add_argument('-r', '--release', action='store_true', default=None,
                         help="release mode (cache statics, remove documentation and index)")
     parser.add_argument('-q', '--quiet', action='store_true',
-                        help="don't display access logging")
+                        help="hide access logging")
     parser.add_argument('-d', '--debug', action='store_true', default=None,
                         help='backend debug mode')
     parser.add_argument('-v', '--var', nargs=2, action='append', metavar=('VAR', 'EXPR'), default = [],

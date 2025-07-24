@@ -75,7 +75,7 @@ options:
   -t, --threads N     the number of web server threads (default is 8)
   -n, --no-browser    don't open a web browser
   -r, --release       release mode (cache statics, remove documentation and index)
-  -q, --quiet         don't display access logging
+  -q, --quiet         hide access logging
   -d, --debug         backend debug mode
   -v, --var VAR EXPR  set a backend global variable
   -c, --config FILE   the application config filename (default is "markdown-up.json")
