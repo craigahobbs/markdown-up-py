@@ -332,7 +332,7 @@ action testError
 '''),
             ('test.bare', '''\
 function testError(request):
-    backendError('TestError')
+    apiError('TestError')
 endfunction
 ''')
         ]
@@ -362,7 +362,7 @@ action testError
 '''),
             ('test.bare', '''\
 function testError(request):
-    backendError('TestError', '500 Internal Server Error')
+    apiError('TestError', '500 Internal Server Error')
 endfunction
 ''')
         ]
@@ -389,7 +389,7 @@ action testError
 '''),
             ('test.bare', '''\
 function testError(request):
-    backendHeader('X-Foobar', 'TestFoobar')
+    apiHeader('X-Foobar', 'TestFoobar')
 endfunction
 ''')
         ]

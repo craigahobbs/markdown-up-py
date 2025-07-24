@@ -2,7 +2,7 @@
 # https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
 """
-The MarkdownUp back-end application
+The MarkdownUp backend application
 """
 
 import importlib.resources
@@ -13,12 +13,12 @@ import urllib.parse
 
 import chisel
 
-from .api import load_backend_requests
+from .api import load_api_requests
 
 
 class MarkdownUpApplication(chisel.Application):
     """
-    The markdown-up back-end API WSGI application class
+    The markdown-up backend API WSGI application class
     """
 
     __slots__ = ('root', 'release', 'add_request_lock')
@@ -55,7 +55,7 @@ class MarkdownUpApplication(chisel.Application):
 
         # Add the backend APIs
         if api_config:
-            self.add_requests(load_backend_requests(root, config, api_config))
+            self.add_requests(load_api_requests(root, config, api_config))
 
 
     def add_static(self, filename, content_type=None, urls=(('GET', None),), doc_group='MarkdownUp File Browser'):
