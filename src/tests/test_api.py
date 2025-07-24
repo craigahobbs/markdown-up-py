@@ -77,9 +77,23 @@ endfunction
 ''')
         ]
         with create_test_files(test_files) as temp_dir:
+            # Relative POSIX paths
             app = MarkdownUpApplication(temp_dir, {}, {
                 'schemas': ['sub/test.smd'],
                 'scripts': ['sub/test.bare'],
+                'apis': [
+                    {'name': 'sumNumbers'}
+                ]
+            })
+            status, headers, content_bytes = app.request('GET', '/sumNumbers', query_string='values.0=1&values.1=2.5')
+            self.assertEqual(status, '200 OK')
+            self.assertEqual(headers, [('Content-Type', 'application/json')])
+            self.assertDictEqual(json.loads(content_bytes.decode('utf-8')), {'result': 3.5})
+
+            # Absolute POSIX paths
+            app = MarkdownUpApplication(temp_dir, {}, {
+                'schemas': ['/sub/test.smd'],
+                'scripts': ['/sub/test.bare'],
                 'apis': [
                     {'name': 'sumNumbers'}
                 ]
