@@ -16,7 +16,7 @@ $(eval $(call WGET, https://craigahobbs.github.io/python-build/pylintrc))
 
 
 # Specify the documentation directory
-GHPAGES_SRC := build/doc
+GHPAGES_SRC := build/doc/
 
 
 # Include python-build
