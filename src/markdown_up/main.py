@@ -75,7 +75,7 @@ def main(argv=None):
     api_path = os.path.normpath(os.path.join(root, args.api))
     if os.path.isfile(api_path):
         with open(api_path, 'r', encoding='utf-8') as api_file:
-            api_config = schema_markdown.validate_type(CONFIG_TYPES, 'MarkdownUpAPI', json.load(api_file))
+            api_config = schema_markdown.validate_type(CONFIG_TYPES, 'MarkdownUpAPIConfig', json.load(api_file))
     else:
         api_config = None
 
@@ -128,7 +128,10 @@ def _wsgiapp_log_access(wsgiapp, environ, start_response):
 
 # The backend configuration schema
 CONFIG_TYPES = schema_markdown.parse_schema_markdown('''\
-# The MarkdownUp configuration (e.g. `markdown-up.json`)
+group "Application Configuration"
+
+
+# The MarkdownUp application configuration (e.g. `markdown-up.json`)
 struct MarkdownUpConfig
 
     # If true, run in release mode. Default is false.
@@ -141,24 +144,30 @@ struct MarkdownUpConfig
     optional int threads
 
     # Global variables
-    optional string{len > 0} globals
+    optional string{} globals
+
+
+group "API Configuration"
 
 
 # The MarkdownUp API configuration (e.g. `markdown-up-api.json`)
+struct MarkdownUpAPIConfig
+
+    # The API schema markdown POSIX file paths
+    string[] schemas
+
+    # The API BareScript POSIX file paths
+    string[] scripts
+
+    # The APIs
+    MarkdownUpAPI[] apis
+
+
+group
+
+
+# An API
 struct MarkdownUpAPI
-
-    # The backend schema markdown POSIX file paths
-    string[len > 0] schemas
-
-    # The backend BareScript POSIX file paths
-    string[len > 0] scripts
-
-    # The backend APIs
-    BackendAPI[len > 0] apis
-
-
-# A backend API
-struct BackendAPI
 
     # The schema action name
     string name
