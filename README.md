@@ -64,19 +64,23 @@ All Markdown parsing and rendering are done on the client to minimize server cos
 The `markdown-up` application has the following command-line arguments:
 
 ```
-usage: markdown-up [-h] [-p N] [-t N] [-n] [-r] [-q] [path]
+usage: markdown-up [-h] [-p N] [-t N] [-n] [-r] [-q] [-d] [-v VAR EXPR] [-c FILE] [-a FILE] [path]
 
 positional arguments:
-  path        the file or directory to view (default is ".")
+  path                the file or directory to view (default is ".")
 
 options:
-  -h, --help  show this help message and exit
-  -p N        the application port (default is 8080)
-  -t N        the number of web server threads (default is 8)
-  -n          don't open a web browser
-  -r          release mode (cache statics, remove documentation and index)
-  -q          don't display access logging
-```
+  -h, --help          show this help message and exit
+  -p, --port N        the application port (default is 8080)
+  -t, --threads N     the number of web server threads (default is 8)
+  -n, --no-browser    don't open a web browser
+  -r, --release       release mode (cache statics, remove documentation and index)
+  -q, --quiet         don't display access logging
+  -d, --debug         backend debug mode
+  -v, --var VAR EXPR  set a global variable to an expression value
+  -c, --config FILE   the application config filename (default is "markdown-up.json")
+  -a, --api FILE      the API config filename (default is "markdown-up-api.json")
+  ```
 
 
 ## MarkdownUp Applications
