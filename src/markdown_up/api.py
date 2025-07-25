@@ -23,7 +23,7 @@ def load_api_requests(root, config, api_config):
     types = {}
     for schema_posix in api_config.get('schemas'):
         schema_parts = Path(schema_posix).parts
-        schema_path = os.path.normpath(os.path.join(root, *(schema_parts[1:] if schema_parts[0] == '/' else schema_parts)))
+        schema_path = os.path.join(root, *(schema_parts[1:] if schema_posix.startswith('/') else schema_parts))
         with open(schema_path, 'r', encoding='utf-8') as schema_file:
             schema_markdown.parse_schema_markdown(schema_file, types, filename=schema_posix, validate=False)
     schema_markdown.validate_type_model(types)
@@ -45,7 +45,7 @@ def load_api_requests(root, config, api_config):
     }
     for script_posix in api_config.get('scripts'):
         script_parts = Path(script_posix).parts
-        script_path = os.path.normpath(os.path.join(root, *(script_parts[1:] if script_parts[0] == '/' else script_parts)))
+        script_path = os.path.join(root, *(script_parts[1:] if script_posix.startswith('/') else script_parts))
         with open(script_path, 'r', encoding='utf-8') as script_file:
             bare_script.execute_script(bare_script.parse_script(script_file), script_options)
 
