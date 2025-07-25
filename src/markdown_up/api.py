@@ -21,7 +21,7 @@ def load_api_requests(root, config, api_config):
 
     # Parse the API schema markdown files
     types = {}
-    for schema_posix in api_config.get('schemas'):
+    for schema_posix in api_config['schemas']:
         schema_parts = PurePosixPath(schema_posix).parts
         schema_path = os.path.join(root, *(schema_parts[1:] if schema_parts[0] == '/' else schema_parts))
         with open(schema_path, 'r', encoding='utf-8') as schema_file:
@@ -43,14 +43,14 @@ def load_api_requests(root, config, api_config):
         'logFn': bare_script.log_stdout,
         'urlFile': bare_script.url_file_relative
     }
-    for script_posix in api_config.get('scripts'):
+    for script_posix in api_config['scripts']:
         script_parts = PurePosixPath(script_posix).parts
         script_path = os.path.join(root, *(script_parts[1:] if script_parts[0] == '/' else script_parts))
         with open(script_path, 'r', encoding='utf-8') as script_file:
             bare_script.execute_script(bare_script.parse_script(script_file), script_options)
 
     # Yield the API requests
-    for api in api_config.get('apis'):
+    for api in api_config['apis']:
         api_name = api['name']
         api_fn_name = api.get('function', api_name)
         api_wsgi = api.get('wsgi', False)
