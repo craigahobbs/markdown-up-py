@@ -718,7 +718,6 @@ endfunction
             status, headers, content_bytes = app.request('GET', '/test', environ={'wsgi.errors': wsgi_errors})
             self.assertEqual(status, '500 Internal Server Error')
             self.assertEqual(headers, [('Content-Type', 'application/json')])
-            self.maxDiff = None
             self.assertEqual(json.loads(content_bytes.decode('utf-8')), {
                 'error': 'InvalidOutput',
                 'message': "Invalid WSGI API function return value ['200 OK', [['Content-Type', 'text/plain']], None]"

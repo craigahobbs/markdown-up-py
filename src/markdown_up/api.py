@@ -101,11 +101,8 @@ def _bare_script_action_fn(api_fn, api_wsgi, api_globals, debug, ctx, req):
                 any(not isinstance(header, list) or len(header) != 2 for header in headers) or \
                 any(not isinstance(key, str) or not isinstance(value, str) for key, value in headers)
         if invalid_response:
-            raise chisel.ActionError(
-                'InvalidOutput',
-                status='500 Internal Server Error',
-                message=f'Invalid WSGI API function return value {response!r}'
-            )
+            error_message = f'Invalid WSGI API function return value {response!r}'
+            raise chisel.ActionError('InvalidOutput', status='500 Internal Server Error', message=error_message)
 
         # Add WSGI response headers
         headers.extend(api_state['headers'].items())
