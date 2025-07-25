@@ -59,7 +59,7 @@ def load_api_requests(root, config, api_config):
         api_fn = api_globals.get(api_fn_name)
         if not api_fn or not callable(api_fn):
             raise NameError(f'Unknown API function "{api_fn_name}"')
-        action_fn = partial(_bare_script_action_fn, api_fn, api_wsgi, api_globals, debug)
+        action_fn = partial(_bare_script_action_fn, api_fn_name, api_wsgi, api_globals, debug)
         yield chisel.Action(action_fn, name=api_name, types=types, wsgi_response=api_wsgi)
 
 
@@ -68,7 +68,9 @@ _API_GLOBAL = '__markdown_up__'
 
 
 # Action function wrapper for a MarkdownUp API function
-def _bare_script_action_fn(api_fn, api_wsgi, api_globals, debug, ctx, req):
+def _bare_script_action_fn(api_fn_name, api_wsgi, api_globals, debug, ctx, req):
+    api_fn = api_globals.get(api_fn_name)
+
     # Copy the API globals
     script_globals = dict(api_globals)
     script_globals[_API_GLOBAL] = {'headers': {}}
@@ -101,7 +103,8 @@ def _bare_script_action_fn(api_fn, api_wsgi, api_globals, debug, ctx, req):
                 any(not isinstance(header, list) or len(header) != 2 for header in headers) or \
                 any(not isinstance(key, str) or not isinstance(value, str) for key, value in headers)
         if invalid_response:
-            error_message = f'Invalid WSGI API function return value {response!r}'
+            error_message = f'WSGI API function "{api_fn_name}" invalid return value: {response!r}'
+            ctx.log.error(error_message)
             raise chisel.ActionError('InvalidOutput', status='500 Internal Server Error', message=error_message)
 
         # Add WSGI response headers
