@@ -496,10 +496,10 @@ endfunction
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertEqual(json.loads(content_bytes.decode('utf-8')), {
                 'error': 'InvalidOutput',
-                'message': 'WSGI API function "test" invalid return value: []'
+                'message': 'WSGI API function "test" invalid return value'
             })
             self.assertTrue(re.match(
-                r'ERROR \[\d+ / \d+\] WSGI API function "test" invalid return value: \[\]',
+                r'ERROR \[\d+ / \d+\] WSGI API function "test" invalid return value',
                 wsgi_errors.getvalue()
             ), wsgi_errors.getvalue())
 
@@ -530,7 +530,7 @@ endfunction
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertEqual(json.loads(content_bytes.decode('utf-8')), {
                 'error': 'InvalidOutput',
-                'message': "WSGI API function \"test\" invalid return value: [200.0, [], 'Hello']"
+                'message': 'WSGI API function "test" invalid return value'
             })
 
 
@@ -560,7 +560,7 @@ endfunction
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertEqual(json.loads(content_bytes.decode('utf-8')), {
                 'error': 'InvalidOutput',
-                'message': "WSGI API function \"test\" invalid return value: ['200 OK', 'text/plain', 'Hello']"
+                'message': 'WSGI API function "test" invalid return value'
             })
 
 
@@ -590,7 +590,7 @@ endfunction
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertEqual(json.loads(content_bytes.decode('utf-8')), {
                 'error': 'InvalidOutput',
-                'message': "WSGI API function \"test\" invalid return value: ['200 OK', ['text/plain'], 'Hello']"
+                'message': 'WSGI API function "test" invalid return value'
             })
 
 
@@ -620,7 +620,7 @@ endfunction
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertEqual(json.loads(content_bytes.decode('utf-8')), {
                 'error': 'InvalidOutput',
-                'message': "WSGI API function \"test\" invalid return value: ['200 OK', [[]], 'Hello']"
+                'message': 'WSGI API function "test" invalid return value'
             })
 
 
@@ -650,7 +650,7 @@ endfunction
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertEqual(json.loads(content_bytes.decode('utf-8')), {
                 'error': 'InvalidOutput',
-                'message': "WSGI API function \"test\" invalid return value: ['200 OK', [[None, 'Value']], 'Hello']"
+                'message': 'WSGI API function "test" invalid return value'
             })
 
 
@@ -680,7 +680,7 @@ endfunction
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertEqual(json.loads(content_bytes.decode('utf-8')), {
                 'error': 'InvalidOutput',
-                'message': "WSGI API function \"test\" invalid return value: ['200 OK', [['Key', None]], 'Hello']"
+                'message': 'WSGI API function "test" invalid return value'
             })
 
 
@@ -710,5 +710,5 @@ endfunction
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertEqual(json.loads(content_bytes.decode('utf-8')), {
                 'error': 'InvalidOutput',
-                'message': "WSGI API function \"test\" invalid return value: ['200 OK', [['Content-Type', 'text/plain']], None]"
+                'message': 'WSGI API function "test" invalid return value'
             })
