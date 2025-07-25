@@ -79,7 +79,7 @@ def _bare_script_action_fn(api_fn, api_wsgi, api_globals, debug, ctx, req):
         'debug': debug,
         'fetchFn': bare_script.fetch_read_write,
         'globals': script_globals,
-        'logFn': partial(_log_filehandle, wsgi_errors) if wsgi_errors is not None else None ,
+        'logFn': partial(_log_filehandle, wsgi_errors) if wsgi_errors is not None else None,
         'statementCount': 0,
         'urlFile': bare_script.url_file_relative
     }
