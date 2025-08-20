@@ -15,12 +15,12 @@ $(eval $(call WGET, https://craigahobbs.github.io/python-build/Makefile.base))
 $(eval $(call WGET, https://craigahobbs.github.io/python-build/pylintrc))
 
 
+# Specify the documentation directory
+GHPAGES_SRC := build/doc/
+
+
 # Include python-build
 include Makefile.base
-
-
-# Development dependencies
-TESTS_REQUIRE := bare-script
 
 
 # Disable pylint docstring warnings
@@ -33,6 +33,14 @@ help:
 
 clean:
 	rm -rf Makefile.base pylintrc
+
+
+doc: $(DEFAULT_VENV_BUILD)
+	mkdir -p build/doc
+	cp -R static/* build/doc
+	cp README.md build/doc
+	$(DEFAULT_VENV_PYTHON) -c 'import json; from markdown_up.main import CONFIG_TYPES; print(json.dumps(CONFIG_TYPES, indent=4))' > build/doc/config.json
+	$(DEFAULT_VENV_BIN)/baredoc src/markdown_up/api.py -o build/doc/api.json
 
 
 .PHONY: test-app

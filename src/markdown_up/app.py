@@ -2,7 +2,7 @@
 # https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE
 
 """
-The MarkdownUp launcher back-end application
+The MarkdownUp backend application
 """
 
 import importlib.resources
@@ -13,25 +13,36 @@ import urllib.parse
 
 import chisel
 
+from .api import load_api_requests
+
 
 class MarkdownUpApplication(chisel.Application):
     """
-    The markdown-up back-end API WSGI application class
+    The markdown-up backend API WSGI application class
     """
 
     __slots__ = ('root', 'release', 'add_request_lock')
 
 
-    def __init__(self, root, release=False):
+    def __init__(self, root, config=None, api_config=None):
         super().__init__()
         self.root = root
-        self.release = release
+        self.release = config.get('release', False) if config else False
         self.add_request_lock = threading.Lock()
 
-        if release:
+        # Release mode?
+        if self.release:
+            # Not-pretty, unvalidated output
+            self.pretty_output = False
+            self.validate_output = False
+
             # Add the MarkdownUp application
             self.add_requests(chisel.create_doc_requests(api=False, app=False, markdown_up=True))
         else:
+            # Pretty, validated output
+            self.pretty_output = True
+            self.validate_output = True
+
             # Add the chisel documentation application (and the MarkdownUp application)
             self.add_requests(chisel.create_doc_requests())
 
@@ -42,8 +53,12 @@ class MarkdownUpApplication(chisel.Application):
             self.add_static('index.html', content_type='text/html; charset=utf-8', urls=(('GET', '/'),))
             self.add_static('markdownUpIndex.bare')
 
+        # Add the backend APIs
+        if api_config:
+            self.add_requests(load_api_requests(root, config, api_config))
 
-    def add_static(self, filename, content_type=None, urls=(('GET', None),), doc_group='MarkdownUp Index Statics'):
+
+    def add_static(self, filename, content_type=None, urls=(('GET', None),), doc_group='MarkdownUp File Browser'):
         with importlib.resources.files('markdown_up.static').joinpath(filename).open('rb') as fh:
             self.add_request(chisel.StaticRequest(filename, fh.read(), content_type=content_type, urls=urls, doc_group=doc_group))
 
@@ -64,14 +79,13 @@ class MarkdownUpApplication(chisel.Application):
         # Directory path?
         request = None
         if os.path.isdir(path):
-
             # Directory redirect?
             if not path_info.endswith('/'):
                 request = chisel.RedirectRequest(((None, path_info),), path_info + '/', name=path_info)
 
             # HTML index file exist?
             if request is None:
-                for index_file in INDEX_FILES:
+                for index_file in HTML_INDEXES:
                     index_posix_path = posix_path_info.joinpath(index_file)
                     index_path = os.path.join(self.root, *index_posix_path.parts[1:])
                     if os.path.isfile(index_path):
@@ -86,7 +100,7 @@ class MarkdownUpApplication(chisel.Application):
 
             # No HTML index file - does a Markdown index file exist?
             if request is None:
-                for index_markdown in INDEX_MARKDOWN:
+                for index_markdown in MARKDOWN_INDEXES:
                     markdown_posix_path = posix_path_info.joinpath(index_markdown)
                     markdown_path = os.path.join(self.root, *markdown_posix_path.parts[1:])
                     if os.path.isfile(markdown_path):
@@ -123,8 +137,7 @@ class MarkdownUpApplication(chisel.Application):
 
         # Not found?
         if not request:
-            start_response('404 Not Found', [('Content-Type', 'text/plain; charset=utf-8')])
-            return [b'Not Found']
+            return super().__call__(environ, start_response)
 
         # Add the request, if caching of statics is enabled
         if self.release:
@@ -142,16 +155,17 @@ class MarkdownUpApplication(chisel.Application):
         return request(environ, start_response)
 
 
-# Render-able file extensions
-MARKDOWN_EXTS = ('.md', '.markdown')
+# Recognized HTML and Markdown extensions
 HTML_EXTS = ('.html', '.htm')
+MARKDOWN_EXTS = ('.md', '.markdown')
 
 
-# Index file names
-INDEX_FILES = ('index.html', 'index.htm')
-INDEX_MARKDOWN = ('index.md', 'README.md')
+# Recognized HTML and Markdown index file names
+HTML_INDEXES = ('index.html', 'index.htm')
+MARKDOWN_INDEXES = ('index.md', 'README.md')
 
 
+# Create a MarkdownUp HTML file (bytes)
 def create_markdown_up_stub(filename):
     return f'''\
 <!DOCTYPE html>
@@ -205,10 +219,10 @@ def create_markdown_up_stub(filename):
 
 
 @chisel.action(spec='''\
-group "MarkdownUp Index API"
+group "MarkdownUp File Browser"
 
 
-# The MarkdownUp launcher index API
+# The MarkdownUp file browser API
 action markdown_up_index
     urls
         GET

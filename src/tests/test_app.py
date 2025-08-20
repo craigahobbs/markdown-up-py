@@ -35,6 +35,8 @@ class TestMarkdownUp(unittest.TestCase):
 
     def test_init(self):
         app = MarkdownUpApplication('.')
+        self.assertEqual(app.pretty_output, True)
+        self.assertEqual(app.validate_output, True)
         self.assertEqual(app.root, '.')
         self.assertTrue('index.html' in (request.name for request in app.requests.values()))
         self.assertTrue('markdownUpIndex.bare' in (request.name for request in app.requests.values()))
@@ -44,7 +46,9 @@ class TestMarkdownUp(unittest.TestCase):
 
 
     def test_init_release(self):
-        app = MarkdownUpApplication('.', True)
+        app = MarkdownUpApplication('.', {'release': True})
+        self.assertEqual(app.pretty_output, False)
+        self.assertEqual(app.validate_output, False)
         self.assertEqual(app.root, '.')
         self.assertFalse('index.html' in (request.name for request in app.requests.values()))
         self.assertFalse('markdownUpIndex.bare' in (request.name for request in app.requests.values()))
@@ -114,7 +118,7 @@ class TestMarkdownUp(unittest.TestCase):
             self.assertEqual(start_response.status, '404 Not Found')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'text/plain; charset=utf-8')]
+                [('Content-Type', 'text/plain')]
             )
             self.assertEqual(content, [b'Not Found'])
 
@@ -163,7 +167,7 @@ class TestMarkdownUp(unittest.TestCase):
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '404 Not Found')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain')])
             self.assertEqual(content, [b'Not Found'])
 
             # Not found HTML
@@ -171,7 +175,7 @@ class TestMarkdownUp(unittest.TestCase):
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '404 Not Found')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain')])
             self.assertEqual(content, [b'Not Found'])
 
             # Bad method
@@ -202,7 +206,7 @@ class TestMarkdownUp(unittest.TestCase):
             (('sub3', 'test.txt'), 'test')
         ]
         with create_test_files(test_files) as temp_dir:
-            app = MarkdownUpApplication(temp_dir, True)
+            app = MarkdownUpApplication(temp_dir, {'release': True})
 
             # Root
             environ = chisel.Context.create_environ('GET', '/')
@@ -255,7 +259,7 @@ class TestMarkdownUp(unittest.TestCase):
             self.assertEqual(start_response.status, '404 Not Found')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'text/plain; charset=utf-8')]
+                [('Content-Type', 'text/plain')]
             )
             self.assertEqual(content, [b'Not Found'])
 
@@ -304,7 +308,7 @@ class TestMarkdownUp(unittest.TestCase):
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '404 Not Found')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain')])
             self.assertEqual(content, [b'Not Found'])
 
             # Not found HTML
@@ -312,7 +316,7 @@ class TestMarkdownUp(unittest.TestCase):
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '404 Not Found')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain')])
             self.assertEqual(content, [b'Not Found'])
 
             # Bad method
@@ -339,13 +343,13 @@ class TestMarkdownUp(unittest.TestCase):
             ('test.unk', '')
         ]
         with create_test_files(test_files) as temp_dir:
-            app = MarkdownUpApplication(temp_dir, True)
+            app = MarkdownUpApplication(temp_dir)
             wsgi_errors = StringIO()
             environ = chisel.Context.create_environ('GET', '/test.unk', environ={'wsgi.errors': wsgi_errors})
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '404 Not Found')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain')])
             self.assertEqual(content, [b'Not Found'])
             self.assertTrue(re.match(
                 r'^WARNING \[\d+ / \d+\] Unknown content type for static resource "/test.unk"',
@@ -356,12 +360,12 @@ class TestMarkdownUp(unittest.TestCase):
     def test_static_unknown_extension_not_found(self):
         test_files = []
         with create_test_files(test_files) as temp_dir:
-            app = MarkdownUpApplication(temp_dir, True)
+            app = MarkdownUpApplication(temp_dir)
             environ = chisel.Context.create_environ('GET', '/test.unk')
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '404 Not Found')
-            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain; charset=utf-8')])
+            self.assertEqual(start_response.headers, [('Content-Type', 'text/plain')])
             self.assertEqual(content, [b'Not Found'])
 
 
@@ -458,7 +462,7 @@ class TestMarkdownUpAPI(unittest.TestCase):
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=../dir')
             self.assertEqual(status, '400 Bad Request')
             self.assertEqual(headers, [('Content-Type', 'application/json')])
-            self.assertEqual(content_bytes, b'{"error":"InvalidPath"}')
+            self.assertEqual(json.loads(content_bytes.decode('utf-8')), {'error': 'InvalidPath'})
 
 
     def test_markdown_up_index_file_path(self):
@@ -470,7 +474,7 @@ class TestMarkdownUpAPI(unittest.TestCase):
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=README.md')
             self.assertEqual(status, '400 Bad Request')
             self.assertEqual(headers, [('Content-Type', 'application/json')])
-            self.assertEqual(content_bytes, b'{"error":"InvalidPath"}')
+            self.assertEqual(json.loads(content_bytes.decode('utf-8')), {'error': 'InvalidPath'})
 
 
     def test_markdown_up_index_file_not_found(self):
@@ -479,4 +483,4 @@ class TestMarkdownUpAPI(unittest.TestCase):
             status, headers, content_bytes = app.request('GET', '/markdown_up_index', query_string='path=dir')
             self.assertEqual(status, '400 Bad Request')
             self.assertEqual(headers, [('Content-Type', 'application/json')])
-            self.assertEqual(content_bytes, b'{"error":"InvalidPath"}')
+            self.assertEqual(json.loads(content_bytes.decode('utf-8')), {'error': 'InvalidPath'})

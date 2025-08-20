@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>MarkdownUp Tests</title>
+        <title>MarkdownUp</title>
         <meta charset="UTF-8">
-        <meta name="description" content="MarkdownUp Tests">
+        <meta name="description" content="MarkdownUp is a Markdown viewer">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://craigahobbs.github.io/markdown-up/app.css">
 
@@ -39,13 +39,7 @@
     </body>
     <script type="module">
         import {MarkdownUp} from 'https://craigahobbs.github.io/markdown-up/lib/app.js';
-        const app = new MarkdownUp(window, {'markdownText': `\
-# MarkdownUp Tests
-
-~~~ markdown-script
-include 'runTests.bare'
-~~~
-`});
+        const app = new MarkdownUp(window);
         app.run();
     </script>
 </html>
