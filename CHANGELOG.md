@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0 (2025-08-20)
+
+- [cbce552](https://github.com/craigahobbs/markdown-up-py/commit/cbce552) - backend APIs with BareScript
+
 ## 2.2.1 (2025-07-19)
 
 - [e9d27a1](https://github.com/craigahobbs/markdown-up-py/commit/e9d27a1) - update readme
