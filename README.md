@@ -284,6 +284,8 @@ To run the application, run `markdown-up` in the directory containing the applic
 markdown-up index.md
 ```
 
+With the application running, you can view the backend API documentation at <http://127.0.0.1:8080/doc/>.
+
 
 ## Development
 
