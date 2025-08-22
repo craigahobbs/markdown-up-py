@@ -5,7 +5,7 @@
 [![GitHub](https://img.shields.io/github/license/craigahobbs/markdown-up-py)](https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/markdown-up)](https://pypi.org/project/markdown-up/)
 
-MarkdownUp is a Markdown viewer.
+MarkdownUp is a Markdown viewer. This is the MarkdownUp backend application.
 
 
 ## Install MarkdownUp
@@ -55,7 +55,7 @@ files: "README.md" and "CHANGELOG.md". The MarkdownUp service automatically gene
 and "CHANGELOG.html" files.
 
 The generated `.html` files are HTML stubs for the
-[MarkdownUp Front-End Application](https://github.com/craigahobbs/markdown-up#readme).
+[MarkdownUp frontend application](https://github.com/craigahobbs/markdown-up#readme).
 All Markdown parsing and rendering are done on the client.
 
 
