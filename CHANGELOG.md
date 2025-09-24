@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.0 (2025-09-24)
+
+- [005267d](https://github.com/craigahobbs/markdown-up-py/commit/005267d) - bare-script 3.5.0
+
 ## 2.3.0 (2025-08-20)
 
 - [cbce552](https://github.com/craigahobbs/markdown-up-py/commit/cbce552) - backend APIs with BareScript
