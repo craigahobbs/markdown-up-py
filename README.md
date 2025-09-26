@@ -5,7 +5,7 @@
 [![GitHub](https://img.shields.io/github/license/craigahobbs/markdown-up-py)](https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/markdown-up)](https://pypi.org/project/markdown-up/)
 
-MarkdownUp is a Markdown viewer. This is the MarkdownUp backend application.
+MarkdownUp is a Markdown viewer.
 
 
 ## Install MarkdownUp
