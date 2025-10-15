@@ -47,7 +47,7 @@ doc: $(DEFAULT_VENV_BUILD)
 commit: test-app
 test-app: $(DEFAULT_VENV_BUILD)
 	$(DEFAULT_VENV_BIN)/bare -s src/markdown_up/static/*.bare src/markdown_up/static/test/*.bare
-	$(DEFAULT_VENV_BIN)/bare -m src/markdown_up/static/test/runTests.bare$(if $(DEBUG), -d)$(if $(TEST), -v vTest "'$(TEST)'")
+	$(DEFAULT_VENV_BIN)/bare -d -m -v vUnittestReport true src/markdown_up/static/test/runTests.bare$(if $(TEST), -v vTest "'$(TEST)'")
 
 
 .PHONY: run
