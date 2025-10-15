@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.4.1 (2025-10-15)
+
+- [db83618](https://github.com/craigahobbs/markdown-up-py/commit/db83618) - bare-script 3.6, chisel 1.7
+
+- [b3f3d1a](https://github.com/craigahobbs/markdown-up-py/commit/b3f3d1a) - remove python 3.9
+
 ## 2.4.0 (2025-09-24)
 
 - [005267d](https://github.com/craigahobbs/markdown-up-py/commit/005267d) - bare-script 3.5.0
