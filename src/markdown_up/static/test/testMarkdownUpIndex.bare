@@ -43,7 +43,7 @@ async function testMarkdownUpIndex():
         arrayNew('markdownPrint', arrayNew('', "[sub2](#var.vPath='sub2')")) \
     ))
 endfunction
-unittestRunTestAsync('testMarkdownUpIndex')
+unittestRunTest('testMarkdownUpIndex')
 
 
 async function testMarkdownUpIndex_escapes():
@@ -83,7 +83,7 @@ async function testMarkdownUpIndex_escapes():
         arrayNew('markdownPrint', arrayNew('', "[sub\\+\\)dir](#var.vPath='sub%2B%29dir')")) \
     ))
 endfunction
-unittestRunTestAsync('testMarkdownUpIndex_escapes')
+unittestRunTest('testMarkdownUpIndex_escapes')
 
 
 async function testMarkdownUpIndex_path():
@@ -128,7 +128,7 @@ async function testMarkdownUpIndex_path():
         arrayNew('markdownPrint', arrayNew('', "[sub2](#var.vPath='subdir%2Fsub2')")) \
     ))
 endfunction
-unittestRunTestAsync('testMarkdownUpIndex_path')
+unittestRunTest('testMarkdownUpIndex_path')
 
 
 async function testMarkdownUpIndex_empty():
@@ -160,7 +160,7 @@ async function testMarkdownUpIndex_empty():
         arrayNew('markdownPrint', arrayNew('', 'No files or sub-directories found')) \
     ))
 endfunction
-unittestRunTestAsync('testMarkdownUpIndex_empty')
+unittestRunTest('testMarkdownUpIndex_empty')
 
 
 async function testMarkdownUpIndex_onlyFiles():
@@ -197,7 +197,7 @@ async function testMarkdownUpIndex_onlyFiles():
         arrayNew('markdownPrint', arrayNew('', '[c.md](c.html)')) \
     ))
 endfunction
-unittestRunTestAsync('testMarkdownUpIndex_onlyFiles')
+unittestRunTest('testMarkdownUpIndex_onlyFiles')
 
 
 async function testMarkdownUpIndex_onlyDirectories():
@@ -231,4 +231,4 @@ async function testMarkdownUpIndex_onlyDirectories():
         arrayNew('markdownPrint', arrayNew('', "[sub2](#var.vPath='sub2')")) \
     ))
 endfunction
-unittestRunTestAsync('testMarkdownUpIndex_onlyDirectories')
+unittestRunTest('testMarkdownUpIndex_onlyDirectories')
