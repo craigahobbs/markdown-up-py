@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.5.0 (2025-10-18)
+
+- [c9b9766](https://github.com/craigahobbs/markdown-up-py/commit/c9b9766) - bare-script 3.7, chisel 1.8
+
+- [03ce2ab](https://github.com/craigahobbs/markdown-up-py/commit/03ce2ab) - enable app test coverage
+
 ## 2.4.1 (2025-10-15)
 
 - [db83618](https://github.com/craigahobbs/markdown-up-py/commit/db83618) - bare-script 3.6, chisel 1.7
