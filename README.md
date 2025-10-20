@@ -187,10 +187,7 @@ async function exampleMain():
     n2 = objectGet(args, 'n2')
 
     # Call the backend service to add the two numbers
-    sumResponseText = systemFetch(objectNew( \
-        'url', 'sumNumbers', \
-        'body', jsonStringify(objectNew('n1', n1, 'n2', n2)) \
-    ))
+    sumResponseText = systemFetch({'url': 'sumNumbers', 'body': jsonStringify({'n1': n1, 'n2': n2})})
     sumResponseJSON = if(sumResponseText, jsonParse(sumResponseText))
     result = if(sumResponseJSON, objectGet(sumResponseJSON, 'result'))
 
@@ -201,12 +198,12 @@ async function exampleMain():
         '# ' + markdownEscape(title), \
         '', \
         'n1 = ' + n1 + ' (' + \
-            argsLink(exampleArguments, 'Down', objectNew('n1', n1 - 1)) + ' | ' + \
-            argsLink(exampleArguments, 'Up', objectNew('n1', n1 + 1)) + ')', \
+            argsLink(exampleArguments, 'Down', {'n1': n1 - 1}) + ' | ' + \
+            argsLink(exampleArguments, 'Up', {'n1': n1 + 1}) + ')', \
         '', \
         'n2 = ' + n2 + ' (' + \
-            argsLink(exampleArguments, 'Down', objectNew('n2', n2 - 1)) + ' | ' + \
-            argsLink(exampleArguments, 'Up', objectNew('n2', n2 + 1)) + ')', \
+            argsLink(exampleArguments, 'Down', {'n2': n2 - 1}) + ' | ' + \
+            argsLink(exampleArguments, 'Up', {'n2': n2 + 1}) + ')', \
         '', \
         n1 + ' + ' + n2 + ' = ' + result \
     )
@@ -214,10 +211,10 @@ endfunction
 
 
 # The example application's arguments (for use with argsParse, etc.)
-exampleArguments = arrayNew( \
-    objectNew('name', 'n1', 'type', 'float', 'default', 0), \
-    objectNew('name', 'n2', 'type', 'float', 'default', 0) \
-)
+exampleArguments = [ \
+    {'name': 'n1', 'type': 'float', 'default': 0}, \
+    {'name': 'n2', 'type': 'float', 'default': 0} \
+]
 ```
 
 
@@ -274,7 +271,7 @@ object.
 function sumNumbers(request):
     n1 = objectGet(request, 'n1')
     n2 = objectGet(request, 'n2')
-    return objectNew('result', n1 + n2)
+    return {'result': n1 + n2}
 endfunction
 ```
 
