@@ -36,7 +36,7 @@ function sumNumbers(request):
     for value in objectGet(request, 'values'):
         result = result + value
     endfor
-    return objectNew('result', result)
+    return {'result': result}
 endfunction
 ''')
         ]
@@ -72,7 +72,7 @@ function sumNumbers(request):
     for value in objectGet(request, 'values'):
         result = result + value
     endfor
-    return objectNew('result', result)
+    return {'result': result}
 endfunction
 ''')
         ]
@@ -113,7 +113,7 @@ action test
 '''),
             ('test.bare', '''\
 function testx(request):
-    return objectNew()
+    return {}
 endfunction
 ''')
         ]
@@ -147,11 +147,11 @@ function sumNumbers(request):
     for value in objectGet(request, 'values'):
         result = result + value
     endfor
-    return arrayNew( \
-        '200 OK', \
-        arrayNew(arrayNew('Content-Type', 'text/plain')), \
-        'The result is ' + result \
-    )
+    return [ \\
+        '200 OK', \\
+        [['Content-Type', 'text/plain']], \\
+        'The result is ' + result \\
+    ]
 endfunction
 ''')
         ]
@@ -202,7 +202,7 @@ asdf
 '''),
             ('test.bare', '''\
 function test(request):
-    return objectNew()
+    return {}
 endfunction
 ''')
         ]
@@ -262,7 +262,7 @@ action test
 '''),
             ('test.bare', '''\
 function test():
-    return objectNew()
+    return {}
 endfunction
 ''')
         ]
@@ -318,11 +318,11 @@ action testGlobals
 '''),
             ('test.bare', '''\
 function testGlobals(request):
-    return arrayNew( \
-        '200 OK', \
-        arrayNew(arrayNew('Content-Type', 'text/plain')), \
-        vName1 + ' and ' + vName2 \
-    )
+    return [ \\
+        '200 OK', \\
+        [['Content-Type', 'text/plain']], \\
+        vName1 + ' and ' + vName2 \\
+    ]
 endfunction
 ''')
         ]
@@ -504,7 +504,7 @@ action test
 '''),
             ('test.bare', '''\
 function test(request):
-    return arrayNew()
+    return []
 endfunction
 ''')
         ]
@@ -539,7 +539,7 @@ action test
 '''),
             ('test.bare', '''\
 function test(request):
-    return arrayNew(200, arrayNew(), 'Hello')
+    return [200, [], 'Hello']
 endfunction
 ''')
         ]
@@ -569,7 +569,7 @@ action test
 '''),
             ('test.bare', '''\
 function test(request):
-    return arrayNew('200 OK', 'text/plain', 'Hello')
+    return ['200 OK', 'text/plain', 'Hello']
 endfunction
 ''')
         ]
@@ -599,7 +599,7 @@ action test
 '''),
             ('test.bare', '''\
 function test(request):
-    return arrayNew('200 OK', arrayNew('text/plain'), 'Hello')
+    return ['200 OK', ['text/plain'], 'Hello']
 endfunction
 ''')
         ]
@@ -629,7 +629,7 @@ action test
 '''),
             ('test.bare', '''\
 function test(request):
-    return arrayNew('200 OK', arrayNew(arrayNew()), 'Hello')
+    return ['200 OK', [[]], 'Hello']
 endfunction
 ''')
         ]
@@ -659,7 +659,7 @@ action test
 '''),
             ('test.bare', '''\
 function test(request):
-    return arrayNew('200 OK', arrayNew(arrayNew(null, 'Value')), 'Hello')
+    return ['200 OK', [[null, 'Value']], 'Hello']
 endfunction
 ''')
         ]
@@ -689,7 +689,7 @@ action test
 '''),
             ('test.bare', '''\
 function test(request):
-    return arrayNew('200 OK', arrayNew(arrayNew('Key', null)), 'Hello')
+    return ['200 OK', [['Key', null]], 'Hello']
 endfunction
 ''')
         ]
@@ -719,7 +719,7 @@ action test
 '''),
             ('test.bare', '''\
 function test(request):
-    return arrayNew('200 OK', arrayNew(arrayNew('Content-Type', 'text/plain')), null)
+    return ['200 OK', [['Content-Type', 'text/plain']], null]
 endfunction
 ''')
         ]

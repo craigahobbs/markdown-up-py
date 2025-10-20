@@ -6,102 +6,102 @@ include '../markdownUpIndex.bare'
 
 async function testMarkdownUpIndex():
     # Setup mocks
-    unittestMockAll(objectNew( \
-        'systemFetch', objectNew( \
-            'markdown_up_index', jsonStringify(objectNew( \
-                'path', '.', \
-                'files', arrayNew( \
-                    objectNew('name', 'a.html', 'display', 'a.md'), \
-                    objectNew('name', 'b.html'), \
-                    objectNew('name', 'c.html', 'display', 'c.md') \
-                ), \
-                'directories', arrayNew('sub1', 'sub2') \
-            )) \
-        ) \
-    ))
+    unittestMockAll({ \
+        'systemFetch': { \
+            'markdown_up_index': jsonStringify({ \
+                'path': '.', \
+                'files': [ \
+                    {'name': 'a.html', 'display': 'a.md'}, \
+                    {'name': 'b.html'}, \
+                    {'name': 'c.html', 'display': 'c.md'} \
+                ], \
+                'directories': ['sub1', 'sub2'] \
+            }) \
+        } \
+    })
 
     # Render the index
     markdownUpIndex()
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemFetch', arrayNew('markdown_up_index')), \
-        arrayNew('documentSetTitle', arrayNew('MarkdownUp - .')), \
-        arrayNew('markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['systemFetch', ['markdown_up_index']], \
+        ['documentSetTitle', ['MarkdownUp - .']], \
+        ['markdownPrint', [ \
             'Root |', \
             'Parent |', \
             '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
             '', \
             '# MarkdownUp \\- .' \
-        )), \
-        arrayNew('markdownPrint', arrayNew('', '## Files')), \
-        arrayNew('markdownPrint', arrayNew('', '[a.md](a.html)')), \
-        arrayNew('markdownPrint', arrayNew('', '[b.html](b.html)')), \
-        arrayNew('markdownPrint', arrayNew('', '[c.md](c.html)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Directories')), \
-        arrayNew('markdownPrint', arrayNew('', "[sub1](#var.vPath='sub1')")), \
-        arrayNew('markdownPrint', arrayNew('', "[sub2](#var.vPath='sub2')")) \
-    ))
+        ]], \
+        ['markdownPrint', ['', '## Files']], \
+        ['markdownPrint', ['', '[a.md](a.html)']], \
+        ['markdownPrint', ['', '[b.html](b.html)']], \
+        ['markdownPrint', ['', '[c.md](c.html)']], \
+        ['markdownPrint', ['', '## Directories']], \
+        ['markdownPrint', ['', "[sub1](#var.vPath='sub1')"]], \
+        ['markdownPrint', ['', "[sub2](#var.vPath='sub2')"]] \
+    ])
 endfunction
 unittestRunTest('testMarkdownUpIndex')
 
 
 async function testMarkdownUpIndex_escapes():
     # Setup mocks
-    unittestMockAll(objectNew( \
-        'systemFetch', objectNew( \
-            'markdown_up_index', jsonStringify(objectNew( \
-                'path', '.', \
-                'files', arrayNew( \
-                    objectNew('name', 'a+)b.html', 'display', 'a+)b.md'), \
-                    objectNew('name', 'b+)a.html') \
-                ), \
-                'directories', arrayNew('sub+)dir') \
-            )) \
-        ) \
-    ))
+    unittestMockAll({ \
+        'systemFetch': { \
+            'markdown_up_index': jsonStringify({ \
+                'path': '.', \
+                'files': [ \
+                    {'name': 'a+)b.html', 'display': 'a+)b.md'}, \
+                    {'name': 'b+)a.html'} \
+                ], \
+                'directories': ['sub+)dir'] \
+            }) \
+        } \
+    })
 
     # Render the index
     markdownUpIndex()
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemFetch', arrayNew('markdown_up_index')), \
-        arrayNew('documentSetTitle', arrayNew('MarkdownUp - .')), \
-        arrayNew('markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['systemFetch', ['markdown_up_index']], \
+        ['documentSetTitle', ['MarkdownUp - .']], \
+        ['markdownPrint', [ \
                 'Root |', \
                 'Parent |', \
                 '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
                 '', \
                 '# MarkdownUp \\- .' \
-            ) \
-        ), \
-        arrayNew('markdownPrint', arrayNew('', '## Files')), \
-        arrayNew('markdownPrint', arrayNew('', '[a\\+\\)b.md](a+%29b.html)')), \
-        arrayNew('markdownPrint', arrayNew('', '[b\\+\\)a.html](b+%29a.html)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Directories')), \
-        arrayNew('markdownPrint', arrayNew('', "[sub\\+\\)dir](#var.vPath='sub%2B%29dir')")) \
-    ))
+            ] \
+        ], \
+        ['markdownPrint', ['', '## Files']], \
+        ['markdownPrint', ['', '[a\\+\\)b.md](a+%29b.html)']], \
+        ['markdownPrint', ['', '[b\\+\\)a.html](b+%29a.html)']], \
+        ['markdownPrint', ['', '## Directories']], \
+        ['markdownPrint', ['', "[sub\\+\\)dir](#var.vPath='sub%2B%29dir')"]] \
+    ])
 endfunction
 unittestRunTest('testMarkdownUpIndex_escapes')
 
 
 async function testMarkdownUpIndex_path():
     # Setup mocks
-    unittestMockAll(objectNew( \
-        'systemFetch', objectNew( \
-            'markdown_up_index?path=subdir', jsonStringify(objectNew( \
-                'path', 'subdir', \
-                'parent', '.', \
-                'files', arrayNew( \
-                    objectNew('name', 'a.html', 'display', 'a.md'), \
-                    objectNew('name', 'b.html'), \
-                    objectNew('name', 'c.html', 'display', 'c.md') \
-                ), \
-                'directories', arrayNew('sub1', 'sub2') \
-            )) \
-        ) \
-    ))
+    unittestMockAll({ \
+        'systemFetch': { \
+            'markdown_up_index?path=subdir': jsonStringify({ \
+                'path': 'subdir', \
+                'parent': '.', \
+                'files': [ \
+                    {'name': 'a.html', 'display': 'a.md'}, \
+                    {'name': 'b.html'}, \
+                    {'name': 'c.html', 'display': 'c.md'} \
+                ], \
+                'directories': ['sub1', 'sub2'] \
+            }) \
+        } \
+    })
 
     # Render the index
     systemGlobalSet('vPath', 'subdir')
@@ -109,126 +109,126 @@ async function testMarkdownUpIndex_path():
     systemGlobalSet('vPath', null)
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemFetch', arrayNew('markdown_up_index?path=subdir')), \
-        arrayNew('documentSetTitle', arrayNew('MarkdownUp - subdir')), \
-        arrayNew('markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['systemFetch', ['markdown_up_index?path=subdir']], \
+        ['documentSetTitle', ['MarkdownUp - subdir']], \
+        ['markdownPrint', [ \
             '[Root](#var=) |', \
             "[Parent](#var.vPath='.') |", \
             '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
             '', \
             '# MarkdownUp \\- subdir' \
-        )), \
-        arrayNew('markdownPrint', arrayNew('', '## Files')), \
-        arrayNew('markdownPrint', arrayNew('', '[a.md](subdir/a.html)')), \
-        arrayNew('markdownPrint', arrayNew('', '[b.html](subdir/b.html)')), \
-        arrayNew('markdownPrint', arrayNew('', '[c.md](subdir/c.html)')), \
-        arrayNew('markdownPrint', arrayNew('', '## Directories')), \
-        arrayNew('markdownPrint', arrayNew('', "[sub1](#var.vPath='subdir%2Fsub1')")), \
-        arrayNew('markdownPrint', arrayNew('', "[sub2](#var.vPath='subdir%2Fsub2')")) \
-    ))
+        ]], \
+        ['markdownPrint', ['', '## Files']], \
+        ['markdownPrint', ['', '[a.md](subdir/a.html)']], \
+        ['markdownPrint', ['', '[b.html](subdir/b.html)']], \
+        ['markdownPrint', ['', '[c.md](subdir/c.html)']], \
+        ['markdownPrint', ['', '## Directories']], \
+        ['markdownPrint', ['', "[sub1](#var.vPath='subdir%2Fsub1')"]], \
+        ['markdownPrint', ['', "[sub2](#var.vPath='subdir%2Fsub2')"]] \
+    ])
 endfunction
 unittestRunTest('testMarkdownUpIndex_path')
 
 
 async function testMarkdownUpIndex_empty():
     # Setup mocks
-    unittestMockAll(objectNew( \
-        'systemFetch', objectNew( \
-            'markdown_up_index', jsonStringify(objectNew( \
-                'path', '.', \
-                'files', arrayNew(), \
-                'directories', arrayNew() \
-            )) \
-        ) \
-    ))
+    unittestMockAll({ \
+        'systemFetch': { \
+            'markdown_up_index': jsonStringify({ \
+                'path': '.', \
+                'files': [], \
+                'directories': [] \
+            }) \
+        } \
+    })
 
     # Render the index
     markdownUpIndex()
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemFetch', arrayNew('markdown_up_index')), \
-        arrayNew('documentSetTitle', arrayNew('MarkdownUp - .')), \
-        arrayNew('markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['systemFetch', ['markdown_up_index']], \
+        ['documentSetTitle', ['MarkdownUp - .']], \
+        ['markdownPrint', [ \
             'Root |', \
             'Parent |', \
             '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
             '', \
             '# MarkdownUp \\- .' \
-        )), \
-        arrayNew('markdownPrint', arrayNew('', 'No files or sub-directories found')) \
-    ))
+        ]], \
+        ['markdownPrint', ['', 'No files or sub-directories found']] \
+    ])
 endfunction
 unittestRunTest('testMarkdownUpIndex_empty')
 
 
 async function testMarkdownUpIndex_onlyFiles():
     # Setup mocks
-    unittestMockAll(objectNew( \
-        'systemFetch', objectNew( \
-            'markdown_up_index', jsonStringify(objectNew( \
-                'path', '.', \
-                'files', arrayNew( \
-                    objectNew('name', 'a.html', 'display', 'a.md'), \
-                    objectNew('name', 'c.html', 'display', 'c.md') \
-                ), \
-                'directories', arrayNew() \
-            )) \
-        ) \
-    ))
+    unittestMockAll({ \
+        'systemFetch': { \
+            'markdown_up_index': jsonStringify({ \
+                'path': '.', \
+                'files': [ \
+                    {'name': 'a.html', 'display': 'a.md'}, \
+                    {'name': 'c.html', 'display': 'c.md'} \
+                ], \
+                'directories': [] \
+            }) \
+        } \
+    })
 
     # Render the index
     markdownUpIndex()
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemFetch', arrayNew('markdown_up_index')), \
-        arrayNew('documentSetTitle', arrayNew('MarkdownUp - .')), \
-        arrayNew('markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['systemFetch', ['markdown_up_index']], \
+        ['documentSetTitle', ['MarkdownUp - .']], \
+        ['markdownPrint', [ \
             'Root |', \
             'Parent |', \
             '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
             '', \
             '# MarkdownUp \\- .' \
-        )), \
-        arrayNew('markdownPrint', arrayNew('', '## Files')), \
-        arrayNew('markdownPrint', arrayNew('', '[a.md](a.html)')), \
-        arrayNew('markdownPrint', arrayNew('', '[c.md](c.html)')) \
-    ))
+        ]], \
+        ['markdownPrint', ['', '## Files']], \
+        ['markdownPrint', ['', '[a.md](a.html)']], \
+        ['markdownPrint', ['', '[c.md](c.html)']] \
+    ])
 endfunction
 unittestRunTest('testMarkdownUpIndex_onlyFiles')
 
 
 async function testMarkdownUpIndex_onlyDirectories():
     # Setup mocks
-    unittestMockAll(objectNew( \
-        'systemFetch', objectNew( \
-            'markdown_up_index', jsonStringify(objectNew( \
-                'path', '.', \
-                'files', arrayNew(), \
-                'directories', arrayNew('sub2', 'sub1') \
-            )) \
-        ) \
-    ))
+    unittestMockAll({ \
+        'systemFetch': { \
+            'markdown_up_index': jsonStringify({ \
+                'path': '.', \
+                'files': [], \
+                'directories': ['sub2', 'sub1'] \
+            }) \
+        } \
+    })
 
     # Render the index
     markdownUpIndex()
 
     # Reset mocks
-    unittestDeepEqual(unittestMockEnd(), arrayNew( \
-        arrayNew('systemFetch', arrayNew('markdown_up_index')), \
-        arrayNew('documentSetTitle', arrayNew('MarkdownUp - .')), \
-        arrayNew('markdownPrint', arrayNew( \
+    unittestDeepEqual(unittestMockEnd(), [ \
+        ['systemFetch', ['markdown_up_index']], \
+        ['documentSetTitle', ['MarkdownUp - .']], \
+        ['markdownPrint', [ \
             'Root |', \
             'Parent |', \
             '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
             '', \
             '# MarkdownUp \\- .' \
-        )), \
-        arrayNew('markdownPrint', arrayNew('', '## Directories')), \
-        arrayNew('markdownPrint', arrayNew('', "[sub1](#var.vPath='sub1')")), \
-        arrayNew('markdownPrint', arrayNew('', "[sub2](#var.vPath='sub2')")) \
-    ))
+        ]], \
+        ['markdownPrint', ['', '## Directories']], \
+        ['markdownPrint', ['', "[sub1](#var.vPath='sub1')"]], \
+        ['markdownPrint', ['', "[sub2](#var.vPath='sub2')"]] \
+    ])
 endfunction
 unittestRunTest('testMarkdownUpIndex_onlyDirectories')

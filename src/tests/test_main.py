@@ -312,7 +312,7 @@ action testGlobals
 '''),
             ('test.bare', '''\
 function testGlobals(request):
-    return objectNew('result', numberParseInt(N1) + numberParseInt(N2))
+    return {"result": numberParseInt(N1) + numberParseInt(N2)}
 endfunction
 '''),
             ('markdown-up-api.json', '''\

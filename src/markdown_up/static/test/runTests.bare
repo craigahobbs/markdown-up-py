@@ -15,7 +15,7 @@ include 'testMarkdownUpIndex.bare'
 coverageStop()
 
 # Test report
-return unittestReport(objectNew( \
-    'coverageExclude', arrayNew('runTests.bare'), \
-    'coverageMin', 100 \
-))
+return unittestReport({ \
+    'coverageExclude': ['runTests.bare'], \
+    'coverageMin': 100 \
+})

@@ -9,7 +9,7 @@ include <args.bare>
 #
 async function markdownUpIndex():
     # Parse arguments
-    arguments = argsValidate(arrayNew(objectNew('name', 'path')))
+    arguments = argsValidate([{'name': 'path'}])
     args = argsParse(arguments)
     path = objectGet(args, 'path')
 
@@ -24,10 +24,10 @@ async function markdownUpIndex():
     # Menu and title
     parent = objectGet(index, 'parent')
     markdownPrint( \
-        if(path == null, 'Root', argsLink(arguments, 'Root', objectNew('path', null))) + ' |', \
+        if(path == null, 'Root', argsLink(arguments, 'Root', {'path': null})) + ' |', \
         if(path == null, 'Parent', if(parent == null, \
-            argsLink(arguments, 'Parent', objectNew('path', null)), \
-            argsLink(arguments, 'Parent', objectNew('path', parent)))) + ' |', \
+            argsLink(arguments, 'Parent', {'path': null}), \
+            argsLink(arguments, 'Parent', {'path': parent}))) + ' |', \
         '[MarkdownUp](https://github.com/craigahobbs/markdown-up#readme)', \
         '', \
         '# ' + markdownEscape(title) \
@@ -51,7 +51,7 @@ async function markdownUpIndex():
         markdownPrint('', '## Directories')
         for directory in arraySort(directories):
             directoryURL = if(path != null, path + '/', '') + directory
-            markdownPrint('', argsLink(arguments, directory, objectNew('path', directoryURL)))
+            markdownPrint('', argsLink(arguments, directory, {'path': directoryURL}))
         endfor
     endif
 
