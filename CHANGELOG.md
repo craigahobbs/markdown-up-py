@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.0 (2025-10-29)
+
+- [60ceae8](https://github.com/craigahobbs/markdown-up-py/commit/60ceae8) - bare-script 3.8, chisel 1.9
+
 ## 2.5.1 (2025-10-20)
 
 - [7bd4755](https://github.com/craigahobbs/markdown-up-py/commit/7bd4755) - use barescript object syntax
