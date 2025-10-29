@@ -2,7 +2,6 @@
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 include <unittest.bare>
-include <unittestMock.bare>
 
 
 # Start coverage
