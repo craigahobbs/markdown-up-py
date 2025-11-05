@@ -116,9 +116,7 @@ markdownPrint('Hello, **World**!!')
 
 [The BareScript Language](https://craigahobbs.github.io/bare-script/language/)
 
-[The MarkdownUp Library](https://craigahobbs.github.io/markdown-up/library/)
-
-[The MarkdownUp Include Library](https://craigahobbs.github.io/markdown-up/library/include.html)
+[The BareScript Library](https://craigahobbs.github.io/bare-script/library/)
 
 [MarkdownUp Frontend Examples](https://craigahobbs.github.io/#var.vPage='MarkdownUp')
 
@@ -172,7 +170,7 @@ exampleMain()
 **example.bare**
 
 The frontend application file, `example.bare`, uses the
-[args.bare](https://craigahobbs.github.io/markdown-up/library/include.html#var.vGroup='args.bare')
+[args.bare](https://craigahobbs.github.io/bare-script/library/#var.vGroup='args.bare')
 include library to parse the application arguments. It then uses the `sumNumbers` API to sum the
 numbers. Finally, it then renders the links to change the input numbers and the result.
 
