@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.2 (2025-11-21)
+
+- [fe7056c](https://github.com/craigahobbs/markdown-up-py/commit/fe7056c) - cleanup markdown-up stubs
+
 ## 2.6.1 (2025-11-05)
 
 - [f51518b](https://github.com/craigahobbs/markdown-up-py/commit/f51518b) - update readme
