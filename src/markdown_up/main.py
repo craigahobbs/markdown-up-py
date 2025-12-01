@@ -9,6 +9,7 @@ import argparse
 from functools import partial
 import json
 import os
+import sys
 import threading
 import webbrowser
 
@@ -24,7 +25,10 @@ def main(argv=None):
     """
 
     # Command line arguments
-    parser = argparse.ArgumentParser(prog='markdown-up', color=False)
+    argument_parser_args = {'prog': 'markdown-up'}
+    if sys.version_info >= (3, 14): # pragma: no cover
+        argument_parser_args['color'] = False
+    parser = argparse.ArgumentParser(**argument_parser_args)
     parser.add_argument('path', nargs='?', default='.',
                         help='the file or directory to view (default is ".")')
     parser.add_argument('-p', '--port', metavar='N', type=int, default=8080,
