@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.3 (2025-12-01)
+
+- [c394450](https://github.com/craigahobbs/markdown-up-py/commit/c394450) - ArgumentParser color=False
+
 ## 2.6.2 (2025-11-21)
 
 - [fe7056c](https://github.com/craigahobbs/markdown-up-py/commit/fe7056c) - cleanup markdown-up stubs
