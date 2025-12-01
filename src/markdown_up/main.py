@@ -24,7 +24,7 @@ def main(argv=None):
     """
 
     # Command line arguments
-    parser = argparse.ArgumentParser(prog='markdown-up')
+    parser = argparse.ArgumentParser(prog='markdown-up', color=False)
     parser.add_argument('path', nargs='?', default='.',
                         help='the file or directory to view (default is ".")')
     parser.add_argument('-p', '--port', metavar='N', type=int, default=8080,
