@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.4 (2026-04-23)
+
+- [c57ec1f](https://github.com/craigahobbs/markdown-up-py/commit/c57ec1f) - restrict bare-script and chisel versions
+
 ## 2.6.3 (2025-12-01)
 
 - [c394450](https://github.com/craigahobbs/markdown-up-py/commit/c394450) - ArgumentParser color=False
