@@ -41,7 +41,7 @@ doc: $(DEFAULT_VENV_BUILD)
 	cp README.md build/doc
 	$(DEFAULT_VENV_PYTHON) -c 'import json; from markdown_up.main import CONFIG_TYPES; print(json.dumps(CONFIG_TYPES, indent=4))' > build/doc/config.json
 	$(DEFAULT_VENV_BIN)/bare -m \
-		-v 'vFiles' "'$$(jq -n --args '$$ARGS.positional' src/markdown_up/api.py)'" \
+		-v 'vFiles' "'[\"src/markdown_up/api.py\"]'" \
 		-v 'vOutput' "'build/doc/api.json'" \
 		-c 'include <baredocCLI.bare>' \
 		-c 'return baredocCLIMain()'
