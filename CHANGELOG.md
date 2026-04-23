@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.0 (2026-04-23)
+
+- [09179c0](https://github.com/craigahobbs/markdown-up-py/commit/09179c0) - update to MarkdownUp 4.0 HTML stubs
+
 ## 2.6.4 (2026-04-23)
 
 - [c57ec1f](https://github.com/craigahobbs/markdown-up-py/commit/c57ec1f) - restrict bare-script and chisel versions
