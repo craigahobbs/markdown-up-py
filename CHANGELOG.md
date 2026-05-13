@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.1 (2026-05-13)
+
+- [417e0f2](https://github.com/craigahobbs/markdown-up-py/commit/417e0f2) - allow bare-script 4.1 \(C runtime\)
+
 ## 2.7.0 (2026-04-23)
 
 - [09179c0](https://github.com/craigahobbs/markdown-up-py/commit/09179c0) - update to MarkdownUp 4.0 HTML stubs
