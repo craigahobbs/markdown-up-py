@@ -486,11 +486,11 @@ endfunction
             self.assertEqual(headers, [('Content-Type', 'application/json')])
             self.assertEqual(json.loads(content_bytes.decode('utf-8')), {
                 'error': 'InvalidOutput',
-                'message': "Invalid value 'asdf' (type 'str'), expected type 'test_output'"
+                'message': 'Invalid value "asdf" (type "str"), expected type "test_output"'
             })
             self.assertTrue(re.match(
-                r"ERROR \[\d+ / \d+\] Invalid output returned from action 'test': "
-                    r"Invalid value 'asdf' \(type 'str'\), expected type 'test_output'",
+                r'ERROR \[\d+ / \d+\] Invalid output returned from action "test": '
+                    r'Invalid value "asdf" \(type "str"\), expected type "test_output"',
                 wsgi_errors.getvalue()
             ), wsgi_errors.getvalue())
 
