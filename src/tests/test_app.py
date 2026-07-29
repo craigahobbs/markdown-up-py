@@ -74,7 +74,7 @@ class TestMarkdownUp(unittest.TestCase):
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '2bb0b3f1bf02672999928177e31af330')]
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '145b50bbe61504fb455af3c60599ca39')]
             )
             self.assertTrue(b'<title>MarkdownUp</title>' in b''.join(content))
 
@@ -96,7 +96,7 @@ class TestMarkdownUp(unittest.TestCase):
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'bd6499a74d92067eae17ae4f4b9b0987')]
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '00890c48e54acdf4c568d071e9042ab6')]
             )
             self.assertTrue(content, [create_markdown_up_stub('index.md')])
 
@@ -149,13 +149,13 @@ class TestMarkdownUp(unittest.TestCase):
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '0053d43949c74643e0ff7323b4872a71')]
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'e9609c26809eb178142eee1ececf314b')]
             )
             self.assertEqual(content, [create_markdown_up_stub('README.md')])
 
             # Auto HTML stub unmodified
             environ = chisel.Context.create_environ('GET', '/README.html')
-            environ['HTTP_IF_NONE_MATCH'] = '0053d43949c74643e0ff7323b4872a71'
+            environ['HTTP_IF_NONE_MATCH'] = 'e9609c26809eb178142eee1ececf314b'
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '304 Not Modified')
@@ -215,7 +215,7 @@ class TestMarkdownUp(unittest.TestCase):
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '0053d43949c74643e0ff7323b4872a71')]
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'e9609c26809eb178142eee1ececf314b')]
             )
             self.assertTrue(content, [create_markdown_up_stub('README.md')])
 
@@ -237,7 +237,7 @@ class TestMarkdownUp(unittest.TestCase):
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'bd6499a74d92067eae17ae4f4b9b0987')]
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '00890c48e54acdf4c568d071e9042ab6')]
             )
             self.assertTrue(content, [create_markdown_up_stub('index.md')])
 
@@ -290,13 +290,13 @@ class TestMarkdownUp(unittest.TestCase):
             self.assertEqual(start_response.status, '200 OK')
             self.assertEqual(
                 start_response.headers,
-                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', '0053d43949c74643e0ff7323b4872a71')]
+                [('Content-Type', 'text/html; charset=utf-8'), ('ETag', 'e9609c26809eb178142eee1ececf314b')]
             )
             self.assertEqual(content, [create_markdown_up_stub('README.md')])
 
             # Auto HTML stub unmodified
             environ = chisel.Context.create_environ('GET', '/README.html')
-            environ['HTTP_IF_NONE_MATCH'] = '0053d43949c74643e0ff7323b4872a71'
+            environ['HTTP_IF_NONE_MATCH'] = 'e9609c26809eb178142eee1ececf314b'
             start_response = chisel.app.StartResponse()
             content = app(environ, start_response)
             self.assertEqual(start_response.status, '304 Not Modified')

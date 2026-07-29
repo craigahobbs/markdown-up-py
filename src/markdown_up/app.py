@@ -181,7 +181,6 @@ def create_markdown_up_stub(filename):
     <script type="module">
         import {{MarkdownUp}} from '/markdown-up/lib/appImports.js';
         const app = new MarkdownUp(window, {{
-            'systemPrefix': '/markdown-up/include/',
             'url': '{urllib.parse.quote(filename)}'
         }});
         app.run();

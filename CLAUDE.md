@@ -84,6 +84,6 @@ When reading, writing, or reviewing BareScript, the `markdown-up.json`/`markdown
 
 ## Dependencies
 
-Runtime: `bare-script` (pinned `>=4.2.0,<4.3.0`), `chisel` (`>=2.0.0,<2.1.0`), `waitress`. `bare-script`
+Runtime: `bare-script` (pinned `>=5.0.0,<5.1.0`), `chisel` (`>=2.2.0,<2.3.0`), `waitress`. `bare-script`
 provides the BareScript interpreter/library and `chisel` provides the WSGI app, actions, and schema-markdown
 validation used throughout.
