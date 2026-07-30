@@ -2,6 +2,8 @@
 # https://github.com/craigahobbs/markdown-up/blob/main/LICENSE
 
 include <args.bare>
+include <markdown.bare>
+include <url.bare>
 
 
 #
