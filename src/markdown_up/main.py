@@ -13,7 +13,7 @@ import sys
 import threading
 import webbrowser
 
-import schema_markdown
+from bare_script.include import schema_parse, schema_validate
 import waitress
 
 from .app import HTML_EXTS, MARKDOWN_EXTS, MarkdownUpApplication
@@ -71,7 +71,7 @@ def main(argv=None):
     config_path = os.path.normpath(os.path.join(root, args.config))
     if os.path.isfile(config_path):
         with open(config_path, 'r', encoding='utf-8') as config_file:
-            config = schema_markdown.validate_type(CONFIG_TYPES, 'MarkdownUpConfig', json.load(config_file))
+            config = schema_validate(CONFIG_TYPES, 'MarkdownUpConfig', json.load(config_file))
     else:
         config = {}
 
@@ -79,7 +79,7 @@ def main(argv=None):
     api_path = os.path.normpath(os.path.join(root, args.api))
     if os.path.isfile(api_path):
         with open(api_path, 'r', encoding='utf-8') as api_file:
-            api_config = schema_markdown.validate_type(CONFIG_TYPES, 'MarkdownUpAPIConfig', json.load(api_file))
+            api_config = schema_validate(CONFIG_TYPES, 'MarkdownUpAPIConfig', json.load(api_file))
     else:
         api_config = None
 
@@ -131,7 +131,7 @@ def _wsgiapp_log_access(wsgiapp, environ, start_response):
 
 
 # The backend configuration schema
-CONFIG_TYPES = schema_markdown.parse_schema_markdown('''\
+CONFIG_TYPES = schema_parse('''\
 group "Application Configuration"
 
 

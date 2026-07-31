@@ -8,7 +8,7 @@ import unittest
 import unittest.mock
 
 from bare_script import BareScriptParserError
-from schema_markdown import SchemaMarkdownParserError
+from bare_script.include import SchemaParserError
 
 from markdown_up.app import MarkdownUpApplication
 
@@ -207,7 +207,7 @@ endfunction
 ''')
         ]
         with create_test_files(test_files) as temp_dir:
-            with self.assertRaises(SchemaMarkdownParserError) as cm_exc:
+            with self.assertRaises(SchemaParserError) as cm_exc:
                 MarkdownUpApplication(
                     temp_dir,
                     {},

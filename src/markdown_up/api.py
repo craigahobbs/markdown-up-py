@@ -10,9 +10,9 @@ import os
 from pathlib import PurePosixPath
 
 import bare_script
+from bare_script.include import schema_parse, schema_type_model_validate
 from bare_script.value import value_args_model, value_args_validate
 import chisel
-import schema_markdown
 
 
 # Load the MarkdownUp API requests
@@ -25,8 +25,8 @@ def load_api_requests(root, config, api_config):
         schema_parts = PurePosixPath(schema_posix).parts
         schema_path = os.path.join(root, *(schema_parts[1:] if schema_parts[0] == '/' else schema_parts))
         with open(schema_path, 'r', encoding='utf-8') as schema_file:
-            schema_markdown.parse_schema_markdown(schema_file, types, filename=schema_posix, validate=False)
-    schema_markdown.validate_type_model(types)
+            schema_parse(schema_file.read(), types, schema_posix, False)
+    schema_type_model_validate(types)
 
     # Parse and execute the API BareScript files
     api_globals = {
