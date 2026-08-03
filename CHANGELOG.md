@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.1 (2026-08-03)
+
+- [b188c53](https://github.com/craigahobbs/markdown-up-py/commit/b188c53) - replace schema-markdown with bare-script schema
+
+- [f1cb524](https://github.com/craigahobbs/markdown-up-py/commit/f1cb524) - cleanup barescript includes
+
 ## 3.0.0 (2026-07-29)
 
 - [01983d8](https://github.com/craigahobbs/markdown-up-py/commit/01983d8) - update to bare-script 5.0 and chisel 2.2, remove the MarkdownUp systemPrefix option
