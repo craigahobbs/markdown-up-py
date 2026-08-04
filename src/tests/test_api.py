@@ -247,7 +247,7 @@ asdf-
                     }
                 )
             self.assertEqual(str(cm_exc.exception), '''\
-:1: Syntax error
+test.bare:1: Syntax error
 asdf-
      ^
 ''')

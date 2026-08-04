@@ -47,7 +47,7 @@ def load_api_requests(root, config, api_config):
         script_parts = PurePosixPath(script_posix).parts
         script_path = os.path.join(root, *(script_parts[1:] if script_parts[0] == '/' else script_parts))
         with open(script_path, 'r', encoding='utf-8') as script_file:
-            bare_script.execute_script(bare_script.parse_script(script_file), script_options)
+            bare_script.execute_script(bare_script.barescript_parse_script(script_file.read(), 1, script_posix), script_options)
 
     # Yield the API requests
     for api in api_config['apis']:
