@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.0 (2026-08-04)
+
+- [88b804f](https://github.com/craigahobbs/markdown-up-py/commit/88b804f) - bare-script 5.1
+
 ## 3.0.1 (2026-08-03)
 
 - [b188c53](https://github.com/craigahobbs/markdown-up-py/commit/b188c53) - replace schema-markdown with bare-script schema
