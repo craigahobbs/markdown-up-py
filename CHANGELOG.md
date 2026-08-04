@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.1 (2026-08-04)
+
+- [30f9b0d](https://github.com/craigahobbs/markdown-up-py/commit/30f9b0d) - chisel 2.3
+
 ## 3.1.0 (2026-08-04)
 
 - [88b804f](https://github.com/craigahobbs/markdown-up-py/commit/88b804f) - bare-script 5.1
