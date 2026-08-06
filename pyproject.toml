@@ -1,2 +1,48 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "markdown-up"
+version = "3.1.1"
+description = "MarkdownUp is a Markdown viewer"
+readme = "README.md"
+license = "MIT"
+keywords = ["Markdown", "viewer"]
+authors = [
+    {name = "Craig A. Hobbs", email = "craigahobbs@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Topic :: Text Processing :: Markup :: Markdown",
+    "Topic :: Utilities"
+]
+dependencies = [
+    "bare-script >= 5.1.0, < 5.2.0",
+    "chisel >= 2.3.0, < 2.4.0",
+    "waitress >= 3.0.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/craigahobbs/markdown-up-py"
+
+[project.scripts]
+markdown-up = "markdown_up.main:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["markdown_up", "markdown_up.static"]
+
+[tool.setuptools.package-data]
+markdown_up = [
+    "static/*.bare",
+    "static/*.html"
+]
