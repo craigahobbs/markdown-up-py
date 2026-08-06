@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.2 (2026-08-06)
+
+- [f5dce2f](https://github.com/craigahobbs/markdown-up-py/commit/f5dce2f) - migrate package metadata from setup.cfg to pyproject.toml
+
 ## 3.1.1 (2026-08-04)
 
 - [30f9b0d](https://github.com/craigahobbs/markdown-up-py/commit/30f9b0d) - chisel 2.3
