@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "markdown-up"
-version = "3.1.1"
+version = "3.1.2"
 description = "MarkdownUp is a Markdown viewer"
 readme = "README.md"
 license = "MIT"
