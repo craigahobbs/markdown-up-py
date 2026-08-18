@@ -191,7 +191,7 @@ endfunction
             })
             status, headers, content_bytes = app.request('GET', '/test')
             self.assertEqual(status, '405 Method Not Allowed')
-            self.assertEqual(headers, [('Content-Type', 'text/plain')])
+            self.assertEqual(headers, [('Content-Type', 'text/plain; charset=utf-8')])
             self.assertEqual(content_bytes, b'Method Not Allowed')
 
 

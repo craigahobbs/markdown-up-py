@@ -349,7 +349,7 @@ endfunction
             start_response_calls = []
             environ = chisel.Context.create_environ('GET', '/doc', environ={'wsgi.errors': wsgi_errors})
             response = wsgiapp(environ, start_response)
-            self.assertEqual(start_response_calls, [['404 Not Found', [('Content-Type', 'text/plain')]]])
+            self.assertEqual(start_response_calls, [['404 Not Found', [('Content-Type', 'text/plain; charset=utf-8')]]])
             self.assertEqual(response, [b'Not Found'])
 
             start_response_calls = []

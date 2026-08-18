@@ -27,7 +27,7 @@ classifiers = [
 ]
 dependencies = [
     "bare-script >= 5.1.0, < 5.2.0",
-    "chisel >= 2.3.0, < 2.4.0",
+    "chisel >= 2.4.0, < 2.5.0",
     "waitress >= 3.0.0"
 ]
 
