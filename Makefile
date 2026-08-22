@@ -50,7 +50,8 @@ doc: $(DEFAULT_VENV_BUILD)
 .PHONY: test-app
 commit: test-app
 test-app: $(DEFAULT_VENV_BUILD)
-	$(DEFAULT_VENV_BIN)/bare -x -m src/markdown_up/static/*.bare src/markdown_up/static/test/*.bare
+	$(DEFAULT_VENV_BIN)/bare -x -m src/markdown_up/static/*.bare src/markdown_up/static/test/test*.bare
+	$(DEFAULT_VENV_BIN)/bare -s -m src/markdown_up/static/test/runTests.bare
 	$(DEFAULT_VENV_BIN)/bare -d -m src/markdown_up/static/test/runTests.bare$(if $(TEST), -v vUnittestTest "'$(TEST)'")
 
 
