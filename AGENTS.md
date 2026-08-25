@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Notes for coding agents working in this repository.
 
 ## What this is
 
@@ -10,34 +10,23 @@ BareScript-based frontend applications and backend APIs. **Markdown is never ren
 the backend serves an HTML stub that loads the client-side [MarkdownUp frontend](https://github.com/craigahobbs/markdown-up)
 which fetches and renders the Markdown in the browser.
 
-## Build system
+## python-build
 
-Uses [python-build](https://github.com/craigahobbs/python-build). `Makefile.base` and `pylintrc` are
-downloaded on demand (git-ignored, removed by `make clean`); edit `Makefile` for local overrides, not
-`Makefile.base`. All targets run inside an auto-created venv under `build/venv/` — there is no need to
-manually create a venv or `pip install`.
+This is a [python-build](https://github.com/craigahobbs/python-build#readme) package. Read the python-build skill before running tests, lint, coverage, or changing the Makefile: [`../python-build/SKILL.md`](../python-build/SKILL.md) if that file exists, otherwise [https://raw.githubusercontent.com/craigahobbs/python-build/main/SKILL.md](https://raw.githubusercontent.com/craigahobbs/python-build/main/SKILL.md).
 
-```
-make test      # run Python unit tests (src/tests/)
-make lint      # pylint over src/ (config in pylintrc + Makefile overrides)
-make cover     # tests + coverage; enforces 100% branch coverage
-make doc       # build build/doc/ (config.json, api.json from docstrings, static/)
-make test-app  # run the BareScript unit tests (see "Two test suites" below)
-make commit    # test + lint + doc + cover + test-app — run this before committing
-make run ARGS='README.md -p 9000'   # run the markdown-up CLI from the venv
-```
+Local Makefile overrides:
 
-Run a single Python test (discovery root is `src/`, so the module path starts at `tests.`):
+- `GHPAGES_SRC` — `build/doc/`
+- `PYLINT_ARGS` — missing docstring checks disabled
+- no `SPHINX_DOC` — `doc` is a custom recipe (config.json, api.json, `static/`)
+- `commit` also depends on `test-app`
 
-```
-make test TEST=tests.test_app.TestMarkdownUp.test_init
-make cover TEST=tests.test_app.TestMarkdownUp.test_init
-```
+Package-specific targets:
 
-Run a single BareScript test: `make test-app TEST=<testName>`.
+- `make test-app` — BareScript unit tests for `src/markdown_up/static/` (`TEST=` is an exact BareScript test name)
+- `make run ARGS='...'` — run the `markdown-up` CLI from the default venv
 
-Coverage must stay at 100% (both Python via `make cover` and BareScript via the `coverageMin: 100` in
-`runTests.bare`). New code needs corresponding tests to pass `make commit`.
+Coverage must stay at 100% for both Python (`make cover`) and BareScript (`coverageMin: 100` in `runTests.bare`).
 
 ## Architecture
 
@@ -81,9 +70,3 @@ browser HTML stub) and `markdownUpIndex.bare` (the file browser's client-side Ba
 The `.bare` files (frontend apps in `static/`, and any backend API scripts) are BareScript, not Python.
 When reading, writing, or reviewing BareScript, the `markdown-up.json`/`markdown-up-api.json` config files,
 `markdown-script` fenced blocks, or Schema Markdown (`.smd`), use the **bare-script** skill.
-
-## Dependencies
-
-Runtime: `bare-script` (pinned `>=5.0.0,<5.1.0`), `chisel` (`>=2.2.0,<2.3.0`), `waitress`. `bare-script`
-provides the BareScript interpreter/library and `chisel` provides the WSGI app, actions, and schema-markdown
-validation used throughout.
