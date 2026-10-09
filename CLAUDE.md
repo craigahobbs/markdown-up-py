@@ -17,6 +17,7 @@ This is a [python-build](https://github.com/craigahobbs/python-build#readme) pac
 Local Makefile overrides:
 
 - `GHPAGES_SRC` — `build/doc/`
+- `TESTS_REQUIRE` — `bare-script`, for the `bare` CLI used by `test-app` and `doc` (not a runtime dependency)
 - `PYLINT_ARGS` — missing docstring checks disabled
 - no `SPHINX_DOC` — `doc` is a custom recipe (config.json, `static/`)
 - `commit` also depends on `test-app`
