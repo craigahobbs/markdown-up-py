@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.1 (2026-10-09)
+
+- [c55fe48](https://github.com/craigahobbs/markdown-up-py/commit/c55fe48) - chisel 2.5
+
 ## 3.3.0 (2026-10-09)
 
 - [970061d](https://github.com/craigahobbs/markdown-up-py/commit/970061d) - move bare-script to TESTS_REQUIRE
