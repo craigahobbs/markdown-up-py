@@ -19,7 +19,7 @@ $(eval $(call WGET, https://craigahobbs.github.io/python-build/pylintrc))
 GHPAGES_SRC := build/doc/
 
 
-# Install bare-script for the BareScript unit tests and documentation
+# Install bare-script for the BareScript unit tests
 TESTS_REQUIRE := bare-script
 
 

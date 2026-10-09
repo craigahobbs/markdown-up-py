@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.3.0 (2026-10-09)
+
+- [970061d](https://github.com/craigahobbs/markdown-up-py/commit/970061d) - move bare-script to TESTS_REQUIRE
+
+- [4b6f718](https://github.com/craigahobbs/markdown-up-py/commit/4b6f718) - bare-script 5.2
+
+- [9727c40](https://github.com/craigahobbs/markdown-up-py/commit/9727c40) - remove BareScript backend API support \(superseded by bare-script WSGI\)
+
 ## 3.2.0 (2026-08-18)
 
 - [e662f3e](https://github.com/craigahobbs/markdown-up-py/commit/e662f3e) - chisel 2.4
