@@ -1,4 +1,4 @@
-# AGENTS.md
+# CLAUDE.md
 
 Notes for coding agents working in this repository.
 
@@ -6,7 +6,7 @@ Notes for coding agents working in this repository.
 
 `markdown-up` is the Python backend for MarkdownUp, a local Markdown viewer. It is a `chisel`/`waitress`
 WSGI application, launched by the `markdown-up` CLI, that serves files from a directory and hosts
-BareScript-based frontend applications and backend APIs. **Markdown is never rendered server-side** —
+BareScript-based frontend applications. **Markdown is never rendered server-side** —
 the backend serves an HTML stub that loads the client-side [MarkdownUp frontend](https://github.com/craigahobbs/markdown-up)
 which fetches and renders the Markdown in the browser.
 
@@ -18,7 +18,7 @@ Local Makefile overrides:
 
 - `GHPAGES_SRC` — `build/doc/`
 - `PYLINT_ARGS` — missing docstring checks disabled
-- no `SPHINX_DOC` — `doc` is a custom recipe (config.json, api.json, `static/`)
+- no `SPHINX_DOC` — `doc` is a custom recipe (config.json, `static/`)
 - `commit` also depends on `test-app`
 
 Package-specific targets:
@@ -30,11 +30,10 @@ Coverage must stay at 100% for both Python (`make cover`) and BareScript (`cover
 
 ## Architecture
 
-Three Python modules under `src/markdown_up/`:
+Two Python modules under `src/markdown_up/`:
 
 - **`main.py`** — CLI entry point (`markdown-up`). Parses args, resolves the root directory, loads and
-  schema-validates `markdown-up.json` (`MarkdownUpConfig`) and `markdown-up-api.json` (`MarkdownUpAPIConfig`),
-  then serves `MarkdownUpApplication` via `waitress`. CLI flags override config-file values. The full
+  schema-validates `markdown-up.json` (`MarkdownUpConfig`), then serves `MarkdownUpApplication` via `waitress`. CLI flags override config-file values. The full
   config schema lives inline as `CONFIG_TYPES` (schema-markdown) — update it here when adding config options.
 
 - **`app.py`** — `MarkdownUpApplication(chisel.Application)`. Its `__call__` is the routing core: it first
@@ -49,24 +48,18 @@ Three Python modules under `src/markdown_up/`:
   - **Release mode** (`-r`): drops the doc/index apps, disables output validation, and lazily caches each
     served static as a registered request (guarded by `add_request_lock`).
 
-- **`api.py`** — Backend API support. `load_api_requests` parses the schema-markdown schema files and
-  executes the BareScript files named in `markdown-up-api.json`, then yields a `chisel.Action` per configured
-  API wrapping the matching BareScript function. BareScript API functions receive the schema-validated
-  request and can call the injected globals `apiHeader`/`apiError` to set response headers/errors; APIs
-  flagged `wsgi` return a raw `[status, headers, body]` WSGI response instead of a validated struct.
-
 Frontend static assets live in `src/markdown_up/static/` (packaged as `package_data`): `index.html` (file
 browser HTML stub) and `markdownUpIndex.bare` (the file browser's client-side BareScript app).
 
 ## Two test suites
 
-1. **Python** (`src/tests/`, unittest) — covers `main`, `app`, `api`. Run with `make test` / `make cover`.
+1. **Python** (`src/tests/`, unittest) — covers `main` and `app`. Run with `make test` / `make cover`.
 2. **BareScript** (`src/markdown_up/static/test/`) — unit tests for the `.bare` frontend apps, run by the
    `bare` interpreter via `make test-app`. `make test-app` also `-x` lints all `.bare` files. This is part
    of `make commit` but is separate from the Python `make test`.
 
 ## Working with BareScript
 
-The `.bare` files (frontend apps in `static/`, and any backend API scripts) are BareScript, not Python.
-When reading, writing, or reviewing BareScript, the `markdown-up.json`/`markdown-up-api.json` config files,
+The `.bare` files (frontend apps in `static/`) are BareScript, not Python.
+When reading, writing, or reviewing BareScript, the `markdown-up.json` config file,
 `markdown-script` fenced blocks, or Schema Markdown (`.smd`), use the **bare-script** skill.

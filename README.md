@@ -71,7 +71,7 @@ The
 The `markdown-up` application has the following command-line arguments:
 
 ```
-usage: markdown-up [-h] [-p N] [-t N] [-n] [-r] [-q] [-d] [-v VAR EXPR] [-c FILE] [-a FILE] [path]
+usage: markdown-up [-h] [-p N] [-t N] [-n] [-r] [-q] [-c FILE] [path]
 
 positional arguments:
   path                the file or directory to view (default is ".")
@@ -83,22 +83,15 @@ options:
   -n, --no-browser    don't open a web browser
   -r, --release       release mode (cache statics, remove documentation and index)
   -q, --quiet         hide access logging
-  -d, --debug         backend debug mode
-  -v, --var VAR EXPR  set a backend global variable
   -c, --config FILE   the application config filename (default is "markdown-up.json")
-  -a, --api FILE      the API config filename (default is "markdown-up-api.json")
   ```
 
 
 ## MarkdownUp Applications
 
-With MarkdownUp, you can write client-rendered frontend applications and backend APIs using
+With MarkdownUp, you can write client-rendered frontend applications using
 [BareScript](https://craigahobbs.github.io/bare-script/language/).
-
-
-### MarkdownUp Frontend Applications
-
-MarkdownUp frontend applications are created by adding `markdown-script` fenced code blocks containing
+MarkdownUp applications are created by adding `markdown-script` fenced code blocks containing
 [BareScript](https://craigahobbs.github.io/bare-script/language/)
 to a Markdown file and viewing it with the MarkdownUp frontend application. When the Markdown file
 is rendered, the BareScript is executed and its results are rendered in place. For example:
@@ -112,7 +105,7 @@ markdownPrint('Hello, **World**!!')
 ~~~
 
 
-#### MarkdownUp Frontend Reference
+### MarkdownUp Application Reference
 
 [The BareScript Language](https://craigahobbs.github.io/bare-script/language/)
 
@@ -121,165 +114,11 @@ markdownPrint('Hello, **World**!!')
 [MarkdownUp Frontend Examples](https://craigahobbs.github.io/#var.vPage='MarkdownUp')
 
 
-### MarkdownUp Backend APIs
+### MarkdownUp Backend Applications
 
-MarkdownUp backend applications are created by adding a
-[MarkdownUp Backend API Configuration File](https://craigahobbs.github.io/markdown-up-py/config.html#var.vName='MarkdownUpAPIConfig'),
-`markdown-up-api.json`.
-
-The `markdown-up-api.json` file specifies the following:
-
-- The [Schema Markdown](https://craigahobbs.github.io/schema-markdown-js/language/) files containing
-  the API input and output schema definitions
-
-- The [BareScript](https://craigahobbs.github.io/bare-script/language/) files containing the API
-  implementations
-
-
-#### MarkdownUp Backend Reference
-
-[MarkdownUp Backend API Configuration File](https://craigahobbs.github.io/markdown-up-py/config.html#var.vName='MarkdownUpAPIConfig')
-
-[The BareScript Language](https://craigahobbs.github.io/bare-script/language/)
-
-[The Schema Markdown Language](https://craigahobbs.github.io/schema-markdown-js/language/)
-
-[The MarkdownUp Backend API Library](https://craigahobbs.github.io/markdown-up-py/api.html)
-
-
-### MarkdownUp Full Stack Application Example
-
-In this simple full-stack application example, we'll create a MarkdownUp frontend application to
-input two numbers and display their sum. We'll use a MarkdownUp backend API to sum the numbers.
-
-
-**index.md**
-
-The frontend application's index file, `index.md`, includes the application script and executes the
-main entry point:
-
-~~~markdown
-```markdown-script
-include 'example.bare'
-
-exampleMain()
-```
-~~~
-
-
-**example.bare**
-
-The frontend application file, `example.bare`, uses the
-[args.bare](https://craigahobbs.github.io/bare-script/library/#var.vGroup='args.bare')
-include library to parse the application arguments. It then uses the `sumNumbers` API to sum the
-numbers. Finally, it then renders the links to change the input numbers and the result.
-
-```barescript
-include <args.bare>
-
-
-# The example application main entry point
-async function exampleMain():
-    args = argsParse(exampleArguments)
-    n1 = objectGet(args, 'n1')
-    n2 = objectGet(args, 'n2')
-
-    # Call the backend service to add the two numbers
-    sumResponseText = systemFetch({'url': 'sumNumbers', 'body': jsonStringify({'n1': n1, 'n2': n2})})
-    sumResponseJSON = if(sumResponseText, jsonParse(sumResponseText))
-    result = if(sumResponseJSON, objectGet(sumResponseJSON, 'result'))
-
-    # Render the page
-    title = 'Sum Two Numbers'
-    documentSetTitle(title)
-    markdownPrint( \
-        '# ' + markdownEscape(title), \
-        '', \
-        'n1 = ' + n1 + ' (' + \
-            argsLink(exampleArguments, 'Down', {'n1': n1 - 1}) + ' | ' + \
-            argsLink(exampleArguments, 'Up', {'n1': n1 + 1}) + ')', \
-        '', \
-        'n2 = ' + n2 + ' (' + \
-            argsLink(exampleArguments, 'Down', {'n2': n2 - 1}) + ' | ' + \
-            argsLink(exampleArguments, 'Up', {'n2': n2 + 1}) + ')', \
-        '', \
-        n1 + ' + ' + n2 + ' = ' + result \
-    )
-endfunction
-
-
-# The example application's arguments (for use with argsParse, etc.)
-exampleArguments = [ \
-    {'name': 'n1', 'type': 'float', 'default': 0}, \
-    {'name': 'n2', 'type': 'float', 'default': 0} \
-]
-```
-
-
-**markdown-up-api.json**
-
-The
-[MarkdownUp Backend API Configuration File](https://craigahobbs.github.io/markdown-up-py/config.html#var.vName='MarkdownUpAPIConfig'),
-`markdown-up-api.json`, specifies the backend API:
-
-```json
-{
-    "schemas": ["example.smd"],
-    "scripts": ["exampleAPI.bare"],
-    "apis": [
-        {"name": "sumNumbers"}
-    ]
-}
-```
-
-
-**example.smd**
-
-The API input and output schemas are defined using
-[Schema Markdown](https://craigahobbs.github.io/schema-markdown-js/language/).
-
-```schema-markdown
-group "Example"
-
-
-# Sum two numbers
-action sumNumbers
-    input
-        # The first number
-        float n1
-
-        # The second number
-        float n2
-
-    output
-        # The sum of the two numbers
-        float result
-```
-
-
-**exampleAPI.bare**
-
-The backend API is implemented in [BareScript](https://craigahobbs.github.io/bare-script/language/).
-By default, API implementation functions have the same name as the API schema definition. API
-implementation functions take a single argument, `request`, that is the schema-validated input
-object.
-
-```barescript
-# Implementation of the sumNumbers API
-function sumNumbers(request):
-    n1 = objectGet(request, 'n1')
-    n2 = objectGet(request, 'n2')
-    return {'result': n1 + n2}
-endfunction
-```
-
-To run the application, run `markdown-up` in the directory containing the application files.
-
-```sh
-markdown-up index.md
-```
-
-With the application running, you can view the backend API documentation at <http://127.0.0.1:8080/doc/>.
+MarkdownUp no longer hosts BareScript backend APIs. To write a backend application in BareScript, use the
+[bare-script](https://pypi.org/project/bare-script/) package's
+[WSGI support](https://craigahobbs.github.io/bare-script-py/wsgi.html).
 
 
 ## Development

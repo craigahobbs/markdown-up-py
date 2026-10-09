@@ -41,14 +41,8 @@ def main(argv=None):
                         help="release mode (cache statics, remove documentation and index)")
     parser.add_argument('-q', '--quiet', action='store_true',
                         help="hide access logging")
-    parser.add_argument('-d', '--debug', action='store_true', default=None,
-                        help='backend debug mode')
-    parser.add_argument('-v', '--var', nargs=2, action='append', metavar=('VAR', 'EXPR'), default = [],
-                        help='set a backend global variable')
     parser.add_argument('-c', '--config', metavar='FILE', default='markdown-up.json',
                         help='the application config filename (default is "markdown-up.json")')
-    parser.add_argument('-a', '--api', metavar='FILE', default='markdown-up-api.json',
-                        help='the API config filename (default is "markdown-up-api.json")')
     args = parser.parse_args(args=argv)
 
     # Verify the path exists
@@ -75,23 +69,9 @@ def main(argv=None):
     else:
         config = {}
 
-    # Load and validate the API configuration file
-    api_path = os.path.normpath(os.path.join(root, args.api))
-    if os.path.isfile(api_path):
-        with open(api_path, 'r', encoding='utf-8') as api_file:
-            api_config = schema_validate(CONFIG_TYPES, 'MarkdownUpAPIConfig', json.load(api_file))
-    else:
-        api_config = None
-
-    # Add argumentsg to the config
-    config['debug'] = args.debug if args.debug is not None else config.get('debug', False)
+    # Add arguments to the config
     config['release'] = args.release if args.release is not None else config.get('release', False)
     config['threads'] = max(1, args.threads if args.threads is not None else config.get('threads', 8))
-    if args.var:
-        if 'globals' not in config:
-            config['globals'] = {}
-        for key, value in args.var:
-            config['globals'][key] = value
 
     # Construct the URL
     host = '127.0.0.1'
@@ -112,7 +92,7 @@ def main(argv=None):
         webbrowser_thread.start()
 
     # Create the WSGI application
-    wsgiapp = MarkdownUpApplication(root, config, api_config)
+    wsgiapp = MarkdownUpApplication(root, config)
     wsgiapp_wrap = wsgiapp if args.quiet else partial(_wsgiapp_log_access, wsgiapp)
 
     # Host the application
@@ -141,45 +121,6 @@ struct MarkdownUpConfig
     # If true, run in release mode. Default is false.
     optional bool release
 
-    # If true, run in debug mode. Default is false.
-    optional bool debug
-
     # The number of backend server threads. Default is 8.
     optional int threads
-
-    # Global variables
-    optional string{} globals
-
-
-group "API Configuration"
-
-
-# The MarkdownUp API configuration (e.g. `markdown-up-api.json`)
-struct MarkdownUpAPIConfig
-
-    # The API schema markdown POSIX file paths
-    string[] schemas
-
-    # The API BareScript POSIX file paths
-    string[] scripts
-
-    # The APIs
-    MarkdownUpAPI[] apis
-
-
-group
-
-
-# An API
-struct MarkdownUpAPI
-
-    # The schema action name
-    string name
-
-    # The script function name. If unspecified, use the schema action name.
-    optional string function
-
-    # If true, the API function has a WSGI respone (e.g. `["200 Status", [["Content-Type": "text/plain"]], "Hello!"]`)
-    # Default is false.
-    optional bool wsgi
 ''')

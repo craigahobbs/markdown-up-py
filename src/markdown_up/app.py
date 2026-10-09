@@ -13,8 +13,6 @@ import urllib.parse
 
 import chisel
 
-from .api import load_api_requests
-
 
 class MarkdownUpApplication(chisel.Application):
     """
@@ -24,7 +22,7 @@ class MarkdownUpApplication(chisel.Application):
     __slots__ = ('root', 'release', 'add_request_lock')
 
 
-    def __init__(self, root, config=None, api_config=None):
+    def __init__(self, root, config=None):
         super().__init__()
         self.root = root
         self.release = config.get('release', False) if config else False
@@ -52,10 +50,6 @@ class MarkdownUpApplication(chisel.Application):
             # Add the markdown-up statics
             self.add_static('index.html', content_type='text/html; charset=utf-8', urls=(('GET', '/'),))
             self.add_static('markdownUpIndex.bare')
-
-        # Add the backend APIs
-        if api_config:
-            self.add_requests(load_api_requests(root, config, api_config))
 
 
     def add_static(self, filename, content_type=None, urls=(('GET', None),), doc_group='MarkdownUp File Browser'):
