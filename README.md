@@ -116,7 +116,7 @@ markdownPrint('Hello, **World**!!')
 
 ### MarkdownUp Backend Applications
 
-MarkdownUp no longer hosts BareScript backend APIs. To write a backend application in BareScript, use the
+To write a backend application in BareScript, use the
 [bare-script](https://pypi.org/project/bare-script/) package's
 [WSGI support](https://craigahobbs.github.io/bare-script-py/wsgi.html).
 
