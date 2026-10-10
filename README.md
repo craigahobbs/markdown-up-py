@@ -59,19 +59,12 @@ The generated `.html` files are HTML stubs for the
 All Markdown parsing and rendering are done on the client.
 
 
-### Configuration File
-
-The
-[MarkdownUp Application Configuration File](https://craigahobbs.github.io/markdown-up-py/config.html#var.vName='MarkdownUpConfig'),
-`markdown-up.json`, allows you to enable release mode, set the number of backend server threads, and more.
-
-
 ### Command-Line Arguments
 
 The `markdown-up` application has the following command-line arguments:
 
 ```
-usage: markdown-up [-h] [-p N] [-t N] [-n] [-r] [-q] [-c FILE] [path]
+usage: markdown-up [-h] [-p N] [-t N] [-n] [-r] [-q] [path]
 
 positional arguments:
   path                the file or directory to view (default is ".")
@@ -83,7 +76,6 @@ options:
   -n, --no-browser    don't open a web browser
   -r, --release       release mode (cache statics, remove documentation and index)
   -q, --quiet         hide access logging
-  -c, --config FILE   the application config filename (default is "markdown-up.json")
   ```
 
 
