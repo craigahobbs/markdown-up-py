@@ -43,7 +43,6 @@ doc: $(DEFAULT_VENV_BUILD)
 	mkdir -p build/doc
 	cp -R static/* build/doc
 	cp README.md build/doc
-	$(DEFAULT_VENV_PYTHON) -c 'import json; from markdown_up.main import CONFIG_TYPES; print(json.dumps(CONFIG_TYPES, indent=4))' > build/doc/config.json
 
 
 .PHONY: test-app

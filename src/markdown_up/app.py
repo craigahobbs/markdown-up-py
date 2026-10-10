@@ -22,10 +22,10 @@ class MarkdownUpApplication(chisel.Application):
     __slots__ = ('root', 'release', 'add_request_lock')
 
 
-    def __init__(self, root, config=None):
+    def __init__(self, root, release=False):
         super().__init__()
         self.root = root
-        self.release = config.get('release', False) if config else False
+        self.release = release
         self.add_request_lock = threading.Lock()
 
         # Release mode?

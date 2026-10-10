@@ -46,7 +46,7 @@ class TestMarkdownUp(unittest.TestCase):
 
 
     def test_init_release(self):
-        app = MarkdownUpApplication('.', {'release': True})
+        app = MarkdownUpApplication('.', release=True)
         self.assertEqual(app.pretty_output, False)
         self.assertEqual(app.validate_output, False)
         self.assertEqual(app.root, '.')
@@ -206,7 +206,7 @@ class TestMarkdownUp(unittest.TestCase):
             (('sub3', 'test.txt'), 'test')
         ]
         with create_test_files(test_files) as temp_dir:
-            app = MarkdownUpApplication(temp_dir, {'release': True})
+            app = MarkdownUpApplication(temp_dir, release=True)
 
             # Root
             environ = chisel.Context.create_environ('GET', '/')

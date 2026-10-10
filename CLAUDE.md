@@ -19,7 +19,7 @@ Local Makefile overrides:
 - `GHPAGES_SRC` — `build/doc/`
 - `TESTS_REQUIRE` — `bare-script`, for the `bare` CLI used by `test-app` (not a runtime dependency)
 - `PYLINT_ARGS` — missing docstring checks disabled
-- no `SPHINX_DOC` — `doc` is a custom recipe (config.json, `static/`)
+- no `SPHINX_DOC` — `doc` is a custom recipe (`static/`, README)
 - `commit` also depends on `test-app`
 
 Package-specific targets:
@@ -33,9 +33,8 @@ Coverage must stay at 100% for both Python (`make cover`) and BareScript (`cover
 
 Two Python modules under `src/markdown_up/`:
 
-- **`main.py`** — CLI entry point (`markdown-up`). Parses args, resolves the root directory, loads and
-  schema-validates `markdown-up.json` (`MarkdownUpConfig`), then serves `MarkdownUpApplication` via `waitress`. CLI flags override config-file values. The full
-  config schema lives inline as `CONFIG_TYPES` (schema-markdown) — update it here when adding config options.
+- **`main.py`** — CLI entry point (`markdown-up`). Parses args, resolves the root directory, then serves
+  `MarkdownUpApplication` via `waitress`. All options are CLI flags — there is no config file.
 
 - **`app.py`** — `MarkdownUpApplication(chisel.Application)`. Its `__call__` is the routing core: it first
   tries to match a registered chisel request (APIs, docs); otherwise it serves a static file from `root`.
@@ -62,5 +61,4 @@ browser HTML stub) and `markdownUpIndex.bare` (the file browser's client-side Ba
 ## Working with BareScript
 
 The `.bare` files (frontend apps in `static/`) are BareScript, not Python.
-When reading, writing, or reviewing BareScript, the `markdown-up.json` config file,
-`markdown-script` fenced blocks, or Schema Markdown (`.smd`), use the **bare-script** skill.
+When reading, writing, or reviewing BareScript, `markdown-script` fenced blocks, or Schema Markdown (`.smd`), use the **bare-script** skill.
