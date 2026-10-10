@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.2 (2026-10-09)
+
+- [df57a2f](https://github.com/craigahobbs/markdown-up-py/commit/df57a2f) - remove the markdown-up.json config file \(use command-line arguments\)
+
 ## 3.3.1 (2026-10-09)
 
 - [c55fe48](https://github.com/craigahobbs/markdown-up-py/commit/c55fe48) - chisel 2.5
