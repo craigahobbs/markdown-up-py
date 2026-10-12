@@ -5,7 +5,13 @@
 [![GitHub](https://img.shields.io/github/license/craigahobbs/markdown-up-py)](https://github.com/craigahobbs/markdown-up-py/blob/main/LICENSE)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/markdown-up)](https://pypi.org/project/markdown-up/)
 
-MarkdownUp is a Markdown viewer.
+MarkdownUp is a Markdown viewer. This is the MarkdownUp backend application.
+
+
+## Links
+
+- [MarkdownUp Frontend](https://github.com/craigahobbs/markdown-up#readme)
+- [Source code](https://github.com/craigahobbs/markdown-up-py)
 
 
 ## Install MarkdownUp
@@ -17,7 +23,7 @@ pip install markdown-up
 ~~~
 
 
-## View Markdown Files
+## View Local Markdown Files
 
 To start MarkdownUp, open a terminal and run the `markdown-up` application:
 
@@ -81,32 +87,29 @@ options:
 
 ## MarkdownUp Applications
 
-With MarkdownUp, you can write client-rendered frontend applications using
-[BareScript](https://craigahobbs.github.io/bare-script/language/).
-MarkdownUp applications are created by adding `markdown-script` fenced code blocks containing
-[BareScript](https://craigahobbs.github.io/bare-script/language/)
-to a Markdown file and viewing it with the MarkdownUp frontend application. When the Markdown file
-is rendered, the BareScript is executed and its results are rendered in place. For example:
+MarkdownUp applications are Markdown files that contain code. Add a `markdown-script` fenced code
+block of [BareScript](https://craigahobbs.github.io/bare-script/language/) to any Markdown file, and
+when MarkdownUp renders the file, it runs the script and renders its output in place of the code
+block. For example:
 
 ~~~markdown
-# Frontend Hello World
+# Hello World
 
 ```markdown-script
 markdownPrint('Hello, **World**!!')
 ```
 ~~~
 
+Applications run entirely in the browser, so no server-side code is required. Use the following
+resources to learn more:
 
-### MarkdownUp Application Reference
-
-[The BareScript Language](https://craigahobbs.github.io/bare-script/language/)
-
-[The BareScript Library](https://craigahobbs.github.io/bare-script/library/)
-
-[MarkdownUp Frontend Examples](https://craigahobbs.github.io/#var.vPage='MarkdownUp')
+- [The BareScript Language](https://craigahobbs.github.io/bare-script/language/)
+- [The BareScript Library](https://craigahobbs.github.io/bare-script/library/)
+- [MarkdownUp Application Examples](https://craigahobbs.github.io/#var.vPage='MarkdownUp')
+- [The BareScript Creator](https://craigahobbs.github.io/bare-script-py/creator/)
 
 
-### MarkdownUp Backend Applications
+### Backend Applications
 
 To write a backend application in BareScript, use the
 [bare-script](https://pypi.org/project/bare-script/) package's
