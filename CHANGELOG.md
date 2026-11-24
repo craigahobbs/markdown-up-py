@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.3 (2026-11-24)
+
+- [20cf398](https://github.com/craigahobbs/markdown-up-py/commit/20cf398) - bind to 127.0.0.1 by default, add the --host argument
+
 ## 3.3.2 (2026-10-09)
 
 - [df57a2f](https://github.com/craigahobbs/markdown-up-py/commit/df57a2f) - remove the markdown-up.json config file \(use command-line arguments\)
