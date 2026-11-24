@@ -29,6 +29,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(**argument_parser_args)
     parser.add_argument('path', nargs='?', default='.',
                         help='the file or directory to view (default is ".")')
+    parser.add_argument('--host', metavar='HOST',
+                        help='the host address to bind (default is "127.0.0.1"; "0.0.0.0" in release mode)')
     parser.add_argument('-p', '--port', metavar='N', type=int, default=8080,
                         help='the application port (default is 8080)')
     parser.add_argument('-t', '--threads', metavar='N', type=int, default=8,
@@ -57,8 +59,13 @@ def main(argv=None):
     if root == '':
         root = '.'
 
-    # Construct the URL
-    host = '127.0.0.1'
+    # Determine the host address to bind. By default, only release mode is reachable from other machines.
+    bind_host = args.host or ('0.0.0.0' if args.release else '127.0.0.1')
+
+    # Construct the URL - an any-address bind is viewed at its loopback address
+    host = {'0.0.0.0': '127.0.0.1', '::': '::1'}.get(bind_host, bind_host)
+    if ':' in host:
+        host = f'[{host}]'
     if is_file:
         path_base = os.path.basename(args.path)
         path_root, path_ext = os.path.splitext(path_base)
@@ -82,7 +89,7 @@ def main(argv=None):
     # Host the application
     if not args.quiet:
         print(f'markdown-up: Serving at {url} ...')
-    waitress.serve(wsgiapp_wrap, port=args.port, threads=max(1, args.threads))
+    waitress.serve(wsgiapp_wrap, host=bind_host, port=args.port, threads=max(1, args.threads))
 
 
 # WSGI application wrapper and the start_response function so we can log status and environ
