@@ -70,13 +70,14 @@ All Markdown parsing and rendering are done on the client.
 The `markdown-up` application has the following command-line arguments:
 
 ```
-usage: markdown-up [-h] [-p N] [-t N] [-n] [-r] [-q] [path]
+usage: markdown-up [-h] [--host HOST] [-p N] [-t N] [-n] [-r] [-q] [path]
 
 positional arguments:
   path                the file or directory to view (default is ".")
 
 options:
   -h, --help          show this help message and exit
+  --host HOST         the host address to bind (default is "127.0.0.1"; "0.0.0.0" in release mode)
   -p, --port N        the application port (default is 8080)
   -t, --threads N     the number of web server threads (default is 8)
   -n, --no-browser    don't open a web browser
